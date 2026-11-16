@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAT - TWK UUD 1945</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+      --warning: #eab308;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); line-height: 1.6; }
+
+    /* Login Screen */
+    #login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .login-box {
+      background: var(--card); padding: 35px; border-radius: 12px; width: 100%; max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+    .login-box h2 { text-align: center; color: var(--primary); margin-bottom: 5px; }
+    .login-box p { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 25px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+    .form-group input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;
+    }
+    .btn {
+      display: inline-block; padding: 10px 18px; border: none; border-radius: 6px; font-size: 0.95rem;
+      font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; text-decoration: none;
+    }
+    .btn-primary { background: var(--primary); color: white; width: 100%; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+    .btn-logout {
+      background: var(--danger); color: white; padding: 7px 14px; font-size: 0.85rem;
+    }
+    .btn-logout:hover { background: var(--danger-hover); }
+    .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 10px; text-align: center; display: none; }
+
+    .register-link-box {
+      margin-top: 18px; padding-top: 15px; border-top: 1px solid #e2e8f0;
+      text-align: center; font-size: 0.9rem; color: var(--muted);
+    }
+    .register-link-box a {
+      color: var(--primary); font-weight: 700; text-decoration: none;
+    }
+    .register-link-box a:hover {
+      text-decoration: underline; color: var(--primary-hover);
+    }
+
+    /* Header CAT */
+    header {
+      background: var(--primary); color: white; padding: 15px 25px; display: flex;
+      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header-title h1 { font-size: 1.2rem; }
+    .header-info { display: flex; align-items: center; gap: 15px; }
+    .timer-box {
+      background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 6px;
+      font-weight: bold; font-size: 1.1rem; letter-spacing: 1px;
+    }
+
+    /* Main Container */
+    #exam-screen, #result-screen { display: none; max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+    .exam-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+    @media (max-width: 850px) { .exam-layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card); border-radius: 10px; padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
+    }
+
+    /* Soal Area */
+    .question-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 2px solid var(--bg); padding-bottom: 12px; margin-bottom: 18px;
+    }
+    .badge-no { background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; }
+    .question-text { font-size: 1.05rem; margin-bottom: 15px; }
+
+    /* Opsi Jawaban */
+    .options-list { display: flex; flex-direction: column; gap: 10px; }
+    .option-item {
+      display: flex; align-items: center; gap: 12px; padding: 12px 15px;
+      border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: 0.15s;
+    }
+    .option-item:hover { background: #f8fafc; border-color: var(--primary); }
+    .option-item.selected { background: #eff6ff; border-color: var(--primary); font-weight: 600; }
+    .option-letter {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+    }
+    .option-item.selected .option-letter { background: var(--primary); color: white; }
+
+    /* Navigasi Bawah Soal */
+    .nav-actions {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 25px;
+      padding-top: 15px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;
+    }
+    .btn-nav { background: #e2e8f0; color: var(--text); }
+    .btn-nav:hover { background: #cbd5e1; }
+    .btn-ragu { background: var(--warning); color: #000; }
+    .btn-finish { background: var(--success); color: white; width: 100%; margin-top: 15px; }
+    .btn-finish:hover { background: #15803d; }
+
+    /* Grid Nomor Soal */
+    .grid-numbers {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px;
+      max-height: 360px; overflow-y: auto; padding-right: 4px;
+    }
+    .num-btn {
+      padding: 8px 0; border: 1px solid var(--border); border-radius: 6px;
+      background: white; font-weight: 600; cursor: pointer; text-align: center;
+    }
+    .num-btn.active { border: 2px solid var(--primary); }
+    .num-btn.answered { background: var(--success); color: white; border-color: var(--success); }
+    .num-btn.doubt { background: var(--warning); color: black; border-color: var(--warning); }
+
+    .legend { display: flex; gap: 12px; font-size: 0.8rem; margin-top: 15px; flex-wrap: wrap; }
+    .legend span { display: flex; align-items: center; gap: 5px; }
+    .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+    /* Result & Pembahasan */
+    .score-banner {
+      text-align: center; padding: 30px; background: linear-gradient(135deg, #1e40af, #3b82f6);
+      color: white; border-radius: 12px; margin-bottom: 25px;
+    }
+    .score-big { font-size: 3.5rem; font-weight: bold; margin: 10px 0; }
+    .result-actions {
+      display: flex; justify-content: center; gap: 12px; margin-top: 15px; flex-wrap: wrap;
+    }
+    .review-card { margin-bottom: 20px; border-left: 5px solid var(--border); }
+    .review-card.correct { border-left-color: var(--success); }
+    .review-card.wrong { border-left-color: var(--danger); }
+    .pembahasan-box {
+      background: #f8fafc; padding: 15px; border-radius: 8px; margin-top: 12px;
+      border: 1px dashed #94a3b8; font-size: 0.95rem;
+    }
+
+    /* Custom Modal Dialog (Pengganti alert/confirm) */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6); display: none; align-items: center;
+      justify-content: center; z-index: 999; padding: 20px;
+    }
+    .modal-card {
+      background: white; padding: 25px; border-radius: 12px; max-width: 400px;
+      width: 100%; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .modal-card h3 { color: var(--primary); margin-bottom: 10px; }
+    .modal-card p { color: var(--text); font-size: 0.95rem; margin-bottom: 20px; }
+    .modal-btns { display: flex; gap: 10px; justify-content: center; }
+  </style>
+</head>
+<body>
+
+  <!-- HALAMAN LOGIN -->
+  <div id="login-screen">
+    <div class="login-box">
+      <h2>Portal Ujian CAT</h2>
+      <p>Subtes 2: TWK UUD 1945 (50 Soal)</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Username/Email</label>
+          <input type="text" id="username" required placeholder="Masukkan username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="Masukkan password">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-login">Masuk Ujian</button>
+        <div class="error-msg" id="login-error"></div>
+        <div class="register-link-box">
+          Belum punya akun? <a href="http://lynk.id/seputar_guru/4g73189dndge/checkout" target="_blank" rel="noopener noreferrer">Daftar di sini</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- HALAMAN UJIAN CAT -->
+  <div id="exam-screen">
+    <header>
+      <div class="header-title">
+        <h1>CAT - TWK UUD 1945</h1>
+        <small id="peserta-info">Peserta: -</small>
+      </div>
+      <div class="header-info">
+        <div class="timer-box" id="timer">45:00</div>
+        <button type="button" class="btn btn-logout" onclick="confirmLogout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="exam-layout" style="margin-top: 20px;">
+      <!-- Kolom Kiri: Soal -->
+      <div class="card">
+        <div class="question-header">
+          <span class="badge-no" id="q-number">Soal No. 1</span>
+          <span id="q-status" style="font-size: 0.85rem; color: var(--muted);">Belum dijawab</span>
+        </div>
+        <div class="question-text" id="q-text"></div>
+        <div class="options-list" id="q-options"></div>
+
+        <div class="nav-actions">
+          <button class="btn btn-nav" id="btn-prev" onclick="prevQuestion()">&laquo; Sebelumnya</button>
+          <button class="btn btn-ragu" id="btn-doubt" onclick="toggleDoubt()">Ragu-Ragu</button>
+          <button class="btn btn-nav" id="btn-next" onclick="nextQuestion()">Selanjutnya &raquo;</button>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Navigasi Nomor -->
+      <div class="card">
+        <h3>Navigasi Soal</h3>
+        <div class="grid-numbers" id="number-grid"></div>
+        <div class="legend">
+          <span><i class="dot" style="background: var(--success);"></i> Dijawab</span>
+          <span><i class="dot" style="background: var(--warning);"></i> Ragu</span>
+          <span><i class="dot" style="background: #fff; border: 1px solid #cbd5e1;"></i> Kosong</span>
+        </div>
+        <button class="btn btn-finish" onclick="confirmFinish()">Selesai & Kumpulkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN HASIL & PEMBAHASAN -->
+  <div id="result-screen">
+    <div class="score-banner">
+      <h2>Hasil Ujian CAT Anda</h2>
+      <p id="res-peserta"></p>
+      <div class="score-big" id="res-score">0</div>
+      <p id="res-detail">Benar: 0 | Salah: 0 | Kosong: 0</p>
+      <div class="result-actions">
+        <button class="btn" style="background: white; color: var(--primary);" onclick="retryExam()">Ulangi Ujian</button>
+        <button class="btn btn-logout" onclick="logoutUser()">Logout</button>
+      </div>
+    </div>
+    <h3 style="margin-bottom: 15px;">Kunci Jawaban & Pembahasan Lengkap</h3>
+    <div id="review-container"></div>
+  </div>
+
+  <!-- CUSTOM MODAL -->
+  <div class="modal-overlay" id="custom-modal">
+    <div class="modal-card">
+      <h3 id="modal-title">Konfirmasi</h3>
+      <p id="modal-message">Pesan konfirmasi</p>
+      <div class="modal-btns" id="modal-buttons"></div>
+    </div>
+  </div>
+
+<script>
+  // =========================================================================
+  // URL GOOGLE APPS SCRIPT ANDA YANG AKTIF
+  // =========================================================================
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxB6Th7GHlD9o8ABbYcK2mdV7mv4ufy2i-SYXUg3jVqS0Q1bkXa_pkseMhqmIzgCTx7/exec";
+
+  // =========================================================================
+  // BANK SOAL, KUNCI JAWABAN & PEMBAHASAN (50 SOAL TWK UUD 1945)
+  // =========================================================================
+  const questions = [
+    {
+      no: 1,
+      text: "Sebelum UUD 1945 diamandemen, DPA menjadi salah satu lembaga tinggi negara. Namun, seiring dengan perkembangan zaman, UUD 1945 mengalami beberapa kali amandemen dan DPA pun dihapuskan. Penghapusan DPA terjadi pada saat amandemen ...",
+      options: {
+        A: "Kesatu.",
+        B: "Kedua.",
+        C: "Ketiga.",
+        D: "Keempat.",
+        E: "Kelima."
+      },
+      answer: "D",
+      explanation: "DPA bertugas memberikan masukan kepada presiden serta berhak mengajukan usul kepada pemerintah. Dari awal dibentuknya, DPA dinilai kurang berarti. Pada amandemen UUD 1945 keempat yang terjadi pada tanggal 1-11 Agustus 2002 DPA dihapuskan. Hal ini berdasarkan Keputusan Presiden Nomor 135/M/2003 pada tanggal 31 Juli 2003."
+    },
+    {
+      no: 2,
+      text: "Amandemen UUD 1945 dilakukan agar UUD 1945 sesuai dengan perkembangan zaman. Adanya amandemen, membuat batang tubuh mengalami perubahan. Setelah amandemen, batang tubuh terdiri atas ...",
+      options: {
+        A: "20 bab, 37 pasal, 194 ayat, 3 pasal aturan peralihan, dan 2 aturan tambahan.",
+        B: "16 bab, 37 pasal, 4 aturan peralihan, dan 2 aturan tambahan serta penjelasan.",
+        C: "22 bab, 37 pasal, 2 aturan peralihan, dan 2 aturan tambahan.",
+        D: "20 bab, 37 pasal, 4 aturan peralihan, dan 2 pasal aturan tambahan serta penjelasan.",
+        E: "16 bab, 37 pasal, 3 aturan peralihan, dan 2 pasal aturan tambahan."
+      },
+      answer: "A",
+      explanation: "UUD 1945 telah mengalami empat kali amandemen. Sebelum amandemen, UUD 1945 terdiri atas 16 bab, 37 pasal, 4 aturan peralihan, dan 2 aturan tambahan serta penjelasan. Setelah amandemen, batang tubuh berubah menjadi 20 bab, 37 pasal, 194 ayat, 3 pasal aturan peralihan, dan 2 aturan tambahan."
+    },
+    {
+      no: 3,
+      text: "Undang-Undang Dasar 1945 mempunyai beberapa fungsi untuk Negara. Sebagai hukum tertinggi UUD 1945 berfungsi sebagai ...",
+      options: {
+        A: "Mengikat seluruh warga negara.",
+        B: "Sebagai acuan dan alat untuk mengontrol seluruh norma dan peraturan yang berlaku.",
+        C: "Memuat tugas lembaga negara dan pelaksanaannya.",
+        D: "Untuk menentukan lembaga negara.",
+        E: "Menentukan kehidupan negara kedepannya."
+      },
+      answer: "B",
+      explanation: "Salah satu fungsi UUD 1945 adalah sebagai sumber hukum tertinggi di Indonesia sehingga peraturan yang ada dibawahnya harus dibuat berdasarkan UUD 1945. Hal ini karena UUD 1945 menjadi dasar dan alat untuk mengontrol seluruh norma dan peraturan yang berlaku."
+    },
+    {
+      no: 4,
+      text: "Penetapan pertama kali Undang-Undang Dasar 1945 dinyatakan sebagai hukum dasar yang sah dan berlaku di Indonesia dilakukan oleh ...",
+      options: {
+        A: "BPUPKI.",
+        B: "Panitia sembilan.",
+        C: "PPKI.",
+        D: "Presiden.",
+        E: "Dewan konstituante."
+      },
+      answer: "C",
+      explanation: "PPKI pada sidangnya yang pertama pada tanggal 18 Agustus 1945 menghasilkan tiga hal, yaitu:<br>1) Menetapkan UUD 1945 sebagai dasar negara.<br>2) Memilih dan mengangkat presiden dan wakil presiden.<br>3) Membentuk Komite Nasional untuk membantu kinerja presiden sebelum MPR dan DPR dibentuk."
+    },
+    {
+      no: 5,
+      text: "UUD 1945 secara resmi dinyatakan sah digunakan sebagai dasar Negara Indonesia pada tanggal ...",
+      options: {
+        A: "1 Juni 1945.",
+        B: "16 Agustus 1945.",
+        C: "18 Agustus 1945.",
+        D: "19 Agustus 1945.",
+        E: "20 Agustus 1945."
+      },
+      answer: "C",
+      explanation: "UUD 1945 dinyatakan sebagai dasar negara Republik Indonesia pada saat sidang PPKI yang pertama tanggal 18 Agustus 1945."
+    },
+    {
+      no: 6,
+      text: "Pada saat Konstitusi RIS berlaku, alat kelengkapan Republik Indonesia Serikat terdiri atas enam lembaga. Yang bukan menjadi alat kelengkapan pada masa Republik Indonesia Serikat adalah ...",
+      options: {
+        A: "Dewan Pertimbangan Agung Sementara",
+        B: "Presiden",
+        C: "Menteri",
+        D: "Senat",
+        E: "DPR"
+      },
+      answer: "A",
+      explanation: "Alat kelengkapan Republik Indonesia Serikat yaitu:<br>1) Presiden<br>2) Menteri<br>3) Senat<br>4) Dewan Perwakilan Rakyat<br>5) Mahkamah Agung<br>6) Dewan Pengawas Keuangan"
+    },
+    {
+      no: 7,
+      text: "Indonesia telah mengalami beberapa kali fase perubahan konstitusi. Ada masa dimana konstitusi yang digunakan adalah Konstitusi RIS. Masa berlakunya konstitusi RIS adalah ...",
+      options: {
+        A: "19 Oktober 1999",
+        B: "5 Juli 1959-19 Oktober 1999",
+        C: "17 Agustus 1950-5 Juli 1959",
+        D: "27 Desember 1949-17 Agustus 1950",
+        E: "18 Agustus 1945-27 Desember 1949"
+      },
+      answer: "D",
+      explanation: "Konstitusi RIS berlaku sejak Ratu Juliana menandatangani piagam pengakuan kedaulatan RIS di Amsterdam pada tanggal 27 Desember 1949 (sampai 17 Agustus 1950)."
+    },
+    {
+      no: 8,
+      text: "Pemerintahan RIS menganut sistem kabinet parlementer dimana kebijakan dan tanggung jawab kekuasaan pemerintah berada di tangan menteri, baik secara bersama maupun individual. Pada masa ini juga dikenal sistem perwakilan bikameral, yaitu ...",
+      options: {
+        A: "Presiden dan DPR.",
+        B: "Senat dan DPR.",
+        C: "Presiden dan Senat.",
+        D: "DPR dan MPR.",
+        E: "MPR dan Presiden."
+      },
+      answer: "B",
+      explanation: "Sistem bikameral adalah praktik pemerintahan yang menggunakan dua kamar, legislatif atau parlemen. Pada saat Konstitusi RIS berlaku, yaitu senat dan DPR."
+    },
+    {
+      no: 9,
+      text: "Pada saat berlakunya UUD 1945 pertama kali, yang berkedudukan sebagai pembantu presiden adalah ...",
+      options: {
+        A: "Senat.",
+        B: "Menteri.",
+        C: "Komite Nasional.",
+        D: "Perdana Menteri.",
+        E: "DPR."
+      },
+      answer: "C",
+      explanation: "Komite Nasional ditugaskan untuk membantu presiden karena saat itu MPR dan DPR belum terbentuk."
+    },
+    {
+      no: 10,
+      text: "Penyediaan fasilitas pelayanan kesehatan dan fasilitas pelayanan umum yang layak menjadi tanggung jawab Negara. Hal ini sesuai dengan pasal ...",
+      options: {
+        A: "33 ayat 4.",
+        B: "31 ayat 3.",
+        C: "34 ayat 3.",
+        D: "34 ayat 2.",
+        E: "33 ayat 3."
+      },
+      answer: "C",
+      explanation: "Pasal 34 ayat 3 berbunyi, <i>\"Negara bertanggung jawab atas penyediaan fasilitas pelayanan kesehatan dan fasilitas pelayanan umum yang layak.\"</i>"
+    },
+    {
+      no: 11,
+      text: "Presiden dan wakil presiden memegang jabatan selama lima tahun, dan sesudahnya dapat dipilih kembali dalam jabatan yang sama, hanya untuk satu kali jabatan. Pasal yang mengatur hal ini telah mengalami amandemen sebanyak ...",
+      options: {
+        A: "Satu kali.",
+        B: "Dua kali.",
+        C: "Tiga kali.",
+        D: "Empat kali.",
+        E: "Lima kali."
+      },
+      answer: "A",
+      explanation: "Masa jabatan presiden dan wakil presiden diatur dalam UUD 1945 pada pasal 7 yang telah diamandemen sebanyak satu kali."
+    },
+    {
+      no: 12,
+      text: "Presiden menerima penempatan duta negara lain dengan memperhatikan pertimbangan ...",
+      options: {
+        A: "MPR",
+        B: "DPR",
+        C: "Mahkamah Agung",
+        D: "Mahkamah Konstitusi",
+        E: "Komisi Yudisial"
+      },
+      answer: "B",
+      explanation: "Berdasarkan pasal 13 ayat 3 dijelaskan bahwa presiden menerima penempatan duta negara lain dengan memperhatikan pertimbangan Dewan Perwakilan Rakyat."
+    },
+    {
+      no: 13,
+      text: "Anggota DPR dipilih melalui pemilihan umum. Hal ini diatur dalam UUD 1945 yang diamandemen pada tanggal ...",
+      options: {
+        A: "18 Agustus 2000",
+        B: "21 Oktober 1999",
+        C: "11 Agustus 2002",
+        D: "9 November 2001",
+        E: "15 September 2003"
+      },
+      answer: "A",
+      explanation: "Berdasarkan pasal 19 ayat 1 anggota DPR dipilih melalui pemilihan umum. Pasal ini mengalami perubahan pada saat amandemen kedua tanggal 18 Agustus 2000."
+    },
+    {
+      no: 14,
+      text: "Pada tanggal 9 November 2001 ada beberapa pasal yang diamandemen. Beberapa pasal yang diamandemen pada tanggal tersebut adalah ...",
+      options: {
+        A: "5, 7, dan 13",
+        B: "23D, 24, dan 31",
+        C: "26, 27, dan 30",
+        D: "17, 20, dan 21",
+        E: "1, 3, dan 6"
+      },
+      answer: "E",
+      explanation: "Pada amandemen ketiga tanggal 1-9 November 2001 pasal-pasal yang mengalami perubahan di antaranya pasal 1, 3, 6, 6A, 7A, 7B, 7C, 8, 11, 17, 22C, 22D, 22E, 23, 23A, 23C, 23E, 23F, 23G, 24, 24A, 24B, 24C."
+    },
+    {
+      no: 15,
+      text: "Keputusan MPR mengenai pemberhentian presiden atau wakil presiden harus disetujui sekurang-kurangnya ...",
+      options: {
+        A: "3/4 dari jumlah anggota yang hadir.",
+        B: "50% + 1 dari jumlah anggota yang hadir.",
+        C: "2/3 dari jumlah anggota yang hadir.",
+        D: "50% dari jumlah anggota yang hadir.",
+        E: "25% dari jumlah kehadiran."
+      },
+      answer: "C",
+      explanation: "Sesuai dengan pasal 7B (7) dijelaskan bahwa keputusan MPR atas usul pemberhentian presiden dan/atau wakil presiden harus diambil dalam rapat paripurna MPR yang dihadiri oleh sekurang-kurangnya 3/4 dari jumlah anggota dan disetujui oleh sekurang-kurangnya 2/3 dari jumlah anggota yang hadir, setelah presiden dan/atau wakil presiden diberi kesempatan menyampaikan penjelasan dalam rapat paripurna MPR."
+    },
+    {
+      no: 16,
+      text: "Negara Indonesia adalah Negara hukum. Hal ini dijelaskan pada pasal ...",
+      options: {
+        A: "28",
+        B: "35",
+        C: "36",
+        D: "1 ayat 3",
+        E: "1 ayat 1"
+      },
+      answer: "D",
+      explanation: "Pasal 1 ayat 3 menjelaskan negara Indonesia adalah negara hukum."
+    },
+    {
+      no: 17,
+      text: "Apabila terjadi kekosongan wakil presiden, yang memilih wakil presiden selanjutnya adalah ...",
+      options: {
+        A: "Presiden",
+        B: "MPR",
+        C: "DPR",
+        D: "Komisi Yudisial",
+        E: "Mahkamah Konstitusi"
+      },
+      answer: "B",
+      explanation: "Pada pasal 8 ayat 2 dijelaskan bahwa apabila terjadi kekosongan wakil presiden, selambat-lambatnya dalam waktu enam puluh hari, MPR menyelenggarakan sidang untuk memilih wakil presiden dari dua calon yang diusulkan oleh presiden."
+    },
+    {
+      no: 18,
+      text: "Penduduk ialah warga negara Indonesia dan orang asing yang bertempat tinggal di Indonesia merupakan hasil pasal yang sudah diamandemen pada tanggal ...",
+      options: {
+        A: "21 Oktober 1999",
+        B: "18 Agustus 2000",
+        C: "9 November 2001",
+        D: "11 Agustus 2002",
+        E: "15 September 2003"
+      },
+      answer: "B",
+      explanation: "Penduduk ialah warga negara Indonesia dan orang asing yang bertempat tinggal di Indonesia merupakan bunyi pasal 26 yang diamandemen pada tanggal 18 Agustus 2000 atau amandemen kedua."
+    },
+    {
+      no: 19,
+      text: "Pasal di bawah ini yang merupakan hasil amandemen tanggal 9 November 2001 adalah ...",
+      options: {
+        A: "Negara kesatuan Republik Indonesia adalah sebuah negara kepulauan yang berciri Nusantara dengan wilayah yang batas-batas dan hak-haknya ditetapkan undang-undang.",
+        B: "Setiap warga negara berhak mendapatkan pendidikan.",
+        C: "Lagu kebangsaan ialah Indonesia Raya.",
+        D: "Badan Pemeriksa Keuangan berkedudukan di ibu kota negara dan memiliki perwakilan di setiap provinsi.",
+        E: "Presiden berhak mengajukan rancangan undang-undang kepada DPR."
+      },
+      answer: "D",
+      explanation: "Pasal 23G merupakan salah satu pasal hasil amandemen ketiga tanggal 9 November 2001."
+    },
+    {
+      no: 20,
+      text: "DPR bersidang sedikitnya sekali dalam setahun merupakan isi pasal ...",
+      options: {
+        A: "19 ayat 3",
+        B: "20 ayat 1",
+        C: "21",
+        D: "22A",
+        E: "22B"
+      },
+      answer: "A",
+      explanation: "Pasal 19 ayat 3 berisi DPR bersidang sedikitnya sekali dalam setahun."
+    },
+    {
+      no: 21,
+      text: "Kedaulatan berada di tangan rakyat dan dilaksanakan menurut Undang-Undang Dasar. Bunyi pasal tersebut hasil amandemen ...",
+      options: {
+        A: "Kesatu",
+        B: "Kedua",
+        C: "Ketiga",
+        D: "Keempat",
+        E: "Kelima"
+      },
+      answer: "C",
+      explanation: "Kedaulatan berada di tangan rakyat dan dilaksanakan menurut Undang-Undang Dasar adalah isi Pasal 1 ayat 2 yang merupakan hasil amandemen ketiga tanggal 9 November 2001."
+    },
+    {
+      no: 22,
+      text: "Di bawah ini pasal yang mengalami amandemen dua kali adalah pasal ...",
+      options: {
+        A: "5 ayat 1",
+        B: "6A ayat 1",
+        C: "7C",
+        D: "1 ayat 1",
+        E: "3 ayat 2"
+      },
+      answer: "E",
+      explanation: "Pasal 3 ayat 2 yang berbunyi MPR melantik presiden dan/atau wakil presiden mengalami dua kali amandemen, yaitu pada amandemen ketiga dan keempat."
+    },
+    {
+      no: 23,
+      text: "Kedaulatan berada di tangan rakyat dan dilaksanakan menurut Undang-Undang Dasar merupakan hasil amandemen tanggal ...",
+      options: {
+        A: "21 Oktober 2001",
+        B: "18 Agustus 2000",
+        C: "9 November 2001",
+        D: "1 Agustus 2002",
+        E: "15 September 1999"
+      },
+      answer: "C",
+      explanation: "Amandemen ketiga terjadi 1-9 November 2001 dan salah satu pasal yang diamandemen adalah pasal 1."
+    },
+    {
+      no: 24,
+      text: "Lambang negara adalah Garuda Pancasila, diatur pada pasal ...",
+      options: {
+        A: "35",
+        B: "34",
+        C: "36",
+        D: "36A",
+        E: "36B"
+      },
+      answer: "D",
+      explanation: "Pasal 36A berbunyi lambang negara ialah Garuda Pancasila dengan semboyan Bhinneka Tunggal Ika."
+    },
+    {
+      no: 25,
+      text: "Pada pasal 24A menjelaskan bahwa Ketua dan wakil ketua Mahkamah Agung dipilih dari dan oleh ...",
+      options: {
+        A: "Komisi Yudisial",
+        B: "Hakim Agung",
+        C: "Presiden",
+        D: "MPR",
+        E: "DPR"
+      },
+      answer: "B",
+      explanation: "Pasal 24A ayat 4 dijelaskan bahwa ketua dan wakil ketua Mahkamah Agung dipilih dari dan oleh hakim agung."
+    },
+    {
+      no: 26,
+      text: "Jika RUU tidak mendapat persetujuan bersama antara presiden dan DPR maka ...",
+      options: {
+        A: "Boleh diajukan lagi dalam persidangan DPR pada masa itu dengan adanya perubahan.",
+        B: "Tidak boleh diajukan lagi dalam persidangan DPR pada masa itu.",
+        C: "Diajukan pada sidang DPR yang akan datang.",
+        D: "Mengganti draft RUU dan disidangkan kembali.",
+        E: "Langsung diundangkan dan ditulis pada Lembaran Negara."
+      },
+      answer: "B",
+      explanation: "Hal tersebut dijelaskan pada pasal 20 ayat 3. Pasal ini telah diamandemen pada amandemen pertama."
+    },
+    {
+      no: 27,
+      text: "Presiden dan wakil presiden memegang jabatan selama 5 tahun dan sesudahnya dapat dipilih kembali dalam jabatan yang sama hanya untuk satu kali masa jabatan. Pasal yang mengatur hal ini telah mengalami amandemen pada tanggal ...",
+      options: {
+        A: "21 Oktober 1999",
+        B: "18 Agustus 2000",
+        C: "9 November 2001",
+        D: "11 Agustus 2002",
+        E: "15 September 2003"
+      },
+      answer: "A",
+      explanation: "Hal tersebut diatur pada pasal 7 yang diamandemen pada tanggal 21 Oktober 1999, yaitu amandemen yang kesatu."
+    },
+    {
+      no: 28,
+      text: "Kemerdekaan Indonesia merupakan karunia Tuhan. Hal ini merupakan isi pembukaan UUD 1945 alinea ...",
+      options: {
+        A: "5",
+        B: "4",
+        C: "3",
+        D: "2",
+        E: "1"
+      },
+      answer: "C",
+      explanation: "Alinea ketiga pembukaan UUD 1945 berbunyi:<br><i>\"Atas berkat rahmat Allah Yang Maha Kuasa dan dengan didorongkan oleh keinginan luhur, supaya berkehidupan kebangsaan yang bebas, maka rakyat Indonesia menyatakan dengan ini kemerdekaannya.\"</i>"
+    },
+    {
+      no: 29,
+      text: "MPR wajib menyelenggarakan sidang untuk memutuskan usul DPR atas pemberhentian presiden dan/atau wakil presiden paling lama ..... hari setelah MPR menerima usul tersebut.",
+      options: {
+        A: "15.",
+        B: "20.",
+        C: "30.",
+        D: "50.",
+        E: "25."
+      },
+      answer: "C",
+      explanation: "Sidang mengenai pemberhentian presiden dan/atau wakil presiden paling lama 30 hari setelah MPR menerima usul DPR. Hal ini dijelaskan pada pasal 7B ayat 6."
+    },
+    {
+      no: 30,
+      text: "Pasal yang mengatur mengenai pemberian grasi dan rehabilitasi oleh presiden mengalami perubahan pada amandemen ...",
+      options: {
+        A: "Kelima",
+        B: "Keempat",
+        C: "Ketiga",
+        D: "Kedua",
+        E: "Kesatu"
+      },
+      answer: "E",
+      explanation: "Pemberian grasi dan rehabilitasi oleh presiden diatur pada pasal 14 ayat 1 yang diamandemen pada tanggal 21 Oktober 1999 atau amandemen yang pertama."
+    },
+    {
+      no: 31,
+      text: "Setelah Konstitusi RIS, Indonesia mengalami perubahan konstitusi lagi, yaitu Undang-Undang Sementara (UUDS). UUDS mulai diberlakukan pada tanggal ...",
+      options: {
+        A: "18 Agustus 1945.",
+        B: "27 Desember 1949.",
+        C: "5 Juli 1959.",
+        D: "15 Desember 1955.",
+        E: "17 Agustus 1950."
+      },
+      answer: "E",
+      explanation: "Berlakunya UUDS 1950 pada tanggal 17 Agustus 1950 membuat Indonesia kembali menjadi negara yang berbentuk kesatuan karena pada saat Konstitusi RIS yang berlaku, Indonesia berbentuk serikat sehingga menjadi negara terbagi-bagi ke dalam beberapa bagian."
+    },
+    {
+      no: 32,
+      text: "Pada saat UUDS berlaku, ada lembaga yang bernama konstituante. Tugas konstituante adalah ...",
+      options: {
+        A: "Menjalankan konstitusi.",
+        B: "Membantu kinerja presiden.",
+        C: "Membuat konstitusi.",
+        D: "Mengawasi kinerja para menteri.",
+        E: "Menjalankan fungsi DPR."
+      },
+      answer: "C",
+      explanation: "Konstituante bertugas membuat Konstitusi karena pada saat itu UUDS hanya bersifat sementara sehingga oleh para tokoh dinilai bahwa Indonesia membutuhkan konstitusi yang tetap. Anggota Konstituante dipilih melalui pemilu."
+    },
+    {
+      no: 33,
+      text: "Semua negara mempunyai hak untuk mendapatkan keadilan dan dihormati oleh negara lain. Hal ini terkandung dalam ...",
+      options: {
+        A: "Batang tubuh pasal 29",
+        B: "Batang tubuh pasal 28.",
+        C: "Batang tubuh pasal 30.",
+        D: "Pembukaan UUD 1945.",
+        E: "Batang tubuh pasal 28I"
+      },
+      answer: "D",
+      explanation: "Pembukaan UUD 1945 alinea 1 berbunyi:<br><i>\"Bahwa sesungguhnya kemerdekaan itu ialah hak segala bangsa dan oleh sebab itu, maka penjajahan diatas dunia harus dihapuskan, karena tidak sesuai dengan perikemanusiaan dan perikeadilan.\"</i>"
+    },
+    {
+      no: 34,
+      text: "Presiden mempunyai suatu kewenangan pada saat keadaan memaksa. Peraturan perundangan yang dikeluarkan presiden dalam keadaan memaksa adalah ...",
+      options: {
+        A: "Keppres.",
+        B: "Perpu.",
+        C: "UU.",
+        D: "PP.",
+        E: "Perda."
+      },
+      answer: "B",
+      explanation: "Perpu dibuat sendiri oleh presiden dalam keadaan yang memaksa. Perpu harus diajukan kepada DPR pada persidangan berikutnya. Apabila DPR menolak maka perpu itu harus dicabut."
+    },
+    {
+      no: 35,
+      text: "Penyimpangan pertama terhadap Undang-Undang Dasar 1945 adalah ...",
+      options: {
+        A: "Sistem presidensial berubah menjadi sistem parlementer.",
+        B: "Sistem parlementer berubah menjadi sistem presidensial.",
+        C: "Munculnya tritura.",
+        D: "Lembaga-lembaga negara seperti MPR, DPR, DPA dan BPK belum dibentuk berdasar UUD 1945 dan masih bersifat sementara.",
+        E: "Dibentuknya konstituante."
+      },
+      answer: "A",
+      explanation: "Penyimpangan pertama terhadap UUD 1945 adalah adanya Maklumat Pemerintah 14 November 1945, dimana sistem pemerintahan presidensial berganti menjadi parlementer."
+    },
+    {
+      no: 36,
+      text: "Proses amandemen terhadap UUD 1945 yang dilakukan MPR sudah sesuai dengan UUD 1945 Pasal ...",
+      options: {
+        A: "33.",
+        B: "34.",
+        C: "35.",
+        D: "36.",
+        E: "37."
+      },
+      answer: "E",
+      explanation: "Bab XVI UUD 1945 mengatur tentang perubahan undang-undang dasar, yaitu pada pasal 37."
+    },
+    {
+      no: 37,
+      text: "Undang-undang tidak serta merta dapat berlaku. Syarat berlakunya Undang-Undang adalah setelah ...",
+      options: {
+        A: "Ditandatangani presiden.",
+        B: "Diundangkan dalam lembaran negara.",
+        C: "Pertama kali dikeluarkan.",
+        D: "Presiden dan DPR menyetujui.",
+        E: "Ketua DPR menandatangani UU tersebut."
+      },
+      answer: "B",
+      explanation: "Syarat berlakunya UU adalah setelah diundangkan dalam lembaran negara. Tanggal mulai berlakunya sebuah UU menurut yang ditentukan dalam UU tersebut, tetapi jika tidak disebutkan tanggal mulai berlakunya maka secara otomatis akan berlaku setelah 30 hari diundangkannya UU tersebut."
+    },
+    {
+      no: 38,
+      text: "Dalam batang tubuh UUD 1945, yang mengatur tentang kementerian negara adalah pada bab ...",
+      options: {
+        A: "3",
+        B: "4",
+        C: "5",
+        D: "6",
+        E: "7"
+      },
+      answer: "C",
+      explanation: "Bab 5 UUD 1945 mengatur mengenai kementerian negara yang lebih dijabarkan pada pasal 17."
+    },
+    {
+      no: 39,
+      text: "Aturan peralihan dan aturan tambahan merupakan hasil amandemen yang berlangsung pada tanggal ...",
+      options: {
+        A: "7-15 September 2003",
+        B: "1-11 Agustus 2002",
+        C: "1-9 November 2001",
+        D: "7-8 Agustus 2000",
+        E: "14-21 Oktober 1999"
+      },
+      answer: "B",
+      explanation: "Amandemen keempat pada tanggal 1-11 Agustus 2002, salah satunya adalah mengubah aturan peralihan dan aturan tambahan."
+    },
+    {
+      no: 40,
+      text: "Jika peraturan pemerintah pengganti Undang-Undang tidak mendapat persetujuan DPR dalam persidangan berikut maka ...",
+      options: {
+        A: "Harus dicabut.",
+        B: "Langsung sah.",
+        C: "Wajib diundangkan.",
+        D: "Ditulis dalam Lembaran Negara.",
+        E: "Diajukan lagi pada masa selanjutnya."
+      },
+      answer: "A",
+      explanation: "Perpu yang tidak mendapat persetujuan DPR harus dicabut karena dalam merumuskan suatu UU presiden dan DPR harus bersama-sama tidak hanya bersifat fakultatif. Perpu dibuat oleh presiden dalam keadaan memaksa sehingga jika di persidangan berikutnya DPR tidak menyetujuinya maka harus dicabut dan tidak digunakan kembali."
+    },
+    {
+      no: 41,
+      text: "Setiap warga negara mempunyai hak dan kewajiban untuk ikut serta dalam upaya bela negara. Hal ini diatur pada pasal ...",
+      options: {
+        A: "28.",
+        B: "27 ayat (3).",
+        C: "26 ayat (1).",
+        D: "30 ayat (1).",
+        E: "31."
+      },
+      answer: "B",
+      explanation: "Pasal 27 ayat 3 berbunyi, <i>\"Setiap warga negara berhak dan wajib ikut serta dalam upaya pembelaan negara.\"</i>"
+    },
+    {
+      no: 42,
+      text: "Hak seseorang untuk membentuk keluarga dan melanjutkan keturunan melalui perkawinan yang sah merupakan isi pasal hasil amandemen ...",
+      options: {
+        A: "Pertama",
+        B: "Kedua",
+        C: "Ketiga",
+        D: "Keempat",
+        E: "Kelima"
+      },
+      answer: "B",
+      explanation: "Pada bab XA dijelaskan mengenai hak asasi manusia. Bab ini merupakan hasil amandemen yang kedua. Bab ini berisi 10 pasal, yaitu pasal 28A sampai 28J. Mengenai hak untuk membentuk keluarga ada pada pasal 28B ayat 1."
+    },
+    {
+      no: 43,
+      text: "Amandemen pertama pada tanggal 14-21 Oktober 1999 menyempurnakan sejumlah pasal, yaitu sebanyak ...",
+      options: {
+        A: "9.",
+        B: "12.",
+        C: "8.",
+        D: "5.",
+        E: "7."
+      },
+      answer: "A",
+      explanation: "Pasal yang diamandemen pada amandemen pertama, antara lain pasal 5, 7, 9, 13, 14, 15, 17, 20, 21 (berjumlah 9 pasal)."
+    },
+    {
+      no: 44,
+      text: "Pemilihan umum harus dilakukan dengan langsung, umum, bebas, rahasia, jujur dan adil diatur dalam pasal ...",
+      options: {
+        A: "18",
+        B: "20",
+        C: "21",
+        D: "22A",
+        E: "22E"
+      },
+      answer: "E",
+      explanation: "Sesuai dengan hasil amandemen ketiga, pasal 22E menjelaskan bahwa pemilu harus dilakukan sesuai dengan asasnya yaitu langsung, umum, bebas, rahasia, jujur, dan adil setiap lima tahun sekali."
+    },
+    {
+      no: 45,
+      text: "Kemerdekaan merupakan jalan untuk mewujudkan cita-cita bangsa merupakan makna yang terkandung dari pembukaan UUD 1945 alinea ...",
+      options: {
+        A: "1.",
+        B: "2.",
+        C: "3.",
+        D: "4.",
+        E: "5."
+      },
+      answer: "C",
+      explanation: "Pada alinea 3 pembukaan UUD 1945 dijelaskan bahwa pernyataan kemerdekaan yang dikumandangkan Indonesia bertujuan agar Indonesia dapat hidup bebas tanpa ada yang menjajah."
+    },
+    {
+      no: 46,
+      text: "Peraturan mengenai perundangan masih akan tetap berlaku selama belum ada penggantinya diatur pada ...",
+      options: {
+        A: "Pasal 37",
+        B: "Pasal 36",
+        C: "Aturan peralihan pasal 1",
+        D: "Aturan peralihan pasal 2",
+        E: "Aturan tambahan pasal 1"
+      },
+      answer: "C",
+      explanation: "Aturan peralihan pasal 1 menjelaskan bahwa segala peraturan perundangan masih akan ada selama belum ada yang baru."
+    },
+    {
+      no: 47,
+      text: "Pemeliharaan negara terhadap fakir miskin dan anak terlantar dijelaskan pada pasal ...",
+      options: {
+        A: "33 ayat 1",
+        B: "34 ayat 1",
+        C: "35",
+        D: "36",
+        E: "36A"
+      },
+      answer: "B",
+      explanation: "Pasal 34 ayat 1 menjelaskan fakir miskin dan anak terlantar dipelihara oleh negara."
+    },
+    {
+      no: 48,
+      text: "Pasal 24 ayat 1 tentang kekuasaan kehakiman di amandemen pada tanggal ...",
+      options: {
+        A: "18 Agustus 2001",
+        B: "19 November 2001",
+        C: "21 Oktober 2000",
+        D: "11 Agustus 2002",
+        E: "9 November 2001"
+      },
+      answer: "E",
+      explanation: "Pasal ini diamandemen pada amandemen ketiga tanggal 9 November 2001."
+    },
+    {
+      no: 49,
+      text: "Bab mengenai perekonomian nasional dan kesejahteraan nasional merupakan hasil amandemen ...",
+      options: {
+        A: "Kesatu",
+        B: "Kedua",
+        C: "Ketiga",
+        D: "Keempat",
+        E: "Kelima"
+      },
+      answer: "D",
+      explanation: "Bab XIV ini hasil amandemen keempat pada tanggal 11 Agustus 2002."
+    },
+    {
+      no: 50,
+      text: "Dalam menjalankan kehidupan bernegara, Negara Indonesia dalam menjalankan kehidupan berlandaskan berdasarkan Ketuhanan Yang Maha Esa diatur pada pasal ...",
+      options: {
+        A: "28",
+        B: "29 ayat 1",
+        C: "30 ayat 1",
+        D: "31 ayat 2",
+        E: "32"
+      },
+      answer: "B",
+      explanation: "Pasal 29 ayat 1 menjelaskan bahwa negara berdasar atas Ketuhanan Yang Maha Esa."
+    }
+  ];
+
+  // =========================================================================
+  // STATE & LOGIKA APLIKASI CAT
+  // =========================================================================
+  const EXAM_DURATION_SECONDS = 45 * 60; // 45 Menit
+  let currentUser = { user: "", nama: "" };
+  let currentIndex = 0;
+  let userAnswers = new Array(questions.length).fill(null);
+  let doubtStatus = new Array(questions.length).fill(false);
+  let timeLeft = EXAM_DURATION_SECONDS;
+  let timerInterval = null;
+
+  // Fungsi Modal Custom (Pengganti alert & confirm agar aman di semua iframe/browser)
+  function showModal(title, message, buttons) {
+    const overlay = document.getElementById("custom-modal");
+    document.getElementById("modal-title").textContent = title;
+    document.getElementById("modal-message").textContent = message;
+    const btnContainer = document.getElementById("modal-buttons");
+    btnContainer.innerHTML = "";
+
+    buttons.forEach(b => {
+      const btn = document.createElement("button");
+      btn.className = "btn " + (b.className || "btn-primary");
+      btn.style.width = "auto";
+      btn.textContent = b.text;
+      btn.onclick = () => {
+        overlay.style.display = "none";
+        if (b.onClick) b.onClick();
+      };
+      btnContainer.appendChild(btn);
+    });
+
+    overlay.style.display = "flex";
+  }
+
+  // Handle Login ke Google Sheet
+  document.getElementById("login-form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const userVal = document.getElementById("username").value.trim();
+    const passVal = document.getElementById("password").value.trim();
+    const btn = document.getElementById("btn-login");
+    const errBox = document.getElementById("login-error");
+
+    btn.disabled = true;
+    btn.textContent = "Memverifikasi...";
+    errBox.style.display = "none";
+
+    try {
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({ username: userVal, password: passVal })
+      });
+      
+      const textRes = await response.text();
+      let result;
+      try {
+        result = JSON.parse(textRes);
+      } catch (parseErr) {
+        throw new Error("Format respons server tidak valid.");
+      }
+
+      if (result.status === "success") {
+        currentUser = { user: result.user, nama: result.nama };
+        startExam();
+      } else {
+        errBox.style.display = "block";
+        errBox.textContent = result.message || "Username atau Password salah!";
+      }
+    } catch (error) {
+      errBox.style.display = "block";
+      errBox.textContent = "Gagal memproses login. Pastikan Web App sudah di-deploy ulang dengan 'Who has access' diset ke 'Anyone'.";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Masuk Ujian";
+    }
+  });
+
+  function resetExamState() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    currentIndex = 0;
+    userAnswers = new Array(questions.length).fill(null);
+    doubtStatus = new Array(questions.length).fill(false);
+    timeLeft = EXAM_DURATION_SECONDS;
+
+    const timerEl = document.getElementById("timer");
+    timerEl.textContent = "45:00";
+    timerEl.style.color = "white";
+  }
+
+  function startExam() {
+    resetExamState();
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("exam-screen").style.display = "block";
+    document.getElementById("peserta-info").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+
+    initNumberGrid();
+    renderQuestion(0);
+    startTimer();
+  }
+
+  function retryExam() {
+    startExam();
+  }
+
+  function confirmLogout() {
+    showModal(
+      "Konfirmasi Logout",
+      "Apakah Anda yakin ingin keluar dari ujian? Progres jawaban Anda saat ini akan direset.",
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Logout", className: "btn-logout", onClick: logoutUser }
+      ]
+    );
+  }
+
+  function logoutUser() {
+    resetExamState();
+    currentUser = { user: "", nama: "" };
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("login-error").style.display = "none";
+
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("login-screen").style.display = "flex";
+  }
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+      const s = (timeLeft % 60).toString().padStart(2, '0');
+      document.getElementById("timer").textContent = `${m}:${s}`;
+
+      if (timeLeft <= 300) {
+        document.getElementById("timer").style.color = "#fca5a5";
+      }
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        showModal(
+          "Waktu Habis",
+          "Waktu ujian telah habis! Jawaban Anda akan dikumpulkan otomatis.",
+          [{ text: "Lihat Hasil", className: "btn-primary", onClick: finishExam }]
+        );
+      }
+    }, 1000);
+  }
+
+  function initNumberGrid() {
+    const grid = document.getElementById("number-grid");
+    grid.innerHTML = "";
+    questions.forEach((q, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "num-btn";
+      btn.id = `num-btn-${idx}`;
+      btn.textContent = q.no;
+      btn.onclick = () => renderQuestion(idx);
+      grid.appendChild(btn);
+    });
+  }
+
+  function updateNumberGrid() {
+    questions.forEach((_, idx) => {
+      const btn = document.getElementById(`num-btn-${idx}`);
+      if (!btn) return;
+      btn.className = "num-btn";
+      if (idx === currentIndex) btn.classList.add("active");
+      if (doubtStatus[idx]) {
+        btn.classList.add("doubt");
+      } else if (userAnswers[idx] !== null) {
+        btn.classList.add("answered");
+      }
+    });
+  }
+
+  function renderQuestion(index) {
+    currentIndex = index;
+    const q = questions[index];
+
+    document.getElementById("q-number").textContent = `Soal No. ${q.no} dari ${questions.length}`;
+    document.getElementById("q-text").innerHTML = q.text;
+
+    const statusEl = document.getElementById("q-status");
+    if (doubtStatus[index]) {
+      statusEl.textContent = "Ditandai Ragu-Ragu";
+      statusEl.style.color = "#b45309";
+    } else if (userAnswers[index]) {
+      statusEl.textContent = `Terjawab (${userAnswers[index]})`;
+      statusEl.style.color = "var(--success)";
+    } else {
+      statusEl.textContent = "Belum dijawab";
+      statusEl.style.color = "var(--muted)";
+    }
+
+    const optContainer = document.getElementById("q-options");
+    optContainer.innerHTML = "";
+
+    ["A", "B", "C", "D", "E"].forEach(letter => {
+      const div = document.createElement("div");
+      div.className = "option-item" + (userAnswers[index] === letter ? " selected" : "");
+      div.onclick = () => selectOption(letter);
+      div.innerHTML = `
+        <div class="option-letter">${letter}</div>
+        <div>${q.options[letter]}</div>
+      `;
+      optContainer.appendChild(div);
+    });
+
+    document.getElementById("btn-prev").disabled = (index === 0);
+    document.getElementById("btn-next").disabled = (index === questions.length - 1);
+    updateNumberGrid();
+  }
+
+  function selectOption(letter) {
+    userAnswers[currentIndex] = letter;
+    renderQuestion(currentIndex);
+  }
+
+  function toggleDoubt() {
+    doubtStatus[currentIndex] = !doubtStatus[currentIndex];
+    renderQuestion(currentIndex);
+  }
+
+  function prevQuestion() {
+    if (currentIndex > 0) renderQuestion(currentIndex - 1);
+  }
+
+  function nextQuestion() {
+    if (currentIndex < questions.length - 1) renderQuestion(currentIndex + 1);
+  }
+
+  function confirmFinish() {
+    const unanswered = userAnswers.filter(a => a === null).length;
+    const msg = unanswered > 0 
+      ? `Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin mengakhiri ujian?`
+      : "Apakah Anda yakin ingin mengumpulkan semua jawaban sekarang?";
+    
+    showModal(
+      "Kumpulkan Jawaban",
+      msg,
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Kumpulkan", className: "btn-finish", onClick: finishExam }
+      ]
+    );
+  }
+
+  function finishExam() {
+    clearInterval(timerInterval);
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "block";
+
+    let benar = 0, salah = 0, kosong = 0;
+    const reviewContainer = document.getElementById("review-container");
+    reviewContainer.innerHTML = "";
+
+    questions.forEach((q, idx) => {
+      const uAns = userAnswers[idx];
+      const isCorrect = uAns === q.answer;
+
+      if (uAns === null) kosong++;
+      else if (isCorrect) benar++;
+      else salah++;
+
+      const card = document.createElement("div");
+      card.className = `card review-card ${isCorrect ? 'correct' : 'wrong'}`;
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+          <strong>Soal No. ${q.no}</strong>
+          <span style="font-weight:bold; color:${isCorrect ? 'var(--success)' : 'var(--danger)'}">
+            ${uAns === null ? 'Tidak Dijawab' : (isCorrect ? 'BENAR' : 'SALAH')}
+          </span>
+        </div>
+        <p style="margin-bottom:10px;">${q.text}</p>
+        <p><strong>Jawaban Anda:</strong> ${uAns ? `${uAns}. ${q.options[uAns]}` : '-'} | 
+           <strong style="color:var(--success)">Kunci Jawaban:</strong> ${q.answer}. ${q.options[q.answer]}</p>
+        <div class="pembahasan-box">
+          <strong>Pembahasan:</strong><br>${q.explanation}
+        </div>
+      `;
+      reviewContainer.appendChild(card);
+    });
+
+    const skor = Math.round((benar / questions.length) * 100);
+    document.getElementById("res-peserta").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+    document.getElementById("res-score").textContent = `${skor} / 100`;
+    document.getElementById("res-detail").textContent = `Benar: ${benar} | Salah: ${salah} | Kosong: ${kosong}`;
+  }
+</script>
+</body>
+</html>

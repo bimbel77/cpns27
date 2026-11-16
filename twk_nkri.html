@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAT - TWK NKRI</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+      --warning: #eab308;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); line-height: 1.6; }
+
+    /* Login Screen */
+    #login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .login-box {
+      background: var(--card); padding: 35px; border-radius: 12px; width: 100%; max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+    .login-box h2 { text-align: center; color: var(--primary); margin-bottom: 5px; }
+    .login-box p { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 25px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+    .form-group input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;
+    }
+    .btn {
+      display: inline-block; padding: 10px 18px; border: none; border-radius: 6px; font-size: 0.95rem;
+      font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; text-decoration: none;
+    }
+    .btn-primary { background: var(--primary); color: white; width: 100%; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+    .btn-logout {
+      background: var(--danger); color: white; padding: 7px 14px; font-size: 0.85rem;
+    }
+    .btn-logout:hover { background: var(--danger-hover); }
+    .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 10px; text-align: center; display: none; }
+
+    .register-link-box {
+      margin-top: 18px; padding-top: 15px; border-top: 1px solid #e2e8f0;
+      text-align: center; font-size: 0.9rem; color: var(--muted);
+    }
+    .register-link-box a {
+      color: var(--primary); font-weight: 700; text-decoration: none;
+    }
+    .register-link-box a:hover {
+      text-decoration: underline; color: var(--primary-hover);
+    }
+
+    /* Header CAT */
+    header {
+      background: var(--primary); color: white; padding: 15px 25px; display: flex;
+      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header-title h1 { font-size: 1.2rem; }
+    .header-info { display: flex; align-items: center; gap: 15px; }
+    .timer-box {
+      background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 6px;
+      font-weight: bold; font-size: 1.1rem; letter-spacing: 1px;
+    }
+
+    /* Main Container */
+    #exam-screen, #result-screen { display: none; max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+    .exam-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+    @media (max-width: 850px) { .exam-layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card); border-radius: 10px; padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
+    }
+
+    /* Soal Area */
+    .question-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 2px solid var(--bg); padding-bottom: 12px; margin-bottom: 18px;
+    }
+    .badge-no { background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; }
+    .question-text { font-size: 1.05rem; margin-bottom: 15px; }
+
+    /* Opsi Jawaban */
+    .options-list { display: flex; flex-direction: column; gap: 10px; }
+    .option-item {
+      display: flex; align-items: center; gap: 12px; padding: 12px 15px;
+      border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: 0.15s;
+    }
+    .option-item:hover { background: #f8fafc; border-color: var(--primary); }
+    .option-item.selected { background: #eff6ff; border-color: var(--primary); font-weight: 600; }
+    .option-letter {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+    }
+    .option-item.selected .option-letter { background: var(--primary); color: white; }
+
+    /* Navigasi Bawah Soal */
+    .nav-actions {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 25px;
+      padding-top: 15px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;
+    }
+    .btn-nav { background: #e2e8f0; color: var(--text); }
+    .btn-nav:hover { background: #cbd5e1; }
+    .btn-ragu { background: var(--warning); color: #000; }
+    .btn-finish { background: var(--success); color: white; width: 100%; margin-top: 15px; }
+    .btn-finish:hover { background: #15803d; }
+
+    /* Grid Nomor Soal */
+    .grid-numbers {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px;
+      max-height: 360px; overflow-y: auto; padding-right: 4px;
+    }
+    .num-btn {
+      padding: 8px 0; border: 1px solid var(--border); border-radius: 6px;
+      background: white; font-weight: 600; cursor: pointer; text-align: center;
+    }
+    .num-btn.active { border: 2px solid var(--primary); }
+    .num-btn.answered { background: var(--success); color: white; border-color: var(--success); }
+    .num-btn.doubt { background: var(--warning); color: black; border-color: var(--warning); }
+
+    .legend { display: flex; gap: 12px; font-size: 0.8rem; margin-top: 15px; flex-wrap: wrap; }
+    .legend span { display: flex; align-items: center; gap: 5px; }
+    .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+    /* Result & Pembahasan */
+    .score-banner {
+      text-align: center; padding: 30px; background: linear-gradient(135deg, #1e40af, #3b82f6);
+      color: white; border-radius: 12px; margin-bottom: 25px;
+    }
+    .score-big { font-size: 3.5rem; font-weight: bold; margin: 10px 0; }
+    .result-actions {
+      display: flex; justify-content: center; gap: 12px; margin-top: 15px; flex-wrap: wrap;
+    }
+    .review-card { margin-bottom: 20px; border-left: 5px solid var(--border); }
+    .review-card.correct { border-left-color: var(--success); }
+    .review-card.wrong { border-left-color: var(--danger); }
+    .pembahasan-box {
+      background: #f8fafc; padding: 15px; border-radius: 8px; margin-top: 12px;
+      border: 1px dashed #94a3b8; font-size: 0.95rem;
+    }
+
+    /* Custom Modal Dialog (Pengganti alert/confirm) */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6); display: none; align-items: center;
+      justify-content: center; z-index: 999; padding: 20px;
+    }
+    .modal-card {
+      background: white; padding: 25px; border-radius: 12px; max-width: 400px;
+      width: 100%; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .modal-card h3 { color: var(--primary); margin-bottom: 10px; }
+    .modal-card p { color: var(--text); font-size: 0.95rem; margin-bottom: 20px; }
+    .modal-btns { display: flex; gap: 10px; justify-content: center; }
+  </style>
+</head>
+<body>
+
+  <!-- HALAMAN LOGIN -->
+  <div id="login-screen">
+    <div class="login-box">
+      <h2>Portal Ujian CAT</h2>
+      <p>Subtes 3: TWK NKRI (50 Soal)</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Username/Email</label>
+          <input type="text" id="username" required placeholder="Masukkan username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="Masukkan password">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-login">Masuk Ujian</button>
+        <div class="error-msg" id="login-error"></div>
+        <div class="register-link-box">
+          Belum punya akun? <a href="http://lynk.id/seputar_guru/4g73189dndge/checkout" target="_blank" rel="noopener noreferrer">Daftar di sini</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- HALAMAN UJIAN CAT -->
+  <div id="exam-screen">
+    <header>
+      <div class="header-title">
+        <h1>CAT - TWK NKRI</h1>
+        <small id="peserta-info">Peserta: -</small>
+      </div>
+      <div class="header-info">
+        <div class="timer-box" id="timer">45:00</div>
+        <button type="button" class="btn btn-logout" onclick="confirmLogout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="exam-layout" style="margin-top: 20px;">
+      <!-- Kolom Kiri: Soal -->
+      <div class="card">
+        <div class="question-header">
+          <span class="badge-no" id="q-number">Soal No. 1</span>
+          <span id="q-status" style="font-size: 0.85rem; color: var(--muted);">Belum dijawab</span>
+        </div>
+        <div class="question-text" id="q-text"></div>
+        <div class="options-list" id="q-options"></div>
+
+        <div class="nav-actions">
+          <button class="btn btn-nav" id="btn-prev" onclick="prevQuestion()">&laquo; Sebelumnya</button>
+          <button class="btn btn-ragu" id="btn-doubt" onclick="toggleDoubt()">Ragu-Ragu</button>
+          <button class="btn btn-nav" id="btn-next" onclick="nextQuestion()">Selanjutnya &raquo;</button>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Navigasi Nomor -->
+      <div class="card">
+        <h3>Navigasi Soal</h3>
+        <div class="grid-numbers" id="number-grid"></div>
+        <div class="legend">
+          <span><i class="dot" style="background: var(--success);"></i> Dijawab</span>
+          <span><i class="dot" style="background: var(--warning);"></i> Ragu</span>
+          <span><i class="dot" style="background: #fff; border: 1px solid #cbd5e1;"></i> Kosong</span>
+        </div>
+        <button class="btn btn-finish" onclick="confirmFinish()">Selesai & Kumpulkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN HASIL & PEMBAHASAN -->
+  <div id="result-screen">
+    <div class="score-banner">
+      <h2>Hasil Ujian CAT Anda</h2>
+      <p id="res-peserta"></p>
+      <div class="score-big" id="res-score">0</div>
+      <p id="res-detail">Benar: 0 | Salah: 0 | Kosong: 0</p>
+      <div class="result-actions">
+        <button class="btn" style="background: white; color: var(--primary);" onclick="retryExam()">Ulangi Ujian</button>
+        <button class="btn btn-logout" onclick="logoutUser()">Logout</button>
+      </div>
+    </div>
+    <h3 style="margin-bottom: 15px;">Kunci Jawaban & Pembahasan Lengkap</h3>
+    <div id="review-container"></div>
+  </div>
+
+  <!-- CUSTOM MODAL -->
+  <div class="modal-overlay" id="custom-modal">
+    <div class="modal-card">
+      <h3 id="modal-title">Konfirmasi</h3>
+      <p id="modal-message">Pesan konfirmasi</p>
+      <div class="modal-btns" id="modal-buttons"></div>
+    </div>
+  </div>
+
+<script>
+  // =========================================================================
+  // URL GOOGLE APPS SCRIPT ANDA YANG AKTIF
+  // =========================================================================
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxB6Th7GHlD9o8ABbYcK2mdV7mv4ufy2i-SYXUg3jVqS0Q1bkXa_pkseMhqmIzgCTx7/exec";
+
+  // =========================================================================
+  // BANK SOAL, KUNCI JAWABAN & PEMBAHASAN (50 SOAL TWK NKRI)
+  // =========================================================================
+  const questions = [
+    {
+      no: 1,
+      text: "Pada hakikatnya manusia adalah sebagai <i>zoon politicon</i>, yaitu manusia sosial yang tidak dapat dipisahkan satu dengan yang lainnya. Hal ini dikemukakan oleh seorang filsuf yaitu ...",
+      options: {
+        A: "Karl Max",
+        B: "Kranenburg",
+        C: "Aristoteles",
+        D: "Plato",
+        E: "Socrates"
+      },
+      answer: "C",
+      explanation: "Aristoteles adalah seorang filsuf bangsa Yunani yang menyebut bahwa manusia adalah <i>zoon politicon</i>, yaitu manusia sosial."
+    },
+    {
+      no: 2,
+      text: "Wujud hubungan baik Indonesia dengan negara tetangga, yaitu dengan mendirikan ASEAN. ASEAN merupakan salah satu perwujudan kerja sama di antara negara-negara di kawasan Asia Tenggara yang dibentuk pada tanggal ...",
+      options: {
+        A: "8 Agustus 1967",
+        B: "10 September 1967",
+        C: "5 Agustus 1956",
+        D: "22 Oktober 1957",
+        E: "7 Januari 1984"
+      },
+      answer: "A",
+      explanation: "ASEAN diprakarsai oleh 5 negara. ASEAN dibentuk pada tanggal 8 Agustus 1967 di Bangkok, Thailand."
+    },
+    {
+      no: 3,
+      text: "Pada saat ASEAN dibentuk, masing-masing negara diwakili oleh menteri luar negerinya. Indonesia diwakili oleh ...",
+      options: {
+        A: "Tun Abdul Razak",
+        B: "Thanat Khoman",
+        C: "Sir Rajaratnam",
+        D: "Narsisco Ramos",
+        E: "Abdul Malik"
+      },
+      answer: "E",
+      explanation: "Menteri luar negeri yang menjabat pada saat Indonesia bergabung menjadi anggota ASEAN adalah Abdul Malik (Adam Malik)."
+    },
+    {
+      no: 4,
+      text: "Salah satu bentuk kerja sama negara ASEAN adalah mendirikan proyek industri bersama. Proyek industri yang berada di Indonesia adalah ...",
+      options: {
+        A: "Pabrik mesin diesel",
+        B: "Pabrik abu soda",
+        C: "Pabrik urea",
+        D: "Pabrik urea dan amoniak",
+        E: "Pabrik super fosfat"
+      },
+      answer: "D",
+      explanation: "Proyek industri yang ada di Indonesia adalah pabrik urea dan amoniak. Pabrik tersebut berada di Aceh."
+    },
+    {
+      no: 5,
+      text: "Secara astronomi ASEAN terletak pada 28° LU - 11° LS dan 92° BT - 141° BT, sedangkan secara geografis terletak antara Samudra Pasifik dan Samudra Hindia serta Benua Asia dan Benua Australia. Indonesia sebagai salah satu anggota ASEAN secara astronomi terletak pada ...",
+      options: {
+        A: "11° LU - 6° LS dan 95° BT - 114° BT",
+        B: "6° LU - 11° LS dan 95° BT - 141° BT",
+        C: "6° LU - 11° LS dan 95° BB - 141° BT",
+        D: "8° LU - 11° LS dan 95° BT - 141° BT",
+        E: "11° LU - 6° LS dan 95° BB - 114° BT"
+      },
+      answer: "B",
+      explanation: "Letak astronomi Indonesia berada pada 6° LU - 11° LS dan 95° BT - 141° BT."
+    },
+    {
+      no: 6,
+      text: "Kerajaan ini merupakan kerajaan maritim karena mempunyai angkatan laut yang kuat dan wilayah perairan yang luas sehingga disebut kerajaan nusantara pertama di Indonesia. Kerajaan yang dimaksud adalah ...",
+      options: {
+        A: "Kutai",
+        B: "Pajajaran",
+        C: "Sriwijaya",
+        D: "Bali",
+        E: "Majapahit"
+      },
+      answer: "C",
+      explanation: "Pada awal berdirinya Kerajaan Sriwijaya merupakan kerajaan sungai. Namun, kemudian mengadakan perluasan kekuasaan yang dimaksudkan untuk menguasai perdagangan. Dalam upaya memperluas serta mempertahankan wilayah kekuasaannya, Sriwijaya kemudian membentuk armada laut yang kuat. Oleh karena itu, Sriwijaya disebut sebagai Kerajaan Nusantara yang pertama karena luasnya wilayah."
+    },
+    {
+      no: 7,
+      text: "Ekspedisi Pamalayu dikenal pada saat Kerajaan Singasari. Yang dimaksud dengan ekspedisi Pamalayu adalah ...",
+      options: {
+        A: "Pengiriman tentara ke Melayu untuk usaha memperluas wilayah",
+        B: "Penyerangan ke Melayu untuk membebaskan tawanan",
+        C: "Ekspedisi yang dilakukan oleh prajurit Singasari untuk menghancurkan Kerajaan Kediri.",
+        D: "Ekspedisi yang dilakukan oleh Portugis ke seluruh bagian Indonesia.",
+        E: "Penundukan Sriwijaya."
+      },
+      answer: "A",
+      explanation: "Singasari mencapai puncak kejayaan pada masa pemerintahan Kertanegara. Ia pernah mengirimkan tentara ke Melayu dalam usaha memperluas wilayah. Pengiriman tentara ini dikenal dengan istilah Ekspedisi Pamalayu. Wilayah kekuasaannya mencapai Pahang, Melayu, Kalimantan Barat, Maluku, dan Bali."
+    },
+    {
+      no: 8,
+      text: "Salah satu usaha yang dilakukan oleh Belanda untuk mendapatkan keuntungan adalah dengan melakukan pelayaran hongi. Yang dimaksud dengan pelayaran hongi adalah ...",
+      options: {
+        A: "Pelayaran untuk mencegah pelanggaran monopoli rempah-rempah di Maluku.",
+        B: "Mendatangkan pedagang Belanda yang lebih banyak ke Indonesia.",
+        C: "Melakukan pelayaran keliling seluruh wilayah nusantara.",
+        D: "Sistem yang digunakan untuk mengusir Portugis dan Spanyol dari Indonesia.",
+        E: "Melakukan perdagangan keluar wilayah nusantara kemudian kembali lagi ke Indonesia."
+      },
+      answer: "A",
+      explanation: "Pelayaran hongi merupakan salah satu bentuk politik yang diterapkan oleh Belanda di mana memberlakukan sistem perondaan yang dilakukan oleh VOC yang bertujuan untuk mengawasi dan mencegah pelanggaran peraturan monopoli VOC dan untuk mencegah timbulnya perdagangan gelap."
+    },
+    {
+      no: 9,
+      text: "Konferensi yang bertujuan untuk menyelesaikan persengketaan antara Indonesia dan Belanda dengan adanya pengakuan kemerdekaan yang nyata, penuh, dan tanpa syarat kepada Republik Indonesia Serikat adalah ...",
+      options: {
+        A: "Perjanjian Renville.",
+        B: "Perjanjian Linggarjati.",
+        C: "Perjanjian Roem Royen.",
+        D: "Perjanjian Giyanti.",
+        E: "Konferensi Meja Bundar."
+      },
+      answer: "E",
+      explanation: "Pada tanggal 23 Agustus - 2 September 1949 di Den Haag, Belanda, diadakan Konferensi Meja Bundar (KMB). Tujuan diadakannya KMB adalah untuk menyelesaikan persengketaan antara Indonesia dan Belanda. Salah satu keputusan pokok KMB ialah Kerajaan Belanda mengakui kedaulatan Indonesia sepenuhnya, tanpa syarat dan tidak dapat dicabut kembali kepada RIS, selambat-lambatnya pada tanggal 30 Desember 1949."
+    },
+    {
+      no: 10,
+      text: "Baru dua tahun Jepang menduduki Indonesia, Jepang kemudian memberikan janji kemerdekaan untuk Indonesia. Janji kemerdekaan itu disampaikan oleh ...",
+      options: {
+        A: "Perdana Menteri Kaiso.",
+        B: "Laksamana Maeda.",
+        C: "Marsekal Terauchi.",
+        D: "Kaisar Hirohito.",
+        E: "Masuda Toyohiko."
+      },
+      answer: "A",
+      explanation: "Jepang memberikan janji kemerdekaan kepada Indonesia dengan maksud untuk menarik simpati Indonesia agar mau membantu Jepang melawan sekutu karena pada saat itu Jepang sudah mulai kalah melawan sekutu. Janji itu disampaikan oleh Perdana Menteri Kaiso pada tanggal 7 September 1944."
+    },
+    {
+      no: 11,
+      text: "Sebelum Indonesia mendapatkan kemerdekaan, banyak dibentuk organisasi maupun badan-badan yang bertugas untuk mempersiapkan Indonesia merdeka. Badan yang bertugas untuk menyelidiki serta menyampaikan pendapat untuk disampaikan kepada pemerintah Jepang sebagai bahan pertimbangan Indonesia merdeka adalah ...",
+      options: {
+        A: "PPKI.",
+        B: "Budi Utomo.",
+        C: "Panitia Sembilan.",
+        D: "BPUPKI.",
+        E: "Heiho."
+      },
+      answer: "D",
+      explanation: "BPUPKI dibentuk sebagai perwujudan janji kemerdekaan yang diberikan oleh Jepang kepada Indonesia. BPUPKI bertugas menyelidiki serta menyampaikan pendapat untuk selanjutnya disampaikan kepada pemerintah Jepang sebagai bahan pertimbangan Indonesia merdeka."
+    },
+    {
+      no: 12,
+      text: "BPUPKI merupakan badan yang dibentuk oleh pemerintahan Jepang pada tanggal 29 April 1945. BPUPKI diketuai oleh ...",
+      options: {
+        A: "Raden Pandji Soeroso.",
+        B: "Ir. Soekarno.",
+        C: "Moh. Yamin.",
+        D: "K.H Wahid Hasyim.",
+        E: "Dr. Radjiman Wedyodiningrat."
+      },
+      answer: "E",
+      explanation: "BPUPKI dibentuk oleh Jepang pada tanggal 29 April 1945, beranggotakan 67 orang dan diketuai oleh Dr. Radjiman Wedyodiningrat serta wakilnya Ichibangase Yosio."
+    },
+    {
+      no: 13,
+      text: "Setelah BPUPKI mengadakan sidang sebanyak 2 kali, akhirnya BPUPKI dibubarkan dan dibentuklah PPKI. PPKI dibentuk pada tanggal ...",
+      options: {
+        A: "7 Agustus 1945.",
+        B: "1 Juni 1945.",
+        C: "15 Agustus 1945.",
+        D: "6 Agustus 1945.",
+        E: "22 Juni 1945."
+      },
+      answer: "A",
+      explanation: "PPKI (Dokuritsu Junbi Inkai) bertugas untuk mempersiapkan kemerdekaan Indonesia. PPKI dibentuk pada tanggal 7 Agustus 1945 dan diketuai oleh Ir. Soekarno. Di awal pembentukannya PPKI beranggotakan 21 orang."
+    },
+    {
+      no: 14,
+      text: "Setelah Indonesia merdeka, PPKI mengadakan beberapa kali sidang dan salah satu sidangnya memutuskan memilih dan mengangkat presiden dan wakil presiden. Pemilihan presiden dan wakil presiden merupakan hasil sidang PPKI tanggal ...",
+      options: {
+        A: "9 Agustus 1945.",
+        B: "10 Agustus 1945.",
+        C: "18 Agustus 1945.",
+        D: "19 Agustus 1945.",
+        E: "20 Agustus 1945."
+      },
+      answer: "C",
+      explanation: "Sidang pertama PPKI berlangsung pada tanggal 18 Agustus 1945. Hasil sidang PPKI tersebut adalah mengesahkan rancangan UUD 1945 sebagai dasar negara Indonesia, memilih dan mengangkat presiden dan wakil presiden, serta tugas presiden sementara dibantu oleh Komite Nasional sebelum MPR dan DPR dibentuk."
+    },
+    {
+      no: 15,
+      text: "Pada saat proklamasi kemerdekaan, yang mengibarkan bendera sang saka merah putih adalah ...",
+      options: {
+        A: "Sayuti Melik dan Wikana",
+        B: "Ahmad Subarjo dan Sayuti Melik",
+        C: "Latif dan Suhud",
+        D: "Chaerul Saleh dan Moh Yamin",
+        E: "Sukarni dan Fatmawati"
+      },
+      answer: "C",
+      explanation: "Latif Hendraningrat merupakan salah satu pejuang kemerdekaan. Pada masa pendudukan Jepang ia menjadi anggota Peta (Pembela Tanah Air). Bersama Suhud Sastro Kusumo, ia mengibarkan bendera pusaka saat proklamasi kemerdekaan."
+    },
+    {
+      no: 16,
+      text: "Perang Dunia II juga membawa pengaruh terhadap Indonesia, khususnya untuk mencapai kemerdekaan. Pengaruh yang didapatkan Indonesia adalah ...",
+      options: {
+        A: "Munculnya fasisme Jepang di negaranya.",
+        B: "Jepang kalah dari sekutu sehingga memberikan janji kemerdekaan kepada Indonesia.",
+        C: "Penyerangan sekutu ke Indonesia.",
+        D: "Belanda datang kembali untuk menduduki Indonesia lagi.",
+        E: "Belanda mengajak Indonesia bergabung pada saat perang dunia II."
+      },
+      answer: "B",
+      explanation: "Jepang mengalami kekalahan pada saat melawan sekutu sehingga mereka mencoba menarik simpati Indonesia untuk membantu mereka melawan sekutu dengan cara menjanjikan kemerdekaan bagi Indonesia."
+    },
+    {
+      no: 17,
+      text: "Pada saat Perang Dunia II terjadi, negara-negara yang terlibat dibagi menjadi dua blok. Yang termasuk blok sekutu adalah ...",
+      options: {
+        A: "Jerman dan Finlandia",
+        B: "Austria dan Rumania",
+        C: "Prancis dan RRC",
+        D: "Italia dan Polandia",
+        E: "Jepang dan Jerman"
+      },
+      answer: "C",
+      explanation: "Dua blok yang terlibat dalam Perang Dunia II adalah blok sekutu dan blok sentral. Blok sekutu terdiri atas Inggris, Prancis, Rusia, RRC, Amerika Serikat, Australia, dan Polandia. Sedangkan, yang termasuk Blok Sentral, yaitu Jerman, Italia, Jepang, Austria, Rumania, dan Finlandia."
+    },
+    {
+      no: 18,
+      text: "Saat melawan sekutu, Jepang lama kelamaan mengalami kekalahan hingga akhirnya menyatakan menyerah kepada sekutu pada tanggal ...",
+      options: {
+        A: "6 Agustus 1945",
+        B: "9 Agustus 1945",
+        C: "11 Agustus 1945",
+        D: "14 Agustus 1945",
+        E: "16 Agustus 1945"
+      },
+      answer: "D",
+      explanation: "Jepang menyerah tanpa syarat kepada sekutu pada tanggal 14 Agustus 1945."
+    },
+    {
+      no: 19,
+      text: "Saat Jepang menduduki Indonesia ada beberapa kebijakan yang diterapkan, salah satunya di bidang politik, yaitu membentuk Putera. Gerakan ini dipimpin oleh empat serangkai, yaitu ...",
+      options: {
+        A: "Ir. Soekarno, Drs. Moh. Hatta, Ki Hajar Dewantara, dan K.H. Mas Mansyur.",
+        B: "Ir. Soekarno, Drs. Moh. Hatta, Dr. Radjiman Widyodiningrat, Soetomo.",
+        C: "Suwardi Suryaningrat, Douwes Dekker, Dr. Cipto Mangunkusumo, K.H Mas Mansyur.",
+        D: "Ir. Soekarno, Drs. Moh. Hatta, Dr. Cipto Mangunkusumo, Dr. Radjiman Widyodiningrat.",
+        E: "Dr. Radjiman Widyodiningrat, Soetomo, Dr. Cipto Mangunkusumo, Douwes Dekker."
+      },
+      answer: "A",
+      explanation: "Putera (Pusat Tenaga Rakyat) dibentuk Jepang pada tanggal 1 Maret 1943. Gerakan ini dipimpin oleh tokoh empat serangkai, yaitu Ir. Soekarno, Drs. Moh. Hatta, Ki Hajar Dewantara, dan K.H. Mas Mansyur."
+    },
+    {
+      no: 20,
+      text: "Perundingan antara Belanda dan Jepang yang mengawali penjajahan Jepang di Indonesia adalah perundingan ...",
+      options: {
+        A: "Linggarjati",
+        B: "Renville",
+        C: "Roem Royen",
+        D: "Bongaya",
+        E: "Kalijati"
+      },
+      answer: "E",
+      explanation: "Perundingan Kalijati ditandatangani tanggal 8 Maret 1942. Dalam perundingan ini, Belanda menyerah kepada Jepang. Perjanjian ini menjadi titik awal dimulainya penjajahan Jepang di Indonesia."
+    },
+    {
+      no: 21,
+      text: "Setelah Indonesia merdeka, sekutu datang lagi ke Indonesia bersama dengan orang-orang Belanda yang datang kembali untuk menguasai Hindia Belanda atau disebut ...",
+      options: {
+        A: "AFNEI",
+        B: "SEAC",
+        C: "PETA",
+        D: "Tonarigumi",
+        E: "NICA"
+      },
+      answer: "E",
+      explanation: "NICA (Netherland Indies Civil Administration) dibentuk oleh pihak sekutu dengan orang-orang Belanda yang datang kembali untuk menguasai Hindia Belanda. Kedatangan NICA ke Indonesia dipimpin oleh Van der Plas dan Van Mook."
+    },
+    {
+      no: 22,
+      text: "Kedatangan kembali pasukan Sekutu ke Surabaya setelah kemerdekaan dipimpin oleh ...",
+      options: {
+        A: "Brigjen A.W.S. Mallaby.",
+        B: "Letnan Jenderal Sir Philip Christison.",
+        C: "Laksamana Lord Louis Mountbatten.",
+        D: "Paul van Zeeland.",
+        E: "Richard Kirby"
+      },
+      answer: "A",
+      explanation: "Sekutu datang ke Indonesia (Surabaya) pada tanggal 25 Oktober 1945 yang dipimpin oleh Brigjen A.W.S. Mallaby. Pada tanggal 30 Oktober 1945 terjadi pertempuran yang hebat di Gedung Bank Internatio di Jembatan Merah dan menewaskan Brigjen Mallaby. Tewasnya Brigjen Mallaby ini yang menjadi awal terjadinya pertempuran tanggal 10 November 1945."
+    },
+    {
+      no: 23,
+      text: "Perjuangan mempertahankan kemerdekaan juga terjadi di Ambarawa. Pertempuran yang terjadi ini dipimpin oleh ...",
+      options: {
+        A: "Letkol Soeharto",
+        B: "Jenderal Sudirman",
+        C: "Mayor Sarjono",
+        D: "Letnan Masduki",
+        E: "Mayor Kusno"
+      },
+      answer: "B",
+      explanation: "Pertempuran di Ambarawa dimulai pada tanggal 20 November 1945. Pertempuran ini mengakibatkan meninggalnya Letkol Isdiman, yang kemudian digantikan oleh Jenderal Sudirman. Pasukan Sekutu akhirnya meninggalkan kota Ambarawa tanggal 15 Desember 1945."
+    },
+    {
+      no: 24,
+      text: "Tujuan dibumihanguskannya kota Bandung sebelum para pejuang meninggalkan Bandung untuk mengungsi adalah ...",
+      options: {
+        A: "Ada perintah dari oknum TRI yang berpihak pada sekutu.",
+        B: "Agar sekutu tidak akan mau datang ke kota Bandung karena seluruh kota sudah terbakar.",
+        C: "Agar sekutu tidak dapat memanfaatkan sarana-sarana yang penting sehingga mereka tidak dapat menguasai wilayah tersebut.",
+        D: "Membunuh tentara sekutu yang sudah ada di kota tersebut.",
+        E: "Ada perjanjian sebelumnya antara tentara sekutu dengan para pejuang."
+      },
+      answer: "C",
+      explanation: "Awal mula dibumihanguskannya kota Bandung adalah tentara sekutu mengultimatum para pejuang untuk mengosongkan kota Bandung. Ultimatum itu dilancarkan sekutu sebanyak 2 kali dan baru pada ultimatum yang kedua, yaitu tanggal 23 Maret 1946 para pejuang meninggalkan Bandung. Namun, sebelum meninggalkan kota Bandung, para pejuang membumihanguskan kota Bandung dengan tujuan agar Sekutu tidak dapat menduduki dan memanfaatkan sarana-sarana yang vital."
+    },
+    {
+      no: 25,
+      text: "Budi Utomo adalah organisasi pergerakan nasional pertama di Indonesia. Kongres pertama Budi Utomo dilangsungkan di kota ...",
+      options: {
+        A: "Bogor",
+        B: "Yogyakarta",
+        C: "Semarang",
+        D: "Bandung",
+        E: "Jakarta"
+      },
+      answer: "B",
+      explanation: "Kongres pertama Budi Utomo dilangsungkan di Yogyakarta pada tanggal 3-5 Oktober 1908. Kongres ini dihadiri beberapa utusan daerah, yaitu Bogor, Bandung, Yogya I, Yogya II, Magelang, Surabaya, dan Batavia."
+    },
+    {
+      no: 26,
+      text: "Budi Utomo sebagai organisasi pergerakan nasional pertama didirikan pada tanggal ...",
+      options: {
+        A: "2 Mei 1928",
+        B: "20 Mei 1928",
+        C: "2 Mei 1908",
+        D: "20 Mei 1908",
+        E: "22 Maret 1908"
+      },
+      answer: "D",
+      explanation: "Budi Utomo didirikan pada tanggal 20 Mei 1908 dan diketuai oleh dr. Sutomo. Penggagas Budi Utomo adalah dr. Wahidin Sudirohusodo."
+    },
+    {
+      no: 27,
+      text: "Indische Partij adalah organisasi yang bergerak di bidang politik. Pendiri Indische Partij dikenal dengan sebutan tiga serangkai, yaitu ...",
+      options: {
+        A: "Ir. Soekarno, Drs. Moh. Hatta, dan Dr. Cipto Mangunkusumo.",
+        B: "Douwes Dekker, Dr. Cipto Mangunkusumo, dan Suwardi Suryaningrat.",
+        C: "Dr. Cipto Mangunkusumo, Dr. Soetomo, dan Douwes Dekker.",
+        D: "Ki Hajar Dewantara, Dr. Soetomo, dan Douwes Dekker.",
+        E: "Ir. Soekarno, Dr. Soetomo, dan Douwes Dekker."
+      },
+      answer: "B",
+      explanation: "Indische Partij didirikan pada tanggal 25 Desember 1912 di Bandung oleh tokoh Tiga Serangkai, yaitu Douwes Dekker, Dr. Cipto Mangunkusumo, dan Suwardi Suryaningrat (Ki Hajar Dewantara)."
+    },
+    {
+      no: 28,
+      text: "Pahlawan perempuan yang berusaha untuk memperjuangkan nasib wanita Indonesia dengan mendirikan sekolah perempuan adalah ...",
+      options: {
+        A: "R.A Kartini",
+        B: "Cut Mutia",
+        C: "Dewi Sartika",
+        D: "Maria Walanda Maramis",
+        E: "Martha Christina Tiahahu"
+      },
+      answer: "C",
+      explanation: "Dewi Sartika adalah putri dari Raden Rangga Somanagara dan Raden Ayu Rajapermas. Lahir pada tanggal 4 Desember 1884 di Cicalengka, Jawa Barat. Pada tanggal 16 Januari 1904 Dewi Sartika mendirikan Sakola Istri (sekolah perempuan). Pada tahun 1910, sekolah ini berganti nama menjadi Sakola Kautamaan Istri."
+    },
+    {
+      no: 29,
+      text: "Upaya yang dilakukan oleh pemuda untuk menyatukan kekuatan melawan ketidakadilan pada saat dijajah yaitu dengan diadakannya suatu kongres yang disebut Kongres Pemuda. Kongres Pemuda I berlangsung pada tanggal ...",
+      options: {
+        A: "30 April - 2 Mei 1926.",
+        B: "27 - 28 Oktober 1928.",
+        C: "30 Januari - 2 Februari 1925.",
+        D: "7 - 9 Maret 1924.",
+        E: "2 - 4 Mei 1926."
+      },
+      answer: "A",
+      explanation: "Kongres Pemuda I dilaksanakan pada tanggal 30 April - 2 Mei 1926 di Jakarta. Tujuan Kongres ini adalah untuk mempererat hubungan di antara organisasi kepemudaan sehingga dapat menyamakan paham tentang pentingnya persatuan untuk melawan penjajah agar tercapai Indonesia merdeka."
+    },
+    {
+      no: 30,
+      text: "Pada tanggal 9 Agustus 1945 Ir. Soekarno, Moh. Hatta, dan dr. Radjiman Wedyodiningrat ke Dalat, Vietnam untuk ...",
+      options: {
+        A: "Meresmikan PPKI.",
+        B: "Dibentuknya PETA.",
+        C: "Ketiganya dipaksa untuk menandatangani perjanjian untuk mengikuti segala perintah Jepang.",
+        D: "Jepang meminta pertolongan Indonesia melawan sekutu.",
+        E: "Melakukan perundingan untuk kedua negara."
+      },
+      answer: "A",
+      explanation: "Saat Jepang merasa mengalami kekalahan melawan sekutu, Jepang menjanjikan kemerdekaan bagi Indonesia dan wujud nyata dari janji tersebut adalah dibentuknya PPKI. Maksud dipanggilnya ketiga tokoh ke Dalat, Vietnam Selatan adalah untuk meresmikan PPKI. Yang meresmikan PPKI adalah Jenderal Terauchi pada tanggal 9 Agustus 1945."
+    },
+    {
+      no: 31,
+      text: "Sebelum kemerdekaan, terjadilah peristiwa Rengasdengklok. Maksud para pemuda menculik Ir. Soekarno dan Moh. Hatta ke Rengasdengklok adalah ...",
+      options: {
+        A: "Menghindari pengaruh dan tekanan dari Jepang dan mendesak untuk segera memproklamasikan kemerdekaan.",
+        B: "Membuat naskah proklamasi.",
+        C: "Menyembunyikan keduanya karena sedang dikejar-kejar Jepang.",
+        D: "Memaksa keduanya untuk menandatangani naskah proklamasi.",
+        E: "Melaksanakan rencana yang telah dibuat oleh golongan pemuda."
+      },
+      answer: "A",
+      explanation: "Diculiknya Ir. Soekarno dan Moh. Hatta ke Rengasdengklok adalah agar Jepang tidak dapat mempengaruhi lagi karena golongan muda merasa golongan tua mendapatkan pengaruh dari Jepang untuk tidak segera memproklamasikan kemerdekaan."
+    },
+    {
+      no: 32,
+      text: "Setelah Ir. Soekarno dan Drs. Moh. Hatta dibawa ke Jakarta dan segera merumuskan teks kemerdekaan, Ir. Soekarno meminta naskah teks proklamasi untuk diketik. Yang mengetik teks proklamasi adalah ...",
+      options: {
+        A: "Ahmad Subardjo",
+        B: "Sayuti Melik",
+        C: "Wikana",
+        D: "Yusuf Kunto",
+        E: "Sudiro"
+      },
+      answer: "B",
+      explanation: "Yang mengetik naskah teks proklamasi adalah Sayuti Melik."
+    },
+    {
+      no: 33,
+      text: "Perundingan antara Indonesia dan Belanda yang dilakukan pada tanggal 10 November 1946 adalah ...",
+      options: {
+        A: "Renville",
+        B: "Linggarjati",
+        C: "Roem Royen",
+        D: "Giyanti",
+        E: "Bongaya"
+      },
+      answer: "B",
+      explanation: "Perundingan Linggarjati dilakukan pada tanggal 10 November 1946 di Linggarjati. Dalam perundingan ini, Indonesia diwakili oleh Perdana Menteri Sutan Syahrir, sedangkan Belanda diwakili oleh Prof. Schermerhorn."
+    },
+    {
+      no: 34,
+      text: "Serangan yang dilakukan Belanda atau sering disebut agresi militer I terjadi pada tanggal ...",
+      options: {
+        A: "12 Juni 1948",
+        B: "1 Maret 1949",
+        C: "19 Maret 1947",
+        D: "21 Juli 1947",
+        E: "5 Mei 1948"
+      },
+      answer: "D",
+      explanation: "Agresi militer I terjadi pada tanggal 21 Juli 1947. Agresi ini menghasilkan pengambilalihan pusat ekonomi Sumatera dan pelabuhan Jawa oleh Belanda."
+    },
+    {
+      no: 35,
+      text: "PBB membentuk Komisi Tiga Negara untuk mengawasi gencatan senjata pada saat agresi militer I terjadi. Anggota Komisi Tiga Negara adalah ...",
+      options: {
+        A: "Austria, Belgia, Amerika Serikat.",
+        B: "Belanda, Amerika Serikat, Selandia Baru.",
+        C: "Australia, Belgia, Amerika Serikat.",
+        D: "Australia, Filipina, Selandia Baru.",
+        E: "Inggris, Australia, Belanda"
+      },
+      answer: "C",
+      explanation: "Komisi Tiga Negara terdiri atas Australia, Belgia, Amerika Serikat. Tugas KTN adalah mengawasi secara langsung penghentian tembak-menembak, menjadi penengah konflik antara Indonesia dengan Belanda, memasang patok wilayah status quo yang dibantu oleh TNI, dan mempertemukan kembali Indonesia dan Belanda dalam perjanjian Renville."
+    },
+    {
+      no: 36,
+      text: "Perjanjian yang menghasilkan salah satunya adalah Belanda hanya mengakui Jawa Tengah, Yogyakarta, dan Sumatera sebagai bagian wilayah RI adalah perjanjian ...",
+      options: {
+        A: "Roem Royen",
+        B: "Renville",
+        C: "Linggarjati",
+        D: "Bongaya",
+        E: "Salatiga"
+      },
+      answer: "B",
+      explanation: "Perjanjian Renville dilaksanakan pada tanggal 17 Januari 1948 di atas kapal Renville. Dalam perjanjian ini Indonesia diwakili oleh Perdana Menteri Amir Syarifuddin, sedangkan Belanda diwakili oleh Abdul Kadir Widjojoatmodjo. Hasil perjanjian tersebut adalah:<br>1) Belanda hanya mengakui Jawa Tengah, Yogyakarta dan Sumatera sebagai bagian wilayah RI.<br>2) Disetujuinya sebuah garis demarkasi yang memisahkan wilayah Indonesia dan daerah pendudukan Belanda.<br>3) TNI harus ditarik mundur dari daerah-daerah kantongnya di wilayah pendudukan Jawa Barat dan Jawa Timur ke daerah Indonesia di Yogyakarta."
+    },
+    {
+      no: 37,
+      text: "Agresi Militer Belanda II yang terjadi pada tanggal 19 Desember 1948 terjadi di kota ...",
+      options: {
+        A: "Surabaya",
+        B: "Yogyakarta",
+        C: "Bandung",
+        D: "Semarang",
+        E: "Medan"
+      },
+      answer: "B",
+      explanation: "Agresi militer II yang terjadi pada tanggal 19 Desember 1948 terjadi di Yogyakarta. Pada agresi ini Belanda berhasil menduduki Yogyakarta."
+    },
+    {
+      no: 38,
+      text: "Konferensi Asia di New Delhi membawa dampak yang positif bagi Indonesia, yaitu Indonesia mendapatkan dukungan internasional untuk mempertahankan kemerdekaan. Konferensi ini berlangsung pada tanggal ...",
+      options: {
+        A: "1 - 5 Februari 1949",
+        B: "28 - 30 Maret 1950",
+        C: "20 - 25 Januari 1949",
+        D: "15 Agustus 1949",
+        E: "24 April 1950"
+      },
+      answer: "C",
+      explanation: "Konferensi Asia di New Delhi diselenggarakan pada tanggal 20 - 25 Januari 1949. Konferensi ini dihadiri 19 negara."
+    },
+    {
+      no: 39,
+      text: "Sebagai tindak lanjut dari agresi militer I, PBB mengubah KTN menjadi UNCI. Hasil kerja UNCI adalah ...",
+      options: {
+        A: "Konferensi Meja Bundar",
+        B: "Diadakannya perjanjian Renville",
+        C: "Menghimpun kekuatan dunia untuk mendamaikan Indonesia dan Belanda.",
+        D: "Memberikan opsi kepada Belanda untuk menghentikan penyerangan.",
+        E: "Diadakannya perjanjian Roem Royen"
+      },
+      answer: "E",
+      explanation: "Hasil kerja UNCI adalah mengadakan Perjanjian Roem-Royen antara Indonesia dan Belanda. Perjanjian Roem-Royen diadakan tanggal 14 April 1949 di Jakarta. Pada saat perjanjian ini diadakan, delegasi Indonesia dipimpin oleh Mr. Moh. Roem, sedangkan delegasi Belanda dipimpin oleh Van Royen."
+    },
+    {
+      no: 40,
+      text: "Trikora adalah konflik yang dilancarkan Indonesia untuk menggabungkan wilayah Papua bagian Barat. Trikora dibacakan pada tanggal ...",
+      options: {
+        A: "19 Desember 1961.",
+        B: "17 Agustus 1960.",
+        C: "13 Januari 1962.",
+        D: "5 Desember 1957.",
+        E: "18 Juli 1958."
+      },
+      answer: "A",
+      explanation: "Trikora dibacakan oleh Ir. Soekarno pada tanggal 19 Desember 1961 di Yogyakarta. Tugas komando ini adalah merencanakan, mempersiapkan, dan menyelenggarakan operasi militer untuk menggabungkan Papua bagian Barat dengan Indonesia."
+    },
+    {
+      no: 41,
+      text: "Badan pemerintah PBB yang bertugas menjalankan pemerintahan sementara di Irian Barat selama masa peralihan dinamakan ...",
+      options: {
+        A: "NHM.",
+        B: "KLM.",
+        C: "UNTEA.",
+        D: "FNPIB.",
+        E: "NICA"
+      },
+      answer: "C",
+      explanation: "UNTEA terdiri atas Belgia, Amerika Serikat, dan Australia. UNTEA merupakan lembaga PBB yang ditugaskan menjalankan pemerintahan sementara di Irian Barat."
+    },
+    {
+      no: 42,
+      text: "Presiden Soekarno mengeluarkan dekrit presiden untuk menjaga persatuan dan kesatuan pada tanggal ...",
+      options: {
+        A: "5 Juli 1960",
+        B: "5 Juli 1959",
+        C: "29 September 1955",
+        D: "15 Desember 1955",
+        E: "27 Juni 1960"
+      },
+      answer: "B",
+      explanation: "Pada tanggal 5 Juli 1959 presiden Soekarno mengeluarkan dekrit presiden yang berisi:<br>1) Pembubaran Konstituante<br>2) Berlakunya kembali UUD 1945 dan tidak berlakunya lagi UUDS 1950<br>3) Akan dibentuk MPRS dan DPAS."
+    },
+    {
+      no: 43,
+      text: "Pada tanggal 3 Mei 1964 Soekarno mengeluarkan dwikora. Yang menjadi latar belakang dikeluarkannya dwikora adalah ...",
+      options: {
+        A: "Adanya rencana untuk membentuk negara federasi Malaysia.",
+        B: "Malaysia menyerang Indonesia.",
+        C: "Keluarnya Indonesia dari PBB",
+        D: "Konfrontasi yang dilakukan Filipina kepada Indonesia",
+        E: "Indonesia menolak adanya kerja sama dengan Filipina"
+      },
+      answer: "A",
+      explanation: "Pada tahun 1961 muncul rencana pembentukan negara Federasi Malaysia. Rencana tersebut ditentang oleh Presiden Soekarno karena dianggap dapat membahayakan revolusi Indonesia yang belum selesai. Dwikora berisi:<br>1) Perhebat ketahanan revolusi Indonesia,<br>2) Bantu perjuangan revolusioner rakyat Malaya, Singapura, Serawak, Sabah, dan Brunei untuk memerdekakan diri dan menggagalkan negara boneka Malaysia."
+    },
+    {
+      no: 44,
+      text: "Untuk menghabiskan sisa-sisa G 30 S/PKI dilakukan operasi-operasi penumpasan, salah satunya adalah operasi Trisula yang dilakukan di daerah ...",
+      options: {
+        A: "Jawa Tengah.",
+        B: "Perbatasan Jawa Tengah dan Jawa Timur.",
+        C: "Blitar Selatan.",
+        D: "Jawa Barat.",
+        E: "Yogyakarta"
+      },
+      answer: "C",
+      explanation: "Operasi Trisula dilakukan di Blitar Selatan yang dipimpin oleh Mayjen M. Yasin dan Kolonel Witarmin."
+    },
+    {
+      no: 45,
+      text: "Kondisi politik di Indonesia sebelum dilaksanakan Pemilu ialah munculnya banyak partai politik. Pemilu pertama kali diadakan pada tahun ...",
+      options: {
+        A: "1950",
+        B: "1951",
+        C: "1954",
+        D: "1955",
+        E: "1960"
+      },
+      answer: "D",
+      explanation: "Pemilu tahun 1955 dilaksanakan dalam dua tahap, yaitu tanggal 29 September 1955 untuk memilih anggota DPR, dan tanggal 15 Desember 1955 untuk memilih anggota Badan Konstituante."
+    },
+    {
+      no: 46,
+      text: "Setelah agresi militer II, pasukan TNI merebut kembali kota Yogyakarta pada tanggal 1 Maret 1949 yang dipimpin oleh ...",
+      options: {
+        A: "Sri Sultan Hamengkubuwono IX",
+        B: "Letkol Soeharto",
+        C: "Jenderal Sudirman",
+        D: "D.I Panjaitan",
+        E: "Ahmad Yani"
+      },
+      answer: "B",
+      explanation: "Pada saat agresi militer II, Belanda berhasil menduduki Yogyakarta yang waktu itu sebagai ibukota negara. Namun, TNI berusaha menyusun kekuatan untuk melawan Belanda dan puncak penyerangan pada tanggal 1 Maret 1949 yang dipimpin oleh Letkol Soeharto."
+    },
+    {
+      no: 47,
+      text: "Pepera adalah referendum yang dilakukan tahun 1969 yang bertujuan untuk ...",
+      options: {
+        A: "Irian Barat tetap menjadi bagian dari RI.",
+        B: "Penghentian permusuhan.",
+        C: "Angkatan perang Belanda berangsur-angsur dipulangkan.",
+        D: "Bendera Merah Putih mulai berkibar 31 Desember 1962.",
+        E: "Konfrontasi untuk melawan Belanda."
+      },
+      answer: "A",
+      explanation: "Pepera yang dilakukan di Papua tahun 1969 bertujuan untuk menentukan status daerah bagian barat Pulau Papua antara milik Indonesia atau Belanda. Para wakil yang dipilih, memilih persatuan dengan Indonesia dan hasil tersebut diterima oleh PBB."
+    },
+    {
+      no: 48,
+      text: "Pada saat peristiwa G 30 S/PKI banyak yang menjadi korban. Yang gugur di daerah Yogyakarta adalah ...",
+      options: {
+        A: "Letjen Ahmad Yani dan Mayjen S. Parman",
+        B: "Kolonel Katamso dan Letnan Kolonel Sugiyono.",
+        C: "Mayjen Suprapto dan Brigjen D.I Panjaitan",
+        D: "Mayjen MT Haryono dan Brigjen Sutoyo",
+        E: "Lettu Pierre Tendean"
+      },
+      answer: "B",
+      explanation: "Yang gugur saat peristiwa G 30 S/PKI di Yogyakarta adalah Kolonel Katamso dan Letnan Kolonel Sugiyono."
+    },
+    {
+      no: 49,
+      text: "Tidak semua warga Indonesia menaati perjanjian Renville karena dianggap merugikan negara. Salah satu bentuknya adalah dibentuknya Negara Islam Indonesia. Pendirinya adalah ...",
+      options: {
+        A: "Kahar Muzakar.",
+        B: "Kartosuwiryo.",
+        C: "Daud Beureueh.",
+        D: "Amir Fatah.",
+        E: "Musso"
+      },
+      answer: "B",
+      explanation: "Negara Islam Indonesia didirikan pada tanggal 7 Agustus 1949 oleh Kartosuwiryo."
+    },
+    {
+      no: 50,
+      text: "Pimpinan PKI yang mendukung poros NASAKOM adalah ...",
+      options: {
+        A: "Letkol Untung.",
+        B: "A.H. Nasution.",
+        C: "Achmad Hussein.",
+        D: "D.N Aidit.",
+        E: "Ahmad Yani."
+      },
+      answer: "D",
+      explanation: "Pimpinan PKI yang mendukung pemerintahan demokrasi terpimpin yang berporoskan NASAKOM adalah D.N Aidit."
+    }
+  ];
+
+  // =========================================================================
+  // STATE & LOGIKA APLIKASI CAT
+  // =========================================================================
+  const EXAM_DURATION_SECONDS = 45 * 60; // 45 Menit
+  let currentUser = { user: "", nama: "" };
+  let currentIndex = 0;
+  let userAnswers = new Array(questions.length).fill(null);
+  let doubtStatus = new Array(questions.length).fill(false);
+  let timeLeft = EXAM_DURATION_SECONDS;
+  let timerInterval = null;
+
+  // Fungsi Modal Custom (Pengganti alert & confirm agar aman di semua iframe/browser)
+  function showModal(title, message, buttons) {
+    const overlay = document.getElementById("custom-modal");
+    document.getElementById("modal-title").textContent = title;
+    document.getElementById("modal-message").textContent = message;
+    const btnContainer = document.getElementById("modal-buttons");
+    btnContainer.innerHTML = "";
+
+    buttons.forEach(b => {
+      const btn = document.createElement("button");
+      btn.className = "btn " + (b.className || "btn-primary");
+      btn.style.width = "auto";
+      btn.textContent = b.text;
+      btn.onclick = () => {
+        overlay.style.display = "none";
+        if (b.onClick) b.onClick();
+      };
+      btnContainer.appendChild(btn);
+    });
+
+    overlay.style.display = "flex";
+  }
+
+  // Handle Login ke Google Sheet
+  document.getElementById("login-form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const userVal = document.getElementById("username").value.trim();
+    const passVal = document.getElementById("password").value.trim();
+    const btn = document.getElementById("btn-login");
+    const errBox = document.getElementById("login-error");
+
+    btn.disabled = true;
+    btn.textContent = "Memverifikasi...";
+    errBox.style.display = "none";
+
+    try {
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({ username: userVal, password: passVal })
+      });
+      
+      const textRes = await response.text();
+      let result;
+      try {
+        result = JSON.parse(textRes);
+      } catch (parseErr) {
+        throw new Error("Format respons server tidak valid.");
+      }
+
+      if (result.status === "success") {
+        currentUser = { user: result.user, nama: result.nama };
+        startExam();
+      } else {
+        errBox.style.display = "block";
+        errBox.textContent = result.message || "Username atau Password salah!";
+      }
+    } catch (error) {
+      errBox.style.display = "block";
+      errBox.textContent = "Gagal memproses login. Pastikan Web App sudah di-deploy ulang dengan 'Who has access' diset ke 'Anyone'.";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Masuk Ujian";
+    }
+  });
+
+  function resetExamState() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    currentIndex = 0;
+    userAnswers = new Array(questions.length).fill(null);
+    doubtStatus = new Array(questions.length).fill(false);
+    timeLeft = EXAM_DURATION_SECONDS;
+
+    const timerEl = document.getElementById("timer");
+    timerEl.textContent = "45:00";
+    timerEl.style.color = "white";
+  }
+
+  function startExam() {
+    resetExamState();
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("exam-screen").style.display = "block";
+    document.getElementById("peserta-info").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+
+    initNumberGrid();
+    renderQuestion(0);
+    startTimer();
+  }
+
+  function retryExam() {
+    startExam();
+  }
+
+  function confirmLogout() {
+    showModal(
+      "Konfirmasi Logout",
+      "Apakah Anda yakin ingin keluar dari ujian? Progres jawaban Anda saat ini akan direset.",
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Logout", className: "btn-logout", onClick: logoutUser }
+      ]
+    );
+  }
+
+  function logoutUser() {
+    resetExamState();
+    currentUser = { user: "", nama: "" };
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("login-error").style.display = "none";
+
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("login-screen").style.display = "flex";
+  }
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+      const s = (timeLeft % 60).toString().padStart(2, '0');
+      document.getElementById("timer").textContent = `${m}:${s}`;
+
+      if (timeLeft <= 300) {
+        document.getElementById("timer").style.color = "#fca5a5";
+      }
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        showModal(
+          "Waktu Habis",
+          "Waktu ujian telah habis! Jawaban Anda akan dikumpulkan otomatis.",
+          [{ text: "Lihat Hasil", className: "btn-primary", onClick: finishExam }]
+        );
+      }
+    }, 1000);
+  }
+
+  function initNumberGrid() {
+    const grid = document.getElementById("number-grid");
+    grid.innerHTML = "";
+    questions.forEach((q, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "num-btn";
+      btn.id = `num-btn-${idx}`;
+      btn.textContent = q.no;
+      btn.onclick = () => renderQuestion(idx);
+      grid.appendChild(btn);
+    });
+  }
+
+  function updateNumberGrid() {
+    questions.forEach((_, idx) => {
+      const btn = document.getElementById(`num-btn-${idx}`);
+      if (!btn) return;
+      btn.className = "num-btn";
+      if (idx === currentIndex) btn.classList.add("active");
+      if (doubtStatus[idx]) {
+        btn.classList.add("doubt");
+      } else if (userAnswers[idx] !== null) {
+        btn.classList.add("answered");
+      }
+    });
+  }
+
+  function renderQuestion(index) {
+    currentIndex = index;
+    const q = questions[index];
+
+    document.getElementById("q-number").textContent = `Soal No. ${q.no} dari ${questions.length}`;
+    document.getElementById("q-text").innerHTML = q.text;
+
+    const statusEl = document.getElementById("q-status");
+    if (doubtStatus[index]) {
+      statusEl.textContent = "Ditandai Ragu-Ragu";
+      statusEl.style.color = "#b45309";
+    } else if (userAnswers[index]) {
+      statusEl.textContent = `Terjawab (${userAnswers[index]})`;
+      statusEl.style.color = "var(--success)";
+    } else {
+      statusEl.textContent = "Belum dijawab";
+      statusEl.style.color = "var(--muted)";
+    }
+
+    const optContainer = document.getElementById("q-options");
+    optContainer.innerHTML = "";
+
+    ["A", "B", "C", "D", "E"].forEach(letter => {
+      const div = document.createElement("div");
+      div.className = "option-item" + (userAnswers[index] === letter ? " selected" : "");
+      div.onclick = () => selectOption(letter);
+      div.innerHTML = `
+        <div class="option-letter">${letter}</div>
+        <div>${q.options[letter]}</div>
+      `;
+      optContainer.appendChild(div);
+    });
+
+    document.getElementById("btn-prev").disabled = (index === 0);
+    document.getElementById("btn-next").disabled = (index === questions.length - 1);
+    updateNumberGrid();
+  }
+
+  function selectOption(letter) {
+    userAnswers[currentIndex] = letter;
+    renderQuestion(currentIndex);
+  }
+
+  function toggleDoubt() {
+    doubtStatus[currentIndex] = !doubtStatus[currentIndex];
+    renderQuestion(currentIndex);
+  }
+
+  function prevQuestion() {
+    if (currentIndex > 0) renderQuestion(currentIndex - 1);
+  }
+
+  function nextQuestion() {
+    if (currentIndex < questions.length - 1) renderQuestion(currentIndex + 1);
+  }
+
+  function confirmFinish() {
+    const unanswered = userAnswers.filter(a => a === null).length;
+    const msg = unanswered > 0 
+      ? `Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin mengakhiri ujian?`
+      : "Apakah Anda yakin ingin mengumpulkan semua jawaban sekarang?";
+    
+    showModal(
+      "Kumpulkan Jawaban",
+      msg,
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Kumpulkan", className: "btn-finish", onClick: finishExam }
+      ]
+    );
+  }
+
+  function finishExam() {
+    clearInterval(timerInterval);
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "block";
+
+    let benar = 0, salah = 0, kosong = 0;
+    const reviewContainer = document.getElementById("review-container");
+    reviewContainer.innerHTML = "";
+
+    questions.forEach((q, idx) => {
+      const uAns = userAnswers[idx];
+      const isCorrect = uAns === q.answer;
+
+      if (uAns === null) kosong++;
+      else if (isCorrect) benar++;
+      else salah++;
+
+      const card = document.createElement("div");
+      card.className = `card review-card ${isCorrect ? 'correct' : 'wrong'}`;
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+          <strong>Soal No. ${q.no}</strong>
+          <span style="font-weight:bold; color:${isCorrect ? 'var(--success)' : 'var(--danger)'}">
+            ${uAns === null ? 'Tidak Dijawab' : (isCorrect ? 'BENAR' : 'SALAH')}
+          </span>
+        </div>
+        <p style="margin-bottom:10px;">${q.text}</p>
+        <p><strong>Jawaban Anda:</strong> ${uAns ? `${uAns}. ${q.options[uAns]}` : '-'} | 
+           <strong style="color:var(--success)">Kunci Jawaban:</strong> ${q.answer}. ${q.options[q.answer]}</p>
+        <div class="pembahasan-box">
+          <strong>Pembahasan:</strong><br>${q.explanation}
+        </div>
+      `;
+      reviewContainer.appendChild(card);
+    });
+
+    const skor = Math.round((benar / questions.length) * 100);
+    document.getElementById("res-peserta").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+    document.getElementById("res-score").textContent = `${skor} / 100`;
+    document.getElementById("res-detail").textContent = `Benar: ${benar} | Salah: ${salah} | Kosong: ${kosong}`;
+  }
+</script>
+</body>
+</html>

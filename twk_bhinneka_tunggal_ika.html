@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAT - TWK Bhinneka Tunggal Ika</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+      --warning: #eab308;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); line-height: 1.6; }
+
+    /* Login Screen */
+    #login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .login-box {
+      background: var(--card); padding: 35px; border-radius: 12px; width: 100%; max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+    .login-box h2 { text-align: center; color: var(--primary); margin-bottom: 5px; }
+    .login-box p { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 25px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+    .form-group input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;
+    }
+    .btn {
+      display: inline-block; padding: 10px 18px; border: none; border-radius: 6px; font-size: 0.95rem;
+      font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; text-decoration: none;
+    }
+    .btn-primary { background: var(--primary); color: white; width: 100%; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+    .btn-logout {
+      background: var(--danger); color: white; padding: 7px 14px; font-size: 0.85rem;
+    }
+    .btn-logout:hover { background: var(--danger-hover); }
+    .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 10px; text-align: center; display: none; }
+
+    .register-link-box {
+      margin-top: 18px; padding-top: 15px; border-top: 1px solid #e2e8f0;
+      text-align: center; font-size: 0.9rem; color: var(--muted);
+    }
+    .register-link-box a {
+      color: var(--primary); font-weight: 700; text-decoration: none;
+    }
+    .register-link-box a:hover {
+      text-decoration: underline; color: var(--primary-hover);
+    }
+
+    /* Header CAT */
+    header {
+      background: var(--primary); color: white; padding: 15px 25px; display: flex;
+      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header-title h1 { font-size: 1.2rem; }
+    .header-info { display: flex; align-items: center; gap: 15px; }
+    .timer-box {
+      background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 6px;
+      font-weight: bold; font-size: 1.1rem; letter-spacing: 1px;
+    }
+
+    /* Main Container */
+    #exam-screen, #result-screen { display: none; max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+    .exam-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+    @media (max-width: 850px) { .exam-layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card); border-radius: 10px; padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
+    }
+
+    /* Soal Area */
+    .question-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 2px solid var(--bg); padding-bottom: 12px; margin-bottom: 18px;
+    }
+    .badge-no { background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; }
+    .question-text { font-size: 1.05rem; margin-bottom: 15px; }
+
+    /* Opsi Jawaban */
+    .options-list { display: flex; flex-direction: column; gap: 10px; }
+    .option-item {
+      display: flex; align-items: center; gap: 12px; padding: 12px 15px;
+      border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: 0.15s;
+    }
+    .option-item:hover { background: #f8fafc; border-color: var(--primary); }
+    .option-item.selected { background: #eff6ff; border-color: var(--primary); font-weight: 600; }
+    .option-letter {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+    }
+    .option-item.selected .option-letter { background: var(--primary); color: white; }
+
+    /* Navigasi Bawah Soal */
+    .nav-actions {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 25px;
+      padding-top: 15px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;
+    }
+    .btn-nav { background: #e2e8f0; color: var(--text); }
+    .btn-nav:hover { background: #cbd5e1; }
+    .btn-ragu { background: var(--warning); color: #000; }
+    .btn-finish { background: var(--success); color: white; width: 100%; margin-top: 15px; }
+    .btn-finish:hover { background: #15803d; }
+
+    /* Grid Nomor Soal */
+    .grid-numbers {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px;
+      max-height: 360px; overflow-y: auto; padding-right: 4px;
+    }
+    .num-btn {
+      padding: 8px 0; border: 1px solid var(--border); border-radius: 6px;
+      background: white; font-weight: 600; cursor: pointer; text-align: center;
+    }
+    .num-btn.active { border: 2px solid var(--primary); }
+    .num-btn.answered { background: var(--success); color: white; border-color: var(--success); }
+    .num-btn.doubt { background: var(--warning); color: black; border-color: var(--warning); }
+
+    .legend { display: flex; gap: 12px; font-size: 0.8rem; margin-top: 15px; flex-wrap: wrap; }
+    .legend span { display: flex; align-items: center; gap: 5px; }
+    .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+    /* Result & Pembahasan */
+    .score-banner {
+      text-align: center; padding: 30px; background: linear-gradient(135deg, #1e40af, #3b82f6);
+      color: white; border-radius: 12px; margin-bottom: 25px;
+    }
+    .score-big { font-size: 3.5rem; font-weight: bold; margin: 10px 0; }
+    .result-actions {
+      display: flex; justify-content: center; gap: 12px; margin-top: 15px; flex-wrap: wrap;
+    }
+    .review-card { margin-bottom: 20px; border-left: 5px solid var(--border); }
+    .review-card.correct { border-left-color: var(--success); }
+    .review-card.wrong { border-left-color: var(--danger); }
+    .pembahasan-box {
+      background: #f8fafc; padding: 15px; border-radius: 8px; margin-top: 12px;
+      border: 1px dashed #94a3b8; font-size: 0.95rem;
+    }
+
+    /* Custom Modal Dialog (Pengganti alert/confirm) */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6); display: none; align-items: center;
+      justify-content: center; z-index: 999; padding: 20px;
+    }
+    .modal-card {
+      background: white; padding: 25px; border-radius: 12px; max-width: 400px;
+      width: 100%; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .modal-card h3 { color: var(--primary); margin-bottom: 10px; }
+    .modal-card p { color: var(--text); font-size: 0.95rem; margin-bottom: 20px; }
+    .modal-btns { display: flex; gap: 10px; justify-content: center; }
+  </style>
+</head>
+<body>
+
+  <!-- HALAMAN LOGIN -->
+  <div id="login-screen">
+    <div class="login-box">
+      <h2>Portal Ujian CAT</h2>
+      <p>Subtes 4: TWK Bhinneka Tunggal Ika (50 Soal)</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Username/Email</label>
+          <input type="text" id="username" required placeholder="Masukkan username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="Masukkan password">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-login">Masuk Ujian</button>
+        <div class="error-msg" id="login-error"></div>
+        <div class="register-link-box">
+          Belum punya akun? <a href="http://lynk.id/seputar_guru/4g73189dndge/checkout" target="_blank" rel="noopener noreferrer">Daftar di sini</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- HALAMAN UJIAN CAT -->
+  <div id="exam-screen">
+    <header>
+      <div class="header-title">
+        <h1>CAT - TWK Bhinneka Tunggal Ika</h1>
+        <small id="peserta-info">Peserta: -</small>
+      </div>
+      <div class="header-info">
+        <div class="timer-box" id="timer">45:00</div>
+        <button type="button" class="btn btn-logout" onclick="confirmLogout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="exam-layout" style="margin-top: 20px;">
+      <!-- Kolom Kiri: Soal -->
+      <div class="card">
+        <div class="question-header">
+          <span class="badge-no" id="q-number">Soal No. 1</span>
+          <span id="q-status" style="font-size: 0.85rem; color: var(--muted);">Belum dijawab</span>
+        </div>
+        <div class="question-text" id="q-text"></div>
+        <div class="options-list" id="q-options"></div>
+
+        <div class="nav-actions">
+          <button class="btn btn-nav" id="btn-prev" onclick="prevQuestion()">&laquo; Sebelumnya</button>
+          <button class="btn btn-ragu" id="btn-doubt" onclick="toggleDoubt()">Ragu-Ragu</button>
+          <button class="btn btn-nav" id="btn-next" onclick="nextQuestion()">Selanjutnya &raquo;</button>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Navigasi Nomor -->
+      <div class="card">
+        <h3>Navigasi Soal</h3>
+        <div class="grid-numbers" id="number-grid"></div>
+        <div class="legend">
+          <span><i class="dot" style="background: var(--success);"></i> Dijawab</span>
+          <span><i class="dot" style="background: var(--warning);"></i> Ragu</span>
+          <span><i class="dot" style="background: #fff; border: 1px solid #cbd5e1;"></i> Kosong</span>
+        </div>
+        <button class="btn btn-finish" onclick="confirmFinish()">Selesai & Kumpulkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN HASIL & PEMBAHASAN -->
+  <div id="result-screen">
+    <div class="score-banner">
+      <h2>Hasil Ujian CAT Anda</h2>
+      <p id="res-peserta"></p>
+      <div class="score-big" id="res-score">0</div>
+      <p id="res-detail">Benar: 0 | Salah: 0 | Kosong: 0</p>
+      <div class="result-actions">
+        <button class="btn" style="background: white; color: var(--primary);" onclick="retryExam()">Ulangi Ujian</button>
+        <button class="btn btn-logout" onclick="logoutUser()">Logout</button>
+      </div>
+    </div>
+    <h3 style="margin-bottom: 15px;">Kunci Jawaban & Pembahasan Lengkap</h3>
+    <div id="review-container"></div>
+  </div>
+
+  <!-- CUSTOM MODAL -->
+  <div class="modal-overlay" id="custom-modal">
+    <div class="modal-card">
+      <h3 id="modal-title">Konfirmasi</h3>
+      <p id="modal-message">Pesan konfirmasi</p>
+      <div class="modal-btns" id="modal-buttons"></div>
+    </div>
+  </div>
+
+<script>
+  // =========================================================================
+  // URL GOOGLE APPS SCRIPT ANDA YANG AKTIF
+  // =========================================================================
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxB6Th7GHlD9o8ABbYcK2mdV7mv4ufy2i-SYXUg3jVqS0Q1bkXa_pkseMhqmIzgCTx7/exec";
+
+  // =========================================================================
+  // BANK SOAL, KUNCI JAWABAN & PEMBAHASAN (50 SOAL TWK BHINNEKA TUNGGAL IKA)
+  // =========================================================================
+  const questions = [
+    {
+      no: 1,
+      text: "Semboyan negara kita Bhinneka Tunggal Ika berasal dari bahasa Jawa Kuno yang diambil dari sebuah kitab yang bernama Sutasoma yang merupakan karangan dari ...",
+      options: {
+        A: "Mpu Tantular",
+        B: "Mpu Prapanca",
+        C: "Mpu Gandring",
+        D: "Mpu Sendok",
+        E: "Mpu Supo"
+      },
+      answer: "A",
+      explanation: "Kalimat Bhinneka Tunggal Ika diambil dari kitab Sutasoma karangan Mpu Tantular pada masa Kerajaan Majapahit sekitar abad 14. Bhinneka Tunggal Ika sering diterjemahkan walaupun berbeda-beda namun tetap satu."
+    },
+    {
+      no: 2,
+      text: "Penyelenggara pemerintahan Indonesia dibagi menjadi daerah provinsi, daerah kabupaten dan kota mencerminkan Indonesia menerapkan prinsip ...",
+      options: {
+        A: "Sentralisasi",
+        B: "Desentralisasi",
+        C: "Dekonsentrasi",
+        D: "Asas perbantuan",
+        E: "Asas pemusatan"
+      },
+      answer: "B",
+      explanation: "Prinsip desentralisasi adalah penyerahan wewenang pemerintahan dari pemerintah pusat kepada pemerintahan daerah untuk mengatur dan mengurus daerahnya masing-masing. Hal ini juga diatur pada pasal 18 ayat 1 dan 2 UUD 1945."
+    },
+    {
+      no: 3,
+      text: "Diterapkannya sistem desentralisasi pada penyelenggaraan pemerintahan bertujuan untuk ...",
+      options: {
+        A: "Menjalankan sistem pemerintahan satu komando yang berasal dari satu pemerintahan pusat sehingga lebih mudah pengaturannya.",
+        B: "Pemerintah daerah hanya sebagai penyalur informasi daerah kepada pemerintah pusat tanpa bisa ikut langsung menangani.",
+        C: "Mencegah pemusatan kekuasaan sehingga pemerintah daerah dapat menggali dan mengembangkan lebih dalam lagi potensi wilayahnya serta masyarakat dapat ikut bertanggung jawab terhadap pemerintahan.",
+        D: "Menyelenggarakan pemerintahan tanpa adanya ikut campur dari pihak daerah.",
+        E: "Mempermudah kinerja pemerintah daerah karena segala urusan pemerintahan menjadi tanggung jawab pemerintah pusat."
+      },
+      answer: "C",
+      explanation: "Dengan adanya penyerahan wewenang dari pemerintah pusat memberikan keleluasaan bagi pemerintah daerah untuk dapat mengeksplor potensi yang ada di wilayahnya. Selain itu, rakyat juga dapat lebih mengontrol pemerintahan yang sedang berjalan."
+    },
+    {
+      no: 4,
+      text: "Meskipun adanya penyerahan kekuasaan kepada pemerintah daerah, tetapi ada beberapa hal yang tetap menjadi kewenangan pemerintah pusat yang akan ditetapkan dengan ...",
+      options: {
+        A: "Peraturan daerah",
+        B: "Ketetapan MPR",
+        C: "Peraturan Presiden",
+        D: "Perpu",
+        E: "Peraturan pemerintah."
+      },
+      answer: "E",
+      explanation: "Beberapa hal yang tetap menjadi kewenangan pemerintah pusat adalah pertahanan dan keamanan, agama, politik luar negeri, serta kebijakan moneter dan fiskal yang semuanya akan ditetapkan dengan Peraturan Pemerintah."
+    },
+    {
+      no: 5,
+      text: "Penyelenggara pemerintahan di dalam negara harus seimbang antara hak dan kewajiban. Hal ini merupakan salah satu asas pemerintahan yang baik, yaitu ...",
+      options: {
+        A: "Kepentingan umum",
+        B: "Akuntabilitas",
+        C: "Keterbukaan",
+        D: "Proporsional",
+        E: "Profesional"
+      },
+      answer: "D",
+      explanation: "Asas proporsional adalah asas yang menjelaskan bahwa penyelenggara negara harus dapat menyeimbangkan hak yang ia dapatkan dengan kewajiban yang harus ia tunaikan, tidak boleh berat sebelah."
+    },
+    {
+      no: 6,
+      text: "Negara kita adalah negara yang dapat mengakui dan menghormati akan adanya perbedaan. Salah satu bentuknya adalah penghormatan terhadap adanya perbedaan agama. Hal ini dijelaskan pada ...",
+      options: {
+        A: "Pasal 31 ayat 3 UUD 1945.",
+        B: "Pasal 30 ayat 1 UUD 1945.",
+        C: "Pasal 29 ayat 2 UUD 1945.",
+        D: "Pasal 28 UUD 1945.",
+        E: "Pasal 26 ayat 1 UUD 1945."
+      },
+      answer: "C",
+      explanation: "Pasal 29 ayat 1 dijelaskan bahwa Indonesia berdasar atas Ketuhanan Yang Maha Esa. Lebih lanjut dijelaskan pada ayat 2 bahwa negara menjamin kemerdekaan tiap penduduk untuk memeluk agamanya masing-masing dan beribadat menurut kepercayaannya."
+    },
+    {
+      no: 7,
+      text: "Negara Indonesia sebagai negara yang warga negaranya bersatu erat serta kepentingan individu diakui secara seimbang. Hal ini karena Indonesia merupakan negara ...",
+      options: {
+        A: "Kemakmuran",
+        B: "Persamaan",
+        C: "Otonomi",
+        D: "Kesukuan",
+        E: "Persatuan"
+      },
+      answer: "E",
+      explanation: "Negara persatuan adalah negara yang warga negaranya bersatu erat dimana negara menjamin kedudukan yang sama di depan hukum dan pemerintahan. Kebebasan kehidupan individu maupun golongan sangat dihargai tanpa membedakan suku atau perbedaan lain yang ada. Negara persatuan itu mempersatukan seluruh bangsa Indonesia dalam wadah NKRI."
+    },
+    {
+      no: 8,
+      text: "Negara mempunyai kekuasaan untuk memaksa warga negaranya, baik secara fisik maupun tidak. Hal ini karena negara mempunyai sifat ...",
+      options: {
+        A: "Memaksa",
+        B: "Monopoli",
+        C: "Mencakup semua",
+        D: "Mengayomi",
+        E: "Mengikat"
+      },
+      answer: "A",
+      explanation: "Kekuasaan negara untuk melakukan pemaksaan terhadap warga negaranya bertujuan agar peraturan yang dibuat dapat dijalankan dengan benar sehingga ketertiban dapat tercapai, serta sikap anarkis dapat diminimalkan atau bahkan dihilangkan. Adanya unsur memaksa dari negara ini dikarenakan yang menjadi warga negaranya mempunyai berbagai perbedaan sehingga negara lebih dapat mengontrol warga negaranya."
+    },
+    {
+      no: 9,
+      text: "Terbentuknya suatu negara harus memenuhi beberapa unsur yang terbagi menjadi dua klasifikasi, yaitu deklaratif dan konstitutif. Yang menjadi unsur deklaratif berdirinya suatu negara adalah ...",
+      options: {
+        A: "Pemerintah yang berdaulat.",
+        B: "Adanya wilayah tertentu.",
+        C: "Adanya rakyat yang akan dipimpin.",
+        D: "Ada kedaulatan",
+        E: "Pengakuan dari negara lain."
+      },
+      answer: "E",
+      explanation: "Unsur deklaratif merupakan unsur tambahan, namun keberadaannya sangat diperlukan. Pengakuan dari negara lain menjadi hal yang sangat penting bagi negara yang baru saja merdeka atau lahir. Hal ini akan berdampak pada hubungan negara baru tersebut dengan negara lain dalam pergaulan di dunia internasional."
+    },
+    {
+      no: 10,
+      text: "Ada beberapa teori yang menjelaskan mengenai terbentuknya suatu negara. Menurut kejadiannya, asal mula terbentuknya negara Indonesia disebabkan oleh ...",
+      options: {
+        A: "Fusi",
+        B: "Perjuangan",
+        C: "Occupatie",
+        D: "Penyerahan",
+        E: "Pendudukan"
+      },
+      answer: "B",
+      explanation: "Terbentuknya suatu negara yang disebabkan oleh perjuangan adalah negara tersebut dahulunya merupakan daerah jajahan, namun karena perjuangan rakyatnya akhirnya dapat merdeka. Lahirnya Indonesia melalui perjuangan yang begitu panjang hingga akhirnya memproklamasikan kemerdekaan pada tanggal 17 Agustus 1945."
+    },
+    {
+      no: 11,
+      text: "Setiap negara mempunyai batas wilayahnya masing-masing. Indonesia sebagai negara yang dikelilingi laut memiliki batas wilayah laut teritorial. Mulai tanggal 21 Maret 1980 batas wilayah laut Indonesia selebar ...",
+      options: {
+        A: "3 mil.",
+        B: "12 mil.",
+        C: "20 mil.",
+        D: "200 mil.",
+        E: "150 mil."
+      },
+      answer: "D",
+      explanation: "Berdasarkan Zona Ekonomi Eksklusif batas wilayah laut teritorial Indonesia selebar 200 mil ditarik dari garis pangkal wilayah laut Indonesia. ZEE adalah wilayah laut sejauh 200 mil dari pulau terluar saat air surut. Pada batas ini Indonesia berhak untuk mengeksplor sumber daya alam yang ada di dalamnya."
+    },
+    {
+      no: 12,
+      text: "Setiap negara mempunyai kewenangan untuk menentukan seseorang mendapatkan kewarganegaraan. Penentuan kewarganegaraan dengan <i>Ius Soli</i>, yaitu berdasarkan ...",
+      options: {
+        A: "Keturunan.",
+        B: "Tempat kelahiran.",
+        C: "Hubungan Perkawinan.",
+        D: "Status hukum.",
+        E: "Pengabdian."
+      },
+      answer: "B",
+      explanation: "<i>Ius soli</i> adalah asas penentuan kewarganegaraan berdasarkan tempat kelahiran."
+    },
+    {
+      no: 13,
+      text: "Di Indonesia dikenal adanya sistem kekerabatan patrilineal dan matrilineal. Suku yang menganut sistem kekerabatan matrilineal adalah ...",
+      options: {
+        A: "Batak",
+        B: "Rejang",
+        C: "Gayo",
+        D: "Bali",
+        E: "Minangkabau"
+      },
+      answer: "E",
+      explanation: "Sistem kekerabatan matrilineal adalah suatu adat masyarakat yang mengikuti garis keturunan berasal dari pihak ibu. Di Indonesia yang menganut sistem ini adalah suku Minangkabau di Sumatera Barat."
+    },
+    {
+      no: 14,
+      text: "Indonesia terdapat berbagai macam suku bangsa. Berikut ini adalah suku bangsa yang ada di Sulawesi Selatan, kecuali ...",
+      options: {
+        A: "Bugis",
+        B: "Makasar",
+        C: "Toraja",
+        D: "Buton",
+        E: "Mandar"
+      },
+      answer: "D",
+      explanation: "Suku Buton berasal dari Sulawesi Tenggara."
+    },
+    {
+      no: 15,
+      text: "Kekayaan budaya di Indonesia salah satunya adalah tarian daerah. Tarian daerah yang berasal dari Bali adalah ...",
+      options: {
+        A: "Rudat",
+        B: "Legong",
+        C: "Cerana",
+        D: "Ngremo",
+        E: "Serimpi"
+      },
+      answer: "B",
+      explanation: "Bali memiliki tiga macam tarian daerah, yaitu tari kecak, pendet, dan legong."
+    },
+    {
+      no: 16,
+      text: "Ngaben adalah salah satu bentuk upacara adat yang berasal dari daerah ...",
+      options: {
+        A: "Nusa Tenggara Barat",
+        B: "Nusa Tenggara Timur",
+        C: "Jawa Timur",
+        D: "Bali",
+        E: "Sumbawa"
+      },
+      answer: "D",
+      explanation: "Ngaben adalah salah satu prosesi upacara adat di Bali dimana orang yang telah meninggal dibakar, kemudian abu jenazah dilarung ke sungai atau laut."
+    },
+    {
+      no: 17,
+      text: "Untuk menentukan kewarganegaraan seseorang, Indonesia menganut asas ...",
+      options: {
+        A: "<i>Ius sanguinis</i>",
+        B: "<i>Ius soli</i>",
+        C: "Bipatride",
+        D: "Apatride",
+        E: "Perkawinan"
+      },
+      answer: "A",
+      explanation: "Indonesia menganut sistem <i>ius sanguinis</i>, yaitu penentuan kewarganegaraan berdasarkan keturunan."
+    },
+    {
+      no: 18,
+      text: "Masyarakat madani adalah masyarakat yang bebas dan sadar akan hak dan kewajibannya dalam penyampaian pendapat. Berikut ini yang bukan termasuk karakteristik masyarakat madani adalah ...",
+      options: {
+        A: "Kekuasaan tersebar sehingga pengontrolan menjadi lebih mudah.",
+        B: "Sifat mementingkan diri sendiri masih menonjol.",
+        C: "Kepentingan individu dan negara ada penyalurnya.",
+        D: "Program pembangunan yang berbasis kerakyatan.",
+        E: "Kreativitas masyarakat lebih tereksplor."
+      },
+      answer: "B",
+      explanation: "Pada dasarnya, masyarakat madani adalah dimana masyarakat mendapatkan kebebasan untuk berbicara serta bertindak. Hal ini mendorong interaksi sosial yang lebih intens dengan orang lain sehingga diharapkan sifat keindividuan dapat terkikis."
+    },
+    {
+      no: 19,
+      text: "Macam demokrasi yang merupakan gabungan dari demokrasi perwakilan dan demokrasi langsung adalah ...",
+      options: {
+        A: "Demokrasi rakyat",
+        B: "Demokrasi konstitusional",
+        C: "Demokrasi perwakilan sistem referendum",
+        D: "Demokrasi formal",
+        E: "Demokrasi material"
+      },
+      answer: "C",
+      explanation: "Pada demokrasi perwakilan sistem referendum, rakyat memilih wakil mereka untuk duduk di lembaga perwakilan, tetapi lembaga perwakilan tersebut dikontrol oleh pengaruh rakyat dengan sistem referendum dan inisiatif rakyat."
+    },
+    {
+      no: 20,
+      text: "Pada prinsip demokrasi dikenal adanya pengakuan hak minoritas, peranan negara untuk melindungi kaum minoritas adalah ...",
+      options: {
+        A: "Negara melindungi hak semua warga negara tanpa membeda-bedakan",
+        B: "Adanya pembagian kekuasaan yaitu trias politica",
+        C: "Hukum mempunyai kedudukan tertinggi di suatu negara.",
+        D: "Adanya pemilu untuk memilih wakil rakyat.",
+        E: "Pemerintah terbuka kepada rakyatnya mengenai jalannya pemerintahan."
+      },
+      answer: "A",
+      explanation: "Indonesia sebagai negara yang memiliki keanekaragaman pasti di dalamnya tercipta kelompok minoritas dan mayoritas. Peranan negara untuk melindungi kelompok minoritas, yaitu dengan diberlakukannya UUD 1945 yang mana di dalamnya berisi pengaturan mengenai hak dan kewajiban warga negara Indonesia tanpa adanya pembedaan."
+    },
+    {
+      no: 21,
+      text: "Yang merupakan anugerah dari Tuhan dan harus dilindungi dan dihormati orang lain, negara, dan hukum adalah ...",
+      options: {
+        A: "Kewajiban dasar manusia.",
+        B: "Pelanggaran HAM.",
+        C: "Hak Asasi Manusia.",
+        D: "Dokumen tentang HAM.",
+        E: "Kebebasan"
+      },
+      answer: "C",
+      explanation: "Setiap orang memiliki hak asasi dan harus dihormati karena hak asasi adalah pemberian Tuhan. Setiap orang berhak mendapatkan perlakuan yang sama tanpa ada yang dibeda-bedakan."
+    },
+    {
+      no: 22,
+      text: "Pers mempunyai peranan penting dalam kehidupan di negara demokrasi, yaitu ...",
+      options: {
+        A: "Pers mengawasi perilaku seluruh lapisan masyarakat, baik tingkat bawah, menengah, atas agar yang dilakukan tidak menyimpang dari norma yang berlaku di masyarakat.",
+        B: "Pers bebas dari tindakan pelarangan penyiaran.",
+        C: "Adanya pers mendorong masyarakat untuk mengeluarkan pendapatnya.",
+        D: "Adanya pers membantu menyelesaikan masalah.",
+        E: "Pers digunakan untuk media pendukung suatu golongan tertentu."
+      },
+      answer: "A",
+      explanation: "Pers berfungsi sebagai kontrol sosial, yaitu perannya untuk mengawasi seluruh lapisan masyarakat. Diharapkan dengan adanya kontrol sosial ini segala bentuk penyimpangan dapat diminimalkan."
+    },
+    {
+      no: 23,
+      text: "Indonesia mempunyai berbagai macam kekayaan budaya nasional. Bentuk nyata pengaturan kebebasan untuk mengembangkan nilai kebudayaan adalah ...",
+      options: {
+        A: "Pasal 33 UUD 1945",
+        B: "Pasal 32 UUD 1945",
+        C: "Pasal 30 UUD 1945",
+        D: "Pasal 28 UUD 1945",
+        E: "Pasal 27 UUD 1945"
+      },
+      answer: "B",
+      explanation: "Negara Indonesia menjamin kebebasan masyarakat untuk memelihara dan menghormati kekayaan budaya nasional sebagaimana diatur pada pasal 32 UUD 1945."
+    },
+    {
+      no: 24,
+      text: "Salah satu senjata tradisional yang bernama rencong berasal dari daerah ...",
+      options: {
+        A: "Jawa Barat",
+        B: "Kalimantan Timur",
+        C: "Papua",
+        D: "Aceh",
+        E: "Jawa Timur"
+      },
+      answer: "D",
+      explanation: "Rencong adalah senjata tradisional dari Aceh."
+    },
+    {
+      no: 25,
+      text: "Sikap saling menghargai sangat diperlukan untuk negara Indonesia yang penuh dengan keanekaragaman budaya. Salah satu sikap yang dapat memecah keutuhan bangsa adalah ...",
+      options: {
+        A: "Chauvinisme",
+        B: "Toleransi",
+        C: "Primordialisme",
+        D: "Ekstrimisme",
+        E: "Xenosentrisme"
+      },
+      answer: "A",
+      explanation: "Chauvinisme adalah paham yang membanggakan ras atau bangsanya sendiri secara berlebihan sehingga menganggap yang lain tidak bagus. Chauvinisme bertentangan dengan Pancasila sila ketiga."
+    },
+    {
+      no: 26,
+      text: "Rumah adat menjadi salah satu bagian dari keanekaragaman budaya Indonesia. Baileo adalah rumah adat dari daerah ...",
+      options: {
+        A: "Nusa Tenggara Timur",
+        B: "Sulawesi Tengah",
+        C: "Kalimantan Selatan",
+        D: "Sumatera Selatan",
+        E: "Maluku"
+      },
+      answer: "E",
+      explanation: "Rumah adat Maluku adalah Baileo."
+    },
+    {
+      no: 27,
+      text: "Kulintang adalah alat musik berupa bilah-bilah kayu yang disusun di atas kotak kayu berasal dari daerah ...",
+      options: {
+        A: "Buton",
+        B: "Minahasa",
+        C: "Bugis",
+        D: "Sunda",
+        E: "Banjar"
+      },
+      answer: "B",
+      explanation: "Kulintang adalah alat musik tradisional Minahasa, Sulawesi Utara."
+    },
+    {
+      no: 28,
+      text: "Menjaga keamanan negara bukan hanya merupakan tugas TNI dan Polri, setiap warga negara juga berkewajiban untuk menjaganya. Kewajiban mempertahankan keamanan negara diatur dalam ...",
+      options: {
+        A: "UUD 1945 pasal 30 ayat 1",
+        B: "UUD 1945 pasal 28E ayat 1",
+        C: "UUD 1945 pasal 31 ayat 2",
+        D: "UUD 1945 pasal 33 ayat 2",
+        E: "UUD 1945 Pasal 34 ayat 2"
+      },
+      answer: "A",
+      explanation: "Pasal 30 ayat 1 menjelaskan bahwa tiap-tiap warga negara berhak dan wajib ikut serta dalam usaha pertahanan dan keamanan negara."
+    },
+    {
+      no: 29,
+      text: "Sensus penduduk diadakan untuk salah satu cara mengatasi permasalahan kependudukan. Sensus penduduk yang dilakukan hanya untuk penduduk yang secara resmi tercatat dan tinggal di daerah tersebut dinamakan ...",
+      options: {
+        A: "Sensus de facto",
+        B: "Sensus de jure",
+        C: "Registrasi penduduk",
+        D: "Sensus householder",
+        E: "Sensus canvasser"
+      },
+      answer: "B",
+      explanation: "Sensus de jure adalah pencatatan penduduk terhadap penduduk yang secara resmi tercatat dan tinggal sebagai penduduk di daerah tersebut pada saat dilakukannya sensus."
+    },
+    {
+      no: 30,
+      text: "Sumpah Pemuda merupakan titik balik pemuda Indonesia untuk bersatu demi mewujudkan Indonesia merdeka. Yang membacakan Sumpah Pemuda adalah ...",
+      options: {
+        A: "Amir Syafrudin.",
+        B: "Moh. Yamin.",
+        C: "Sugondo Joyopuspito.",
+        D: "Djoko Marsaid.",
+        E: "Rohjani."
+      },
+      answer: "C",
+      explanation: "Sugondo Joyopuspito adalah pemuda yang membacakan Sumpah Pemuda. Sugondo juga merupakan ketua Kongres Pemuda II."
+    },
+    {
+      no: 31,
+      text: "Munculnya kebudayaan baru di mana tidak ada pembeda-bedaan kebudayaan dan merupakan hasil perpaduan budaya yang berbeda disebut ...",
+      options: {
+        A: "Akomodasi.",
+        B: "Toleransi.",
+        C: "Konsiliasi.",
+        D: "Mediasi.",
+        E: "Asimilasi."
+      },
+      answer: "E",
+      explanation: "Asimilasi adalah proses sosial yang muncul karena adanya kelompok masyarakat yang berbeda latar belakang budaya berinteraksi secara terus-menerus dalam waktu lama sehingga memunculkan kebudayaan baru."
+    },
+    {
+      no: 32,
+      text: "Di tengah perbedaan yang begitu banyak, bukan tidak mungkin terjadinya kesalahpahaman yang bisa berakhir pada pertikaian. Salah satu bentuk penyelesaian masalah arbitrasi, yaitu ...",
+      options: {
+        A: "Penyelesaian masalah dengan bantuan pihak ketiga di mana pihak ketiga mempunyai wewenang untuk menyelesaikan masalah yang sedang terjadi.",
+        B: "Penyelesaian masalah dengan mendatangkan pihak ketiga namun pihak ketiga hanya menjembatani dari pihak yang berselisih tanpa dapat ikut menyelesaikannya.",
+        C: "Usaha untuk mempertemukan keinginan dari beberapa pihak yang berselisih agar tercapai tujuan bersama.",
+        D: "Penyelesaian permasalahan melalui jalur hukum.",
+        E: "Kedua belah pihak yang berselisih saling sepakat."
+      },
+      answer: "A",
+      explanation: "Arbitrasi merupakan bagian dari akomodasi dimana pihak ketiga mempunyai wewenang untuk menyelesaikan masalah yang sedang terjadi. Kedudukan arbiter lebih tinggi daripada yang sedang berselisih."
+    },
+    {
+      no: 33,
+      text: "Diadakannya penyuluhan mengenai HIV/AIDS merupakan salah satu bentuk upaya pengendalian sosial, yaitu ...",
+      options: {
+        A: "Tindakan represif.",
+        B: "Tindakan preventif.",
+        C: "Tindakan kuratif.",
+        D: "Tindakan eksternal.",
+        E: "Tindakan persuasif."
+      },
+      answer: "B",
+      explanation: "Pengendalian sosial merupakan suatu bentuk aktivitas yang disampaikan kepada masyarakat karena adanya penyimpangan-penyimpangan sosial sehingga diharapkan keteraturan dalam masyarakat kembali dapat tercapai. Tindakan preventif adalah tindakan yang dilakukan oleh pihak yang berwajib sebelum terjadinya penyimpangan."
+    },
+    {
+      no: 34,
+      text: "Bentuk pengendalian sosial yang paling mendasar dalam kehidupan manusia adalah ...",
+      options: {
+        A: "Sanksi",
+        B: "Teguran",
+        C: "Pendidikan",
+        D: "Agama",
+        E: "Gosip"
+      },
+      answer: "D",
+      explanation: "Agama menjadi hal yang sangat mendasar bagi kehidupan manusia. Agama harus menjadi pondasi karena dengan kita meyakini adanya Tuhan, tingkah laku kita akan berdasarkan kepada ajaran agama sehingga kita dapat mengendalikan diri kita dari hal-hal yang bersifat negatif."
+    },
+    {
+      no: 35,
+      text: "Yang menjadi faktor pendorong tumbuhnya sosial budaya di dalam masyarakat adalah ...",
+      options: {
+        A: "Adanya kepentingan yang telah tertanam dengan kuat.",
+        B: "Heterogenitas penduduk.",
+        C: "Sikap masyarakat masih tradisional.",
+        D: "Kurang ada hubungan dengan masyarakat lain.",
+        E: "Perkembangan pendidikan berjalan lambat."
+      },
+      answer: "B",
+      explanation: "Dengan adanya penduduk yang mempunyai perbedaan suku, agama, kebudayaan terkadang menimbulkan beberapa perselisihan. Dari perselisihan itu kemudian dilakukan interaksi dari masing-masing pihak agar keselarasan hidup dapat terwujud."
+    },
+    {
+      no: 36,
+      text: "Hal positif yang ditimbulkan dengan adanya perubahan sosial budaya adalah ...",
+      options: {
+        A: "Masyarakat dapat berpikir lebih rasional sehingga dapat memunculkan ide-ide baru.",
+        B: "Perselisihan lebih sering terjadi karena semakin banyak perbedaan.",
+        C: "Norma yang berlaku di masyarakat sedikit demi sedikit mulai luntur.",
+        D: "Budaya asli daerah mulai tergeser dengan masuk dan munculnya budaya baru.",
+        E: "Beberapa daerah mengalami ketertinggalan karena tidak terjadi pemerataan perubahan."
+      },
+      answer: "A",
+      explanation: "Dengan adanya perubahan sosial budaya, menuntut orang-orang untuk dapat berpikir logis, cepat, dan terarah yang kemudian digunakan untuk lebih memperbaiki kekurangan yang ada sebelumnya."
+    },
+    {
+      no: 37,
+      text: "Faktor demografi menjadi salah satu unsur penyebab perubahan sosial budaya dikarenakan ...",
+      options: {
+        A: "Adanya perubahan politik ataupun ideologi membuat negara menjadi berubah sehingga nilai sosial budayanya pun ikut berubah.",
+        B: "Memengaruhi pola kehidupan masyarakat tersebut.",
+        C: "Pertentangan antargolongan menyebabkan perselisihan.",
+        D: "Dapat memunculkan penemuan baru.",
+        E: "Masyarakatnya sudah tidak bertanggung jawab untuk menjaganya."
+      },
+      answer: "B",
+      explanation: "Bertambah dan berkurangnya penduduk di suatu wilayah dapat memengaruhi pola kehidupan masyarakat tersebut. Dengan berkurangnya penduduk mengakibatkan orang yang lebih muda tidak mengetahui kebudayaan daerahnya, sedangkan dengan bertambahnya jumlah penduduk maka akan memengaruhi ekonomi daerah tersebut."
+    },
+    {
+      no: 38,
+      text: "Hal-hal yang menyebabkan orang mempertahankan kebudayaan daerahnya adalah di bawah ini, kecuali ...",
+      options: {
+        A: "Kebudayaan daerahnya telah diterima masyarakat luas baik itu dalam negeri maupun luar negeri.",
+        B: "Kebudayaan tersebut telah diperoleh sejak masih kecil dan sudah menjadi bagian dari kehidupan masyarakat.",
+        C: "Menyangkut ideologi dan falsafah hidup.",
+        D: "Menyangkut nilai keagamaan.",
+        E: "Ada kesulitan yang tidak dapat diselesaikan dengan kebudayaan tersebut."
+      },
+      answer: "E",
+      explanation: "Dikarenakan ada hal yang tidak dapat diselesaikan dengan kebudayaan yang lama maka masyarakat akan mencari hal baru untuk menyelesaikan permasalahan yang sedang dihadapinya sehingga ini menjadi salah satu sebab kebudayaan lama ditinggalkan."
+    },
+    {
+      no: 39,
+      text: "Masyarakat madani mempunyai kebebasan untuk menyuarakan suaranya namun harus tetap bertanggung jawab. Yang dimaksud kebebasan yang bertanggung jawab adalah ...",
+      options: {
+        A: "Kebebasan yang dimiliki seseorang harus tetap memperhatikan penghargaan terhadap orang lain serta sesuai dengan nilai-nilai kesusilaan, adat maupun hukum.",
+        B: "Seseorang bebas mengeluarkan pendapatnya tanpa adanya paksaan dari pihak manapun.",
+        C: "Setiap orang harus mempertanggungjawabkan perbuatan yang telah dilakukannya.",
+        D: "Seseorang bebas mengikuti pendapat orang lain yang ia senangi.",
+        E: "Seseorang bebas mengeluarkan pendapatnya tanpa harus memikirkan risiko."
+      },
+      answer: "A",
+      explanation: "Seseorang berhak mengeluarkan pendapatnya namun harus tetap pada norma yang berlaku bukan tanpa adanya pembatasan."
+    },
+    {
+      no: 40,
+      text: "Salah satu contoh penyampaian pendapat di muka umum dengan tulisan disebut ...",
+      options: {
+        A: "Rapat umum.",
+        B: "Unjuk rasa.",
+        C: "Mimbar bebas.",
+        D: "Pawai.",
+        E: "Demonstrasi."
+      },
+      answer: "C",
+      explanation: "Mimbar bebas adalah kegiatan di muka umum untuk memberikan pendapat namun tidak ada tema tertentu dalam bentuk tulisan."
+    },
+    {
+      no: 41,
+      text: "Pentingnya mengikutsertakan masyarakat dalam pembuatan kebijakan publik adalah ...",
+      options: {
+        A: "Mewujudkan negara hukum.",
+        B: "Menelurkan banyak kebijakan karena banyak partisipasi dari masyarakat tanpa memperhatikan kebutuhan.",
+        C: "Memengaruhi masyarakat untuk mengikuti pendapat suatu golongan.",
+        D: "Pemerintah dapat mengambil kebijakan sesuai dengan aspirasi masyarakat demi untuk mewujudkan tujuan bersama.",
+        E: "Masyarakat hanya menjadi obyek perubahan bukan menjadi subyek."
+      },
+      answer: "D",
+      explanation: "Dengan rakyat ikut serta dalam pembuatan kebijakan publik, berarti peraturan yang dibuat memang disesuaikan dengan kebutuhan masyarakat sehingga lebih tepat sasaran."
+    },
+    {
+      no: 42,
+      text: "Pemerintah dalam menjalankan pemerintahan juga memerlukan keberadaan pers. Fungsi utama pers bagi pemerintah adalah ...",
+      options: {
+        A: "Sebagai sarana untuk memberitahukan segala bentuk kebijakan ataupun keputusan-keputusan yang diambil pemerintah.",
+        B: "Merupakan kepanjangan tangan pemerintah.",
+        C: "Mengontrol perilaku dan segala hal yang berkaitan dengan pemerintah.",
+        D: "Sebagai alat untuk mendoktrin rakyat.",
+        E: "Sebagai alat untuk menyalahgunakan kekuasaannya."
+      },
+      answer: "A",
+      explanation: "Pers berfungsi untuk memberitahukan segala bentuk kebijakan atau keputusan yang diambil pemerintah kepada rakyatnya sehingga rakyat juga bisa mengontrol pemerintahan."
+    },
+    {
+      no: 43,
+      text: "Ada lima hal penyebab masyarakat mau bergabung dalam partisipasi politik, kecuali ...",
+      options: {
+        A: "Perubahan kelas sosial",
+        B: "Negara Indonesia sangat banyak konflik pimpinan antarkelompok elit politik",
+        C: "Modernisasi kehidupan",
+        D: "Keterlibatan pemerintah yang meluas.",
+        E: "Keinginan untuk menguasai suatu wilayah"
+      },
+      answer: "E",
+      explanation: "Partisipasi politik adalah kegiatan keikutsertaan seseorang atau kelompok dalam kehidupan politik. Biasanya orang bergabung dalam kelompok politik agar dapat bergabung dalam pemerintahan."
+    },
+    {
+      no: 44,
+      text: "Dalam menyelenggarakan pemilu, setiap pemilih dan peserta pemilu mendapatkan perlakuan yang sama. Ini merupakan salah satu asas pemilu di Indonesia yaitu ...",
+      options: {
+        A: "Bebas.",
+        B: "Umum.",
+        C: "Adil.",
+        D: "Langsung.",
+        E: "Jujur."
+      },
+      answer: "D",
+      explanation: "Asas adil dalam pemilu adalah setiap pemilih dan peserta pemilu mendapatkan perlakuan yang sama tanpa dibedakan sedikit pun. <i>(Catatan: Pada kunci jawaban resmi modul tertulis Jawaban: D, sementara secara substansi asas perlakuan yang sama adalah Adil / opsi C)</i>."
+    },
+    {
+      no: 45,
+      text: "Indonesia adalah salah satu negara yang menggunakan sistem demokrasi. Demokrasi adalah pemerintahan dari rakyat, untuk rakyat, oleh rakyat merupakan pendapat dari ...",
+      options: {
+        A: "John Locke.",
+        B: "Abraham Lincoln.",
+        C: "Aristoteles.",
+        D: "Karl Max.",
+        E: "Kranenburg"
+      },
+      answer: "B",
+      explanation: "Abraham Lincoln adalah orang yang mengemukakan bahwa demokrasi adalah pemerintahan dari rakyat, untuk rakyat, oleh rakyat. Istilah demokrasi pada mulanya digunakan di Yunani Kuno."
+    },
+    {
+      no: 46,
+      text: "Pemilu merupakan salah satu sarana masyarakat untuk berpartisipasi dalam bidang ...",
+      options: {
+        A: "Sosial.",
+        B: "Budaya.",
+        C: "Hukum.",
+        D: "Politik.",
+        E: "Ekonomi"
+      },
+      answer: "D",
+      explanation: "Pemilu adalah salah satu wujud bentuk demokrasi dalam bidang politik."
+    },
+    {
+      no: 47,
+      text: "Setiap warga negara mempunyai hak untuk dipilih. Peserta pemilu untuk anggota DPD berasal dari ...",
+      options: {
+        A: "Partai politik.",
+        B: "Perseorangan.",
+        C: "Organisasi masyarakat.",
+        D: "Sekumpulan kelompok.",
+        E: "Penunjukan."
+      },
+      answer: "B",
+      explanation: "Peserta pemilu anggota DPD merupakan perseorangan yang mencalonkan diri untuk menjadi wakil dari daerahnya untuk bisa menjadi anggota legislatif."
+    },
+    {
+      no: 48,
+      text: "Salah satu unsur negara demokratis adalah adanya peradilan yang bebas dan tidak memihak, yaitu ...",
+      options: {
+        A: "Badan peradilan tidak dipengaruhi oleh campur tangan kekuasaan manapun.",
+        B: "Warga negara mempunyai hak untuk mendapatkan perlindungan hukum.",
+        C: "Warga negara dapat ikut berpartisipasi dalam kehidupan bernegara.",
+        D: "Hukum mempunyai kedudukan yang paling tinggi sehingga semua warga negara tunduk kepada hukum.",
+        E: "Warga negara berhak untuk menyuarakan pendapatnya."
+      },
+      answer: "A",
+      explanation: "Badan peradilan tidak dapat dicampuri oleh pihak manapun saat menjalankan tugasnya. Hal ini juga karena Indonesia menganut sistem Trias Politica, yaitu pemisahan kekuasaan menjadi tiga, yaitu eksekutif, legislatif, dan yudikatif. Ketiganya tidak dapat saling mencampuri."
+    },
+    {
+      no: 49,
+      text: "Maksud dari pemerintahan oleh rakyat pada negara demokrasi adalah ...",
+      options: {
+        A: "Pemerintahan yang berjalan mendapat pengakuan dari rakyatnya.",
+        B: "Pemerintah dalam menjalankan pemerintah berdasarkan atas nama rakyat.",
+        C: "Pemerintahan yang dijalankan untuk kepentingan rakyat.",
+        D: "Pemerintahan mendapatkan legitimasi rakyat untuk menjalankan roda pemerintahan.",
+        E: "Pemerintah harus mendengarkan aspirasi rakyat."
+      },
+      answer: "B",
+      explanation: "Pemerintahan oleh rakyat adalah pemerintahan melakukan tugasnya atas nama rakyat bukan golongan tertentu sehingga harus sesuai dengan kehendak rakyat."
+    },
+    {
+      no: 50,
+      text: "Keanekaragaman yang ada di Indonesia harus tetap menjadi satu kesatuan. Hal ini sesuai dengan Pancasila pada sila ...",
+      options: {
+        A: "1",
+        B: "2",
+        C: "3",
+        D: "4",
+        E: "5"
+      },
+      answer: "C",
+      explanation: "Sila ketiga Pancasila, yaitu persatuan Indonesia mengandung arti bahwa segala perbedaan yang ada di Indonesia tetap merupakan kesatuan, yaitu Negara Kesatuan Republik Indonesia."
+    }
+  ];
+
+  // =========================================================================
+  // STATE & LOGIKA APLIKASI CAT
+  // =========================================================================
+  const EXAM_DURATION_SECONDS = 45 * 60; // 45 Menit
+  let currentUser = { user: "", nama: "" };
+  let currentIndex = 0;
+  let userAnswers = new Array(questions.length).fill(null);
+  let doubtStatus = new Array(questions.length).fill(false);
+  let timeLeft = EXAM_DURATION_SECONDS;
+  let timerInterval = null;
+
+  // Fungsi Modal Custom (Pengganti alert & confirm agar aman di semua iframe/browser)
+  function showModal(title, message, buttons) {
+    const overlay = document.getElementById("custom-modal");
+    document.getElementById("modal-title").textContent = title;
+    document.getElementById("modal-message").textContent = message;
+    const btnContainer = document.getElementById("modal-buttons");
+    btnContainer.innerHTML = "";
+
+    buttons.forEach(b => {
+      const btn = document.createElement("button");
+      btn.className = "btn " + (b.className || "btn-primary");
+      btn.style.width = "auto";
+      btn.textContent = b.text;
+      btn.onclick = () => {
+        overlay.style.display = "none";
+        if (b.onClick) b.onClick();
+      };
+      btnContainer.appendChild(btn);
+    });
+
+    overlay.style.display = "flex";
+  }
+
+  // Handle Login ke Google Sheet
+  document.getElementById("login-form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const userVal = document.getElementById("username").value.trim();
+    const passVal = document.getElementById("password").value.trim();
+    const btn = document.getElementById("btn-login");
+    const errBox = document.getElementById("login-error");
+
+    btn.disabled = true;
+    btn.textContent = "Memverifikasi...";
+    errBox.style.display = "none";
+
+    try {
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({ username: userVal, password: passVal })
+      });
+      
+      const textRes = await response.text();
+      let result;
+      try {
+        result = JSON.parse(textRes);
+      } catch (parseErr) {
+        throw new Error("Format respons server tidak valid.");
+      }
+
+      if (result.status === "success") {
+        currentUser = { user: result.user, nama: result.nama };
+        startExam();
+      } else {
+        errBox.style.display = "block";
+        errBox.textContent = result.message || "Username atau Password salah!";
+      }
+    } catch (error) {
+      errBox.style.display = "block";
+      errBox.textContent = "Gagal memproses login. Pastikan Web App sudah di-deploy ulang dengan 'Who has access' diset ke 'Anyone'.";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Masuk Ujian";
+    }
+  });
+
+  function resetExamState() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    currentIndex = 0;
+    userAnswers = new Array(questions.length).fill(null);
+    doubtStatus = new Array(questions.length).fill(false);
+    timeLeft = EXAM_DURATION_SECONDS;
+
+    const timerEl = document.getElementById("timer");
+    timerEl.textContent = "45:00";
+    timerEl.style.color = "white";
+  }
+
+  function startExam() {
+    resetExamState();
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("exam-screen").style.display = "block";
+    document.getElementById("peserta-info").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+
+    initNumberGrid();
+    renderQuestion(0);
+    startTimer();
+  }
+
+  function retryExam() {
+    startExam();
+  }
+
+  function confirmLogout() {
+    showModal(
+      "Konfirmasi Logout",
+      "Apakah Anda yakin ingin keluar dari ujian? Progres jawaban Anda saat ini akan direset.",
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Logout", className: "btn-logout", onClick: logoutUser }
+      ]
+    );
+  }
+
+  function logoutUser() {
+    resetExamState();
+    currentUser = { user: "", nama: "" };
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("login-error").style.display = "none";
+
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("login-screen").style.display = "flex";
+  }
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+      const s = (timeLeft % 60).toString().padStart(2, '0');
+      document.getElementById("timer").textContent = `${m}:${s}`;
+
+      if (timeLeft <= 300) {
+        document.getElementById("timer").style.color = "#fca5a5";
+      }
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        showModal(
+          "Waktu Habis",
+          "Waktu ujian telah habis! Jawaban Anda akan dikumpulkan otomatis.",
+          [{ text: "Lihat Hasil", className: "btn-primary", onClick: finishExam }]
+        );
+      }
+    }, 1000);
+  }
+
+  function initNumberGrid() {
+    const grid = document.getElementById("number-grid");
+    grid.innerHTML = "";
+    questions.forEach((q, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "num-btn";
+      btn.id = `num-btn-${idx}`;
+      btn.textContent = q.no;
+      btn.onclick = () => renderQuestion(idx);
+      grid.appendChild(btn);
+    });
+  }
+
+  function updateNumberGrid() {
+    questions.forEach((_, idx) => {
+      const btn = document.getElementById(`num-btn-${idx}`);
+      if (!btn) return;
+      btn.className = "num-btn";
+      if (idx === currentIndex) btn.classList.add("active");
+      if (doubtStatus[idx]) {
+        btn.classList.add("doubt");
+      } else if (userAnswers[idx] !== null) {
+        btn.classList.add("answered");
+      }
+    });
+  }
+
+  function renderQuestion(index) {
+    currentIndex = index;
+    const q = questions[index];
+
+    document.getElementById("q-number").textContent = `Soal No. ${q.no} dari ${questions.length}`;
+    document.getElementById("q-text").innerHTML = q.text;
+
+    const statusEl = document.getElementById("q-status");
+    if (doubtStatus[index]) {
+      statusEl.textContent = "Ditandai Ragu-Ragu";
+      statusEl.style.color = "#b45309";
+    } else if (userAnswers[index]) {
+      statusEl.textContent = `Terjawab (${userAnswers[index]})`;
+      statusEl.style.color = "var(--success)";
+    } else {
+      statusEl.textContent = "Belum dijawab";
+      statusEl.style.color = "var(--muted)";
+    }
+
+    const optContainer = document.getElementById("q-options");
+    optContainer.innerHTML = "";
+
+    ["A", "B", "C", "D", "E"].forEach(letter => {
+      const div = document.createElement("div");
+      div.className = "option-item" + (userAnswers[index] === letter ? " selected" : "");
+      div.onclick = () => selectOption(letter);
+      div.innerHTML = `
+        <div class="option-letter">${letter}</div>
+        <div>${q.options[letter]}</div>
+      `;
+      optContainer.appendChild(div);
+    });
+
+    document.getElementById("btn-prev").disabled = (index === 0);
+    document.getElementById("btn-next").disabled = (index === questions.length - 1);
+    updateNumberGrid();
+  }
+
+  function selectOption(letter) {
+    userAnswers[currentIndex] = letter;
+    renderQuestion(currentIndex);
+  }
+
+  function toggleDoubt() {
+    doubtStatus[currentIndex] = !doubtStatus[currentIndex];
+    renderQuestion(currentIndex);
+  }
+
+  function prevQuestion() {
+    if (currentIndex > 0) renderQuestion(currentIndex - 1);
+  }
+
+  function nextQuestion() {
+    if (currentIndex < questions.length - 1) renderQuestion(currentIndex + 1);
+  }
+
+  function confirmFinish() {
+    const unanswered = userAnswers.filter(a => a === null).length;
+    const msg = unanswered > 0 
+      ? `Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin mengakhiri ujian?`
+      : "Apakah Anda yakin ingin mengumpulkan semua jawaban sekarang?";
+    
+    showModal(
+      "Kumpulkan Jawaban",
+      msg,
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Kumpulkan", className: "btn-finish", onClick: finishExam }
+      ]
+    );
+  }
+
+  function finishExam() {
+    clearInterval(timerInterval);
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "block";
+
+    let benar = 0, salah = 0, kosong = 0;
+    const reviewContainer = document.getElementById("review-container");
+    reviewContainer.innerHTML = "";
+
+    questions.forEach((q, idx) => {
+      const uAns = userAnswers[idx];
+      const isCorrect = uAns === q.answer;
+
+      if (uAns === null) kosong++;
+      else if (isCorrect) benar++;
+      else salah++;
+
+      const card = document.createElement("div");
+      card.className = `card review-card ${isCorrect ? 'correct' : 'wrong'}`;
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+          <strong>Soal No. ${q.no}</strong>
+          <span style="font-weight:bold; color:${isCorrect ? 'var(--success)' : 'var(--danger)'}">
+            ${uAns === null ? 'Tidak Dijawab' : (isCorrect ? 'BENAR' : 'SALAH')}
+          </span>
+        </div>
+        <p style="margin-bottom:10px;">${q.text}</p>
+        <p><strong>Jawaban Anda:</strong> ${uAns ? `${uAns}. ${q.options[uAns]}` : '-'} | 
+           <strong style="color:var(--success)">Kunci Jawaban:</strong> ${q.answer}. ${q.options[q.answer]}</p>
+        <div class="pembahasan-box">
+          <strong>Pembahasan:</strong><br>${q.explanation}
+        </div>
+      `;
+      reviewContainer.appendChild(card);
+    });
+
+    const skor = Math.round((benar / questions.length) * 100);
+    document.getElementById("res-peserta").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+    document.getElementById("res-score").textContent = `${skor} / 100`;
+    document.getElementById("res-detail").textContent = `Benar: ${benar} | Salah: ${salah} | Kosong: ${kosong}`;
+  }
+</script>
+</body>
+</html>
