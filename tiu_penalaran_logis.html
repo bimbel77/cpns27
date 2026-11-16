@@ -1,0 +1,1540 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAT - PENALARAN LOGIS</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+      --warning: #eab308;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); line-height: 1.6; }
+
+    /* Login Screen */
+    #login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .login-box {
+      background: var(--card); padding: 35px; border-radius: 12px; width: 100%; max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+    .login-box h2 { text-align: center; color: var(--primary); margin-bottom: 5px; }
+    .login-box p { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 25px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+    .form-group input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;
+    }
+    .btn {
+      display: inline-block; padding: 10px 18px; border: none; border-radius: 6px; font-size: 0.95rem;
+      font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; text-decoration: none;
+    }
+    .btn-primary { background: var(--primary); color: white; width: 100%; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+    .btn-logout {
+      background: var(--danger); color: white; padding: 7px 14px; font-size: 0.85rem;
+    }
+    .btn-logout:hover { background: var(--danger-hover); }
+    .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 10px; text-align: center; display: none; }
+
+    .register-link-box {
+      margin-top: 18px; padding-top: 15px; border-top: 1px solid #e2e8f0;
+      text-align: center; font-size: 0.9rem; color: var(--muted);
+    }
+    .register-link-box a {
+      color: var(--primary); font-weight: 700; text-decoration: none;
+    }
+    .register-link-box a:hover {
+      text-decoration: underline; color: var(--primary-hover);
+    }
+
+    /* Header CAT */
+    header {
+      background: var(--primary); color: white; padding: 15px 25px; display: flex;
+      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header-title h1 { font-size: 1.2rem; }
+    .header-info { display: flex; align-items: center; gap: 15px; }
+    .timer-box {
+      background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 6px;
+      font-weight: bold; font-size: 1.1rem; letter-spacing: 1px;
+    }
+
+    /* Main Container */
+    #exam-screen, #result-screen { display: none; max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+    .exam-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+    @media (max-width: 850px) { .exam-layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card); border-radius: 10px; padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
+    }
+
+    /* Soal Area */
+    .question-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 2px solid var(--bg); padding-bottom: 12px; margin-bottom: 18px;
+    }
+    .badge-no { background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; }
+    .question-text { font-size: 1.05rem; margin-bottom: 15px; }
+
+    /* Opsi Jawaban */
+    .options-list { display: flex; flex-direction: column; gap: 10px; }
+    .option-item {
+      display: flex; align-items: center; gap: 12px; padding: 12px 15px;
+      border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: 0.15s;
+    }
+    .option-item:hover { background: #f8fafc; border-color: var(--primary); }
+    .option-item.selected { background: #eff6ff; border-color: var(--primary); font-weight: 600; }
+    .option-letter {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+    }
+    .option-item.selected .option-letter { background: var(--primary); color: white; }
+
+    /* Navigasi Bawah Soal */
+    .nav-actions {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 25px;
+      padding-top: 15px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;
+    }
+    .btn-nav { background: #e2e8f0; color: var(--text); }
+    .btn-nav:hover { background: #cbd5e1; }
+    .btn-ragu { background: var(--warning); color: #000; }
+    .btn-finish { background: var(--success); color: white; width: 100%; margin-top: 15px; }
+    .btn-finish:hover { background: #15803d; }
+
+    /* Grid Nomor Soal */
+    .grid-numbers {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px;
+      max-height: 360px; overflow-y: auto; padding-right: 4px;
+    }
+    .num-btn {
+      padding: 8px 0; border: 1px solid var(--border); border-radius: 6px;
+      background: white; font-weight: 600; cursor: pointer; text-align: center;
+    }
+    .num-btn.active { border: 2px solid var(--primary); }
+    .num-btn.answered { background: var(--success); color: white; border-color: var(--success); }
+    .num-btn.doubt { background: var(--warning); color: black; border-color: var(--warning); }
+
+    .legend { display: flex; gap: 12px; font-size: 0.8rem; margin-top: 15px; flex-wrap: wrap; }
+    .legend span { display: flex; align-items: center; gap: 5px; }
+    .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+    /* Result & Pembahasan */
+    .score-banner {
+      text-align: center; padding: 30px; background: linear-gradient(135deg, #1e40af, #3b82f6);
+      color: white; border-radius: 12px; margin-bottom: 25px;
+    }
+    .score-big { font-size: 3.5rem; font-weight: bold; margin: 10px 0; }
+    .result-actions {
+      display: flex; justify-content: center; gap: 12px; margin-top: 15px; flex-wrap: wrap;
+    }
+    .review-card { margin-bottom: 20px; border-left: 5px solid var(--border); }
+    .review-card.correct { border-left-color: var(--success); }
+    .review-card.wrong { border-left-color: var(--danger); }
+    .pembahasan-box {
+      background: #f8fafc; padding: 15px; border-radius: 8px; margin-top: 12px;
+      border: 1px dashed #94a3b8; font-size: 0.95rem;
+    }
+    .diagram-scroll {
+      overflow-x: auto;
+      margin: 10px 0 8px 0;
+      padding: 8px;
+      background: #ffffff;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+    .math-table {
+      width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 4px 0;
+    }
+    .math-table th, .math-table td {
+      border: 1px solid #cbd5e1; padding: 6px 10px; text-align: center;
+    }
+    .math-table th {
+      background: #eff6ff; color: var(--primary); font-weight: 700;
+    }
+    .frac {
+      display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: 0.88em; margin: 0 2px;
+    }
+    .frac span:first-child { border-bottom: 1px solid currentColor; padding: 0 3px; }
+    .frac span:last-child { padding: 0 3px; }
+
+    /* Custom Modal Dialog (Pengganti alert/confirm) */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6); display: none; align-items: center;
+      justify-content: center; z-index: 999; padding: 20px;
+    }
+    .modal-card {
+      background: white; padding: 25px; border-radius: 12px; max-width: 400px;
+      width: 100%; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .modal-card h3 { color: var(--primary); margin-bottom: 10px; }
+    .modal-card p { color: var(--text); font-size: 0.95rem; margin-bottom: 20px; }
+    .modal-btns { display: flex; gap: 10px; justify-content: center; }
+  </style>
+</head>
+<body>
+
+  <!-- HALAMAN LOGIN -->
+  <div id="login-screen">
+    <div class="login-box">
+      <h2>Portal Ujian CAT</h2>
+      <p>Subtes TIU: Penalaran Logis (60 Soal)</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Username/Email</label>
+          <input type="text" id="username" required placeholder="Masukkan username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="Masukkan password">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-login">Masuk Ujian</button>
+        <div class="error-msg" id="login-error"></div>
+        <div class="register-link-box">
+          Belum punya akun? <a href="http://lynk.id/seputar_guru/4g73189dndge/checkout" target="_blank" rel="noopener noreferrer">Daftar di sini</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- HALAMAN UJIAN CAT -->
+  <div id="exam-screen">
+    <header>
+      <div class="header-title">
+        <h1>CAT - PENALARAN LOGIS</h1>
+        <small id="peserta-info">Peserta: -</small>
+      </div>
+      <div class="header-info">
+        <div class="timer-box" id="timer">60:00</div>
+        <button type="button" class="btn btn-logout" onclick="confirmLogout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="exam-layout" style="margin-top: 20px;">
+      <!-- Kolom Kiri: Soal -->
+      <div class="card">
+        <div class="question-header">
+          <span class="badge-no" id="q-number">Soal No. 1</span>
+          <span id="q-status" style="font-size: 0.85rem; color: var(--muted);">Belum dijawab</span>
+        </div>
+        <div class="question-text" id="q-text"></div>
+        <div class="options-list" id="q-options"></div>
+
+        <div class="nav-actions">
+          <button class="btn btn-nav" id="btn-prev" onclick="prevQuestion()">&laquo; Sebelumnya</button>
+          <button class="btn btn-ragu" id="btn-doubt" onclick="toggleDoubt()">Ragu-Ragu</button>
+          <button class="btn btn-nav" id="btn-next" onclick="nextQuestion()">Selanjutnya &raquo;</button>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Navigasi Nomor -->
+      <div class="card">
+        <h3>Navigasi Soal</h3>
+        <div class="grid-numbers" id="number-grid"></div>
+        <div class="legend">
+          <span><i class="dot" style="background: var(--success);"></i> Dijawab</span>
+          <span><i class="dot" style="background: var(--warning);"></i> Ragu</span>
+          <span><i class="dot" style="background: #fff; border: 1px solid #cbd5e1;"></i> Kosong</span>
+        </div>
+        <button class="btn btn-finish" onclick="confirmFinish()">Selesai & Kumpulkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN HASIL & PEMBAHASAN -->
+  <div id="result-screen">
+    <div class="score-banner">
+      <h2>Hasil Ujian CAT Anda</h2>
+      <p id="res-peserta"></p>
+      <div class="score-big" id="res-score">0</div>
+      <p id="res-detail">Benar: 0 | Salah: 0 | Kosong: 0</p>
+      <div class="result-actions">
+        <button class="btn" style="background: white; color: var(--primary);" onclick="retryExam()">Ulangi Ujian</button>
+        <button class="btn btn-logout" onclick="logoutUser()">Logout</button>
+      </div>
+    </div>
+    <h3 style="margin-bottom: 15px;">Kunci Jawaban & Pembahasan Lengkap</h3>
+    <div id="review-container"></div>
+  </div>
+
+  <!-- CUSTOM MODAL -->
+  <div class="modal-overlay" id="custom-modal">
+    <div class="modal-card">
+      <h3 id="modal-title">Konfirmasi</h3>
+      <p id="modal-message">Pesan konfirmasi</p>
+      <div class="modal-btns" id="modal-buttons"></div>
+    </div>
+  </div>
+
+<script>
+  // =========================================================================
+  // URL GOOGLE APPS SCRIPT ANDA YANG AKTIF
+  // =========================================================================
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxB6Th7GHlD9o8ABbYcK2mdV7mv4ufy2i-SYXUg3jVqS0Q1bkXa_pkseMhqmIzgCTx7/exec";
+
+  // =========================================================================
+  // BANK SOAL, KUNCI JAWABAN & PEMBAHASAN (60 SOAL PENALARAN LOGIS DARI PDF)
+  // =========================================================================
+  const questions = [
+    {
+      no: 1,
+      text: "Semua mahasiswa berdasi. Sebagian mahasiswa berjas. Jadi ....",
+      options: {
+        A: "Sebagian mahasiswa berjas.",
+        B: "Sebagian mahasiswa berjas dan bersepatu.",
+        C: "Sebagian mahasiswa berdasi dan berjas.",
+        D: "Sebagian mahasiswa berdasi, tapi tak berjas.",
+        E: "Semua mahasiswa berdasi dan berjas."
+      },
+      answer: "C",
+      explanation: "Semua mahasiswa berdasi.<br>Sebagian mahasiswa berjas.<br>Karena salah satu premis partikular maka kesimpulan partikular.<br><strong>Kesimpulan:</strong><br>&bull; Sebagian mahasiswa berdasi dan berjas.<br>&bull; Sebagian mahasiswa berdasi dan tidak berjas."
+    },
+    {
+      no: 2,
+      text: "Semua Y adalah P. Sebagian Y adalah R. Jadi ....",
+      options: {
+        A: "Semua Y yang bukan P adalah R.",
+        B: "Sebagian Y adalah R, tetapi bukan P.",
+        C: "Semua R yang bukan Y adalah P.",
+        D: "Sebagian Y yang bukan R adalah P.",
+        E: "Semua Y yang bukan R adalah P."
+      },
+      answer: "E",
+      visual: `<svg width="260" height="150" viewBox="0 0 260 150" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <mask id="mask-q2">
+            <rect x="0" y="0" width="260" height="150" fill="white"/>
+            <circle cx="155" cy="70" r="42" fill="black"/>
+          </mask>
+        </defs>
+        <circle cx="95" cy="70" r="48" fill="#94a3b8" mask="url(#mask-q2)"/>
+        <circle cx="95" cy="70" r="48" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <circle cx="155" cy="70" r="42" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <text x="95" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Y = P</text>
+        <text x="185" y="25" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">R</text>
+        <path d="M 75 95 Q 72 132 95 135" fill="none" stroke="#0f172a" stroke-width="1.3"/>
+        <polygon points="95,135 89,131 90,138" fill="#0f172a"/>
+        <text x="100" y="138" font-size="10.5" font-weight="600" fill="#0f172a">Yang diarsir: semua Y yang bukan R adalah P</text>
+      </svg>`,
+      explanation: "Semua Y adalah P. Sebagian Y adalah R.<br>Karena salah satu partikular maka kesimpulan partikular, tetapi hati-hati karena pilihan jawaban merupakan jebakan.<br><strong>Kesimpulan:</strong><br>Sebagian Y adalah P dan R.<br>Sebagian Y adalah P, tetapi bukan R atau berarti <strong>semua Y yang bukan R adalah P</strong>."
+    },
+    {
+      no: 3,
+      text: "Semua kertas gambar sangat berguna. Sebagian kertas gambar yang sangat berguna harganya murah. Jadi ....",
+      options: {
+        A: "Semua kertas gambar harganya murah.",
+        B: "Semua kertas yang harganya murah adalah kertas gambar.",
+        C: "Sebagian kertas gambar harganya murah.",
+        D: "Kertas yang murah sangat berguna.",
+        E: "Semua kertas gambar yang harganya murah tidak berguna."
+      },
+      answer: "C",
+      explanation: "Semua kertas gambar sangat berguna.<br>Sebagian kertas yang sangat berguna harganya murah.<br>Karena salah satu partikular maka kesimpulan partikular.<br><strong>Kesimpulan:</strong> Sebagian kertas gambar harganya murah."
+    },
+    {
+      no: 4,
+      text: "Semua dosen adalah pegawai negeri. Sebagian dosen adalah seniman. Yang tidak cocok dengan pernyataan tersebut adalah ....",
+      options: {
+        A: "Sebagian seniman adalah pegawai negeri.",
+        B: "Sebagian pegawai negeri adalah dosen.",
+        C: "Sebagian seniman adalah dosen.",
+        D: "Semua seniman adalah pegawai negeri.",
+        E: "Sebagian dosen adalah pegawai negeri dan seniman."
+      },
+      answer: "D",
+      visual: `<svg width="310" height="175" viewBox="0 0 310 175" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="105" cy="85" r="70" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <circle cx="110" cy="90" r="46" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <ellipse cx="195" cy="90" rx="75" ry="38" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <text x="85" y="13" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">Pegawai negeri</text>
+        <text x="105" y="60" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">Dosen</text>
+        <text x="235" y="45" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">Seniman</text>
+        <path d="M 85 110 Q 80 155 105 162" fill="none" stroke="#0f172a" stroke-width="1.3"/>
+        <polygon points="105,162 99,158 100,165" fill="#0f172a"/>
+        <text x="110" y="165" font-size="10.5" font-weight="600" fill="#0f172a">Dosen bukan seniman</text>
+        <path d="M 140 95 Q 155 135 205 140" fill="none" stroke="#0f172a" stroke-width="1.3"/>
+        <polygon points="205,140 199,136 200,143" fill="#0f172a"/>
+        <text x="210" y="143" font-size="10.5" font-weight="600" fill="#0f172a">Dosen seniman</text>
+      </svg>`,
+      explanation: "Semua dosen adalah pegawai negeri. Sebagian dosen adalah seniman.<br>Dari diagram Venn terlihat:<br>A. Sebagian seniman adalah pegawai negeri (Benar)<br>B. Sebagian pegawai negeri adalah dosen (Benar)<br>C. Sebagian seniman adalah dosen (Benar)<br>E. Sebagian dosen adalah pegawai negeri dan seniman (Benar)<br>Jadi, yang <strong>tidak tepat</strong> adalah <strong>semua seniman adalah pegawai negeri</strong>."
+    },
+    {
+      no: 5,
+      text: "Bila semua X adalah A. Sebagian X adalah B. Jadi ....",
+      options: {
+        A: "Semua X yang bukan A adalah B.",
+        B: "Semua X yang bukan B adalah A.",
+        C: "Semua B yang bukan X adalah A.",
+        D: "Semua A yang bukan X adalah B.",
+        E: "Semua X adalah A dan B."
+      },
+      answer: "B",
+      visual: `<svg width="260" height="150" viewBox="0 0 260 150" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <mask id="mask-q5">
+            <rect x="0" y="0" width="260" height="150" fill="white"/>
+            <circle cx="155" cy="70" r="42" fill="black"/>
+          </mask>
+        </defs>
+        <circle cx="95" cy="70" r="48" fill="#94a3b8" mask="url(#mask-q5)"/>
+        <circle cx="95" cy="70" r="48" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <circle cx="155" cy="70" r="42" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <text x="95" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">X = A</text>
+        <text x="185" y="25" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">B</text>
+        <path d="M 75 95 Q 72 132 95 135" fill="none" stroke="#0f172a" stroke-width="1.3"/>
+        <polygon points="95,135 89,131 90,138" fill="#0f172a"/>
+        <text x="100" y="138" font-size="10.5" font-weight="600" fill="#0f172a">Yang diarsir: Semua X yang bukan B adalah A</text>
+      </svg>`,
+      explanation: "Semua X adalah A. Sebagian X adalah B.<br>Sebagian X adalah A dan bukan B atau ekuivalen dengan <strong>semua X yang bukan B adalah A</strong>."
+    },
+    {
+      no: 6,
+      text: "Semua X bukan P. Sebagian X adalah Q. Jadi ....",
+      options: {
+        A: "Sebagian X adalah Q bukan P.",
+        B: "Semua X bukan P dan Q.",
+        C: "Sebagian X bukan Q adalah P.",
+        D: "Semua X adalah Q.",
+        E: "Semua X adalah P dan Q."
+      },
+      answer: "A",
+      visual: `<svg width="280" height="155" viewBox="0 0 280 155" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <clipPath id="clip-q6-x">
+            <circle cx="80" cy="60" r="42"/>
+          </clipPath>
+        </defs>
+        <ellipse cx="140" cy="95" rx="68" ry="38" fill="#94a3b8" clip-path="url(#clip-q6-x)"/>
+        <circle cx="80" cy="60" r="42" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <circle cx="200" cy="60" r="42" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <ellipse cx="140" cy="95" rx="68" ry="38" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <text x="80" y="36" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">X</text>
+        <text x="200" y="36" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">P</text>
+        <text x="140" y="102" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">Q</text>
+        <path d="M 88 85 Q 80 132 105 142" fill="none" stroke="#0f172a" stroke-width="1.3"/>
+        <polygon points="105,142 99,138 100,145" fill="#0f172a"/>
+        <text x="110" y="145" font-size="10.5" font-weight="600" fill="#0f172a">Yang diarsir: Sebagian X adalah Q bukan P.</text>
+      </svg>`,
+      explanation: "Hati-hati jebakan pada pilihan ganda.<br>Semua X bukan P. Sebagian X adalah Q.<br>Menggunakan diagram Venn di atas, bagian yang diarsir menunjukkan irisan X dan Q yang terpisah dari P.<br><strong>Kesimpulan:</strong> Sebagian X adalah Q bukan P."
+    },
+    {
+      no: 7,
+      text: "Bila semua pelajar bercelana panjang. Sebagian pelajar memakai lengan panjang. Jadi ....",
+      options: {
+        A: "Sebagian pelajar bercelana pendek.",
+        B: "Semua pelajar memakai celana pendek dan berlengan panjang.",
+        C: "Semua pelajar memakai celana panjang dan berlengan panjang.",
+        D: "Sebagian pelajar bercelana pendek tapi tidak memakai celana panjang.",
+        E: "Sebagian pelajar memakai celana panjang dan berlengan panjang."
+      },
+      answer: "E",
+      explanation: "Bila semua pelajar bercelana panjang.<br>Sebagian pelajar memakai lengan panjang.<br>Karena salah satu partikular maka kesimpulan partikular.<br><strong>Kesimpulan:</strong> Sebagian pelajar bercelana panjang dan memakai lengan panjang."
+    },
+    {
+      no: 8,
+      text: "Semua penyanyi dangdut pandai bergoyang. Penyanyi yang bernama Santi tidak pandai bergoyang di panggung. Jadi ....",
+      options: {
+        A: "Santi bukan penyanyi dangdut.",
+        B: "Santi adalah penyanyi sentosa.",
+        C: "Santi adalah penyanyi amatir.",
+        D: "Santi penyanyi panggung.",
+        E: "Santi adalah penari."
+      },
+      answer: "A",
+      explanation: "Karena Santi tidak dapat menggoyangkan badannya di panggung, sedangkan semua penyanyi dangdut pandai bergoyang maka menggunakan modus tollens diperoleh kesimpulan bahwa <strong>Santi bukan penyanyi dangdut</strong>."
+    },
+    {
+      no: 9,
+      text: "Semua orang yang bermental interpreneur hidup dengan makmur. Sebagian orang yang bermental interpreneur melakukan usaha wiraswasta. Jadi ....",
+      options: {
+        A: "Semua wiraswasta bermental interpreneur.",
+        B: "Semua wiraswasta hidup makmur.",
+        C: "Semua wiraswasta yang hidupnya makmur bermental interpreneur.",
+        D: "Semua yang bermental interpreneur dan hidupnya makmur adalah wiraswastawan.",
+        E: "Semua orang yang bermental interpreneur hidup dengan makmur melakukan usaha wiraswasta."
+      },
+      answer: "C",
+      visual: `<svg width="310" height="155" viewBox="0 0 310 155" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <clipPath id="clip-q9">
+            <circle cx="105" cy="72" r="50"/>
+          </clipPath>
+        </defs>
+        <circle cx="165" cy="72" r="42" fill="#94a3b8" clip-path="url(#clip-q9)"/>
+        <circle cx="105" cy="72" r="50" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <circle cx="165" cy="72" r="42" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <text x="95" y="16" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">Interpreneur = Makmur</text>
+        <text x="200" y="25" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">Wiraswasta</text>
+        <path d="M 135 88 Q 140 132 165 138" fill="none" stroke="#0f172a" stroke-width="1.3"/>
+        <polygon points="165,138 159,134 160,141" fill="#0f172a"/>
+        <text x="170" y="142" font-size="10" font-weight="600" fill="#0f172a">Irisan: Wiraswasta makmur &amp; interpreneur</text>
+      </svg>`,
+      explanation: "Semua orang yang bermental interpreneur hidup dengan makmur.<br>Sebagian orang yang bermental interpreneur melakukan usaha wiraswasta.<br><strong>Kesimpulan:</strong> Sebagian orang yang bermental interpreneur melakukan usaha wiraswasta dan hidup dengan makmur, ekuivalen dengan <strong>semua wiraswasta yang hidupnya makmur bermental interpreneur</strong>."
+    },
+    {
+      no: 10,
+      text: "Sebagian P adalah B. B bukan T. Sebagian P bukan M adalah T. Semua B, M, dan T adalah P. Jadi ....",
+      options: {
+        A: "Semua T adalah T bukan M.",
+        B: "Semua P adalah B bukan T.",
+        C: "Semua P bukan B bukan M.",
+        D: "Semua B yang bukan T adalah M.",
+        E: "Sebagian P bukan T, bukan M, bukan B."
+      },
+      answer: "E",
+      visual: `<svg width="290" height="165" viewBox="0 0 290 165" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="140" cy="75" rx="105" ry="58" fill="#94a3b8" stroke="#0f172a" stroke-width="2"/>
+        <circle cx="95" cy="58" r="22" fill="#ffffff" stroke="#0f172a" stroke-width="2"/>
+        <circle cx="185" cy="58" r="22" fill="#ffffff" stroke="#0f172a" stroke-width="2"/>
+        <circle cx="140" cy="98" r="22" fill="#ffffff" stroke="#0f172a" stroke-width="2"/>
+        <text x="55" y="20" font-size="12" font-weight="700" fill="#0f172a">P</text>
+        <text x="95" y="62" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">M</text>
+        <text x="185" y="62" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">T</text>
+        <text x="140" y="102" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">B</text>
+        <path d="M 85 95 Q 82 142 105 148" fill="none" stroke="#0f172a" stroke-width="1.3"/>
+        <polygon points="105,148 99,144 100,151" fill="#0f172a"/>
+        <text x="110" y="150" font-size="10.5" font-weight="600" fill="#0f172a">Yang diarsir: Sebagian P bukan T, bukan M, bukan B</text>
+      </svg>`,
+      explanation: "Berdasarkan diagram Venn di mana B, M, dan T seluruhnya berada di dalam himpunan P namun masih tersisa ruang di dalam P di luar B, M, dan T.<br><strong>Kesimpulan:</strong> Sebagian P bukan T, bukan M, bukan B."
+    },
+    {
+      no: 11,
+      text: "Semua rumah sakit memiliki bagian gawat darurat. Sebagian rumah sakit adalah rumah sakit bersalin. Jadi ....",
+      options: {
+        A: "Ada rumah sakit bersalin yang tidak memiliki bagian gawat darurat.",
+        B: "Rumah sakit bersalin pasti memiliki bagian gawat darurat.",
+        C: "Sebagian rumah sakit tidak memiliki bagian gawat darurat.",
+        D: "Semua rumah sakit yang tidak memiliki bagian gawat darurat adalah rumah sakit bersalin.",
+        E: "Semua rumah sakit memiliki bagian gawat darurat dan merupakan rumah sakit bersalin."
+      },
+      answer: "B",
+      explanation: "Karena semua rumah sakit memiliki bagian gawat darurat, dan rumah sakit bersalin adalah bagian dari rumah sakit, maka <strong>rumah sakit bersalin pasti memiliki bagian gawat darurat</strong>."
+    },
+    {
+      no: 12,
+      text: "Semua ikan hidup di air. Beberapa ikan hidup di air tawar. Jadi ....",
+      options: {
+        A: "Semua ikan dapat hidup di air tawar dan air laut.",
+        B: "Beberapa ikan yang hidup di air tawar tidak dapat hidup di air laut.",
+        C: "Sebagian ikan tidak hidup di air tawar.",
+        D: "Tidak ada ikan yang hidup di air laut.",
+        E: "Semua ikan hidup di air laut."
+      },
+      answer: "C",
+      explanation: "Semua ikan hidup di air. Beberapa ikan hidup di air tawar.<br><strong>Kesimpulan:</strong> Sebagian ikan tidak hidup di air tawar."
+    },
+    {
+      no: 13,
+      text: "Semua donor harus berbadan sehat. Sebagian donor darah memiliki golongan darah O. Jadi ....",
+      options: {
+        A: "Sebagian orang yang bergolongan darah O dan menjadi donor darah berbadan sehat.",
+        B: "Semua donor harus memiliki golongan darah O dan berbadan sehat.",
+        C: "Semua donor darah yang memiliki golongan darah O harus berbadan sehat.",
+        D: "Yang berbadan sehat adalah yang memiliki golongan darah O dan menjadi donor darah.",
+        E: "Semua donor tidak harus memiliki golongan darah O dan tidak harus berbadan sehat."
+      },
+      answer: "C",
+      explanation: "Semua donor harus berbadan sehat. Sebagian donor darah memiliki golongan darah O.<br>Sebagian donor berbadan sehat dan bergolongan darah O ekuivalen dengan <strong>semua donor darah yang memiliki golongan darah O harus berbadan sehat</strong>.<br><em>Catatan:</em> Pilihan A salah karena menyebut hanya 'sebagian' yang sehat, padahal premis menyatakan semua donor harus sehat."
+    },
+    {
+      no: 14,
+      text: "Jika A = B maka A tidak sama dengan C. Bila P = A maka ....",
+      options: {
+        A: "Bila P = C maka P = B",
+        B: "Bila P = C maka P tidak sama dengan A.",
+        C: "Bila P = C maka tidak P tidak sama dengan B.",
+        D: "Bila P = C maka P = A = B",
+        E: "Bila P = C maka B bukan A."
+      },
+      answer: "B",
+      visual: `<svg width="260" height="110" viewBox="0 0 260 110" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="80" cy="58" r="35" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <circle cx="180" cy="58" r="35" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <text x="80" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">A = B</text>
+        <text x="180" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">C = P</text>
+      </svg>`,
+      explanation: "Jika A = B maka A &ne; C.<br>Bila P = C maka <strong>P tidak sama dengan A</strong> (P &ne; A)."
+    },
+    {
+      no: 15,
+      text: "Bila kendaraan lewat jalan tol harus membayar. Sebagian kendaraan tak punya uang. Jadi ....",
+      options: {
+        A: "Semua kendaraan tidak lewat jalan tol.",
+        B: "Semua kendaraan lewat jalan tol.",
+        C: "Sebagian kendaraan tak punya uang.",
+        D: "Sebagian kendaraan tidak lewat jalan tol.",
+        E: "Sebagian kendaraan lewat jalan tol tanpa membayar."
+      },
+      answer: "D",
+      explanation: "Karena lewat jalan tol harus membayar, sedangkan sebagian kendaraan tak punya uang (tidak sanggup membayar tol), maka <strong>sebagian kendaraan tidak lewat jalan tol</strong>."
+    },
+    {
+      no: 16,
+      text: "Semua murid yang mengikuti ujian tidak menggunakan kalkulator. Sebagian murid yang ujian mengenakan jam tangan. Jadi ....",
+      options: {
+        A: "Semua murid yang ujian mengenakan jam tangan.",
+        B: "Sementara murid yang ujian tidak mengenakan jam tangan.",
+        C: "Semua murid yang ujian tidak menggunakan kalkulator dan tidak mengenakan jam tangan.",
+        D: "Sebagian murid yang ujian mengenakan jam tangan dan tidak menggunakan kalkulator.",
+        E: "Sebagian murid yang ujian mengenakan jam tangan dan menggunakan kalkulator."
+      },
+      answer: "D",
+      explanation: "Semua murid yang mengikuti ujian tidak menggunakan kalkulator.<br>Sebagian murid yang ujian mengenakan jam tangan.<br>Kesimpulan partikular. Karena salah satu premis negatif, maka kesimpulan juga negatif:<br><strong>Sebagian murid yang ujian mengenakan jam tangan dan tidak menggunakan kalkulator.</strong>"
+    },
+    {
+      no: 17,
+      text: "Semua U bukan B. Sebagian U adalah C. Jadi ....",
+      options: {
+        A: "Semua B adalah C.",
+        B: "Semua U bukan B dan C.",
+        C: "Sebagian U bukan C adalah B.",
+        D: "Semua U adalah C.",
+        E: "Sebagian U adalah C bukan B."
+      },
+      answer: "E",
+      visual: `<svg width="280" height="150" viewBox="0 0 280 150" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <clipPath id="clip-q17">
+            <circle cx="80" cy="82" r="42"/>
+          </clipPath>
+        </defs>
+        <circle cx="115" cy="52" r="40" fill="#94a3b8" clip-path="url(#clip-q17)"/>
+        <circle cx="80" cy="82" r="42" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <circle cx="115" cy="52" r="40" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <circle cx="215" cy="70" r="38" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <text x="65" y="88" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">U</text>
+        <text x="80" y="16" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">C</text>
+        <text x="215" y="75" text-anchor="middle" font-size="12" font-weight="700" fill="#0f172a">B</text>
+        <path d="M 98 68 Q 105 128 130 135" fill="none" stroke="#0f172a" stroke-width="1.3"/>
+        <polygon points="130,135 124,131 125,138" fill="#0f172a"/>
+        <text x="135" y="138" font-size="10.5" font-weight="600" fill="#0f172a">Yang diarsir: Sebagian U adalah C bukan B</text>
+      </svg>`,
+      explanation: "Semua U bukan B (lingkaran U dan B terpisah). Sebagian U adalah C (lingkaran U dan C beririsan).<br><strong>Kesimpulan:</strong> Sebagian U adalah C bukan B."
+    },
+    {
+      no: 18,
+      text: "Akhmad adalah pekerja. Akhmad menjadi buruh di sebuah pabrik. Banyak di antara buruh-buruhnya yang malas bekerja. Badrun adalah teman Akhmad. Jadi ....",
+      options: {
+        A: "Akhmad itu malas.",
+        B: "Badrun itu malas.",
+        C: "Badrun mungkin teman sekerja Akhmad.",
+        D: "Teman-teman Badrun semuanya rajin.",
+        E: "Akhmad dan Badrun pasti rajin."
+      },
+      answer: "C",
+      explanation: "Analisis setiap pilihan:<br>A. Akhmad itu malas (belum tentu)<br>B. Badrun itu malas (belum tentu)<br><strong>C. Badrun mungkin teman sekerja Akhmad (mungkin)</strong><br>D. Teman-teman Badrun semuanya rajin (berlawanan dengan pernyataan banyak di antara buruh-buruhnya yang malas bekerja)<br>E. Akhmad dan Badrun pasti rajin (belum tentu)"
+    },
+    {
+      no: 19,
+      text: "Semua peserta CPNS menempuh tes kemampuan dasar. Sebagian peserta CPNS mengikuti tes kemampuan bidang. Jadi ....",
+      options: {
+        A: "Semua peserta CPNS yang menempuh tes kemampuan dasar tidak mengikuti tes kemampuan bidang.",
+        B: "Semua peserta CPNS yang mengikuti tes kemampuan bidang tidak menempuh tes kemampuan dasar.",
+        C: "Semua peserta CPNS yang tidak mengikuti tes kemampuan bidang tidak menempuh tes kemampuan dasar.",
+        D: "Sebagian peserta CPNS yang tidak mengikuti tes kemampuan bidang menempuh tes kemampuan dasar.",
+        E: "Sebagian peserta CPNS yang mengikuti tes kemampuan bidang tidak menempuh tes kemampuan dasar."
+      },
+      answer: "D",
+      explanation: "Semua peserta CPNS menempuh tes kemampuan dasar.<br>Sebagian peserta CPNS mengikuti tes kemampuan bidang.<br>Kesimpulan partikular (jawaban yang mungkin D dan E). Jawaban E salah karena berlawanan dengan pernyataan semua peserta CPNS menempuh tes kemampuan dasar.<br>Jadi jawaban yang benar adalah <strong>D</strong>."
+    },
+    {
+      no: 20,
+      text: "Semua siswa kelas A dapat berbahasa Inggris. Sebagian siswa kelas A mendapat nilai tinggi. Jadi ....",
+      options: {
+        A: "Sebagian siswa kelas A mendapat nilai tinggi dan dapat berbahasa Inggris.",
+        B: "Sebagian siswa kelas A mendapat nilai tinggi dan tidak dapat berbahasa Inggris.",
+        C: "Sebagian siswa kelas A tidak mendapat nilai tinggi dan tidak dapat berbahasa Inggris.",
+        D: "Semua siswa kelas A mendapat nilai tinggi dan tidak dapat berbahasa Inggris.",
+        E: "Semua siswa kelas A tidak mendapat nilai tinggi dan tidak dapat berbahasa Inggris."
+      },
+      answer: "A",
+      explanation: "Semua siswa kelas A dapat berbahasa Inggris.<br>Sebagian siswa kelas A mendapat nilai tinggi.<br>Kesimpulan partikular (jawaban yang mungkin A, B, dan C). Jawaban B dan C salah karena berlawanan dengan pernyataan semua siswa kelas A dapat berbahasa Inggris.<br>Jadi jawaban yang tepat adalah <strong>A</strong>."
+    },
+    {
+      no: 21,
+      text: "Semua model mengenakan gaun pengantin. Semua yang mengenakan gaun pengantin terlihat cantik. Jadi ....",
+      options: {
+        A: "Semua yang terlihat cantik adalah model.",
+        B: "Semua model terlihat cantik.",
+        C: "Semua yang tidak terlihat cantik adalah bukan model.",
+        D: "Semua yang tidak mengenakan gaun pengantin adalah model yang cantik.",
+        E: "Semua model terlihat tidak cantik."
+      },
+      answer: "B",
+      explanation: "Semua model mengenakan gaun pengantin.<br>Semua yang mengenakan gaun pengantin terlihat cantik.<br>Karena semua premis umum maka kesimpulan umum (silogisme):<br><strong>Kesimpulan:</strong> Semua model terlihat cantik."
+    },
+    {
+      no: 22,
+      text: "Semua dokter adalah profesional. Semua penghuni perumahan adalah dokter. Jadi ....",
+      options: {
+        A: "Semua yang profesional bukan penghuni perumahan.",
+        B: "Semua penghuni perumahan adalah profesional.",
+        C: "Sebagian profesional adalah penghuni perumahan.",
+        D: "Sebagian dokter bukan penghuni perumahan.",
+        E: "Semua yang tidak profesional adalah penghuni perumahan."
+      },
+      answer: "B",
+      explanation: "Semua dokter adalah profesional.<br>Semua penghuni perumahan adalah dokter.<br>Karena semua premis umum maka kesimpulan umum:<br><strong>Kesimpulan:</strong> Semua penghuni perumahan adalah profesional."
+    },
+    {
+      no: 23,
+      text: "Jika air sungai jernih maka tidak terkandung zat pencemar. Jika beberapa ikan mati maka terkandung zat tercemar. Jadi ....",
+      options: {
+        A: "Jika air sungai jernih maka beberapa ikan tidak mati.",
+        B: "Jika air sungai jernih maka semua ikan tidak mati.",
+        C: "Jika air sungai tidak jernih maka semua ikan mati.",
+        D: "Jika terkandung zat pencemar maka semua ikan mati.",
+        E: "Jika tidak terkandung zat pencemar maka semua ikan tidak mati."
+      },
+      answer: "B",
+      explanation: "Premis 1: Jika air sungai jernih maka tidak terkandung zat pencemar.<br>Premis 2: Jika beberapa ikan mati maka terkandung zat pencemar (ekuivalen dengan kontraposisinya: Jika tidak terkandung zat pencemar maka semua ikan tidak mati).<br>Kesimpulan menggunakan silogisme:<br><strong>Jika air sungai jernih maka semua ikan tidak mati.</strong>"
+    },
+    {
+      no: 24,
+      text: "Semua pencuri adalah penjahat. Semua koruptor adalah penjahat. Jadi ....",
+      options: {
+        A: "Tidak semua koruptor adalah penjahat.",
+        B: "Beberapa koruptor adalah penjahat.",
+        C: "Tidak ada koruptor yang penjahat.",
+        D: "Semua koruptor dan pencuri adalah penjahat.",
+        E: "Semua koruptor adalah pencuri."
+      },
+      answer: "D",
+      explanation: "Semua pencuri adalah penjahat.<br>Semua koruptor adalah penjahat.<br>Karena semua premis umum maka kesimpulan umum:<br><strong>Semua koruptor dan pencuri adalah penjahat.</strong>"
+    },
+    {
+      no: 25,
+      text: "Semua guru adalah pegawai negeri. Sebagian guru adalah penulis. Jadi ....",
+      options: {
+        A: "Sebagian penulis adalah pegawai negeri.",
+        B: "Sebagian pegawai negeri adalah guru.",
+        C: "Sebagian penulis adalah guru.",
+        D: "Semua penulis adalah pegawai negeri.",
+        E: "Semua guru adalah pegawai negeri dan penulis."
+      },
+      answer: "C",
+      visual: `<svg width="300" height="165" viewBox="0 0 300 165" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="105" cy="82" r="68" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <circle cx="110" cy="86" r="45" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <ellipse cx="195" cy="86" rx="75" ry="38" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <text x="85" y="13" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">Pegawai negeri</text>
+        <text x="105" y="56" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">Guru</text>
+        <text x="235" y="42" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">penulis</text>
+        <path d="M 140 90 Q 155 135 205 142" fill="none" stroke="#0f172a" stroke-width="1.3"/>
+        <polygon points="205,142 199,138 200,145" fill="#0f172a"/>
+        <text x="210" y="145" font-size="10.5" font-weight="600" fill="#0f172a">Guru penulis</text>
+      </svg>`,
+      explanation: "Semua guru adalah pegawai negeri. Sebagian guru adalah penulis.<br>Menggunakan diagram Venn di atas, irisan antara guru dan penulis menunjukkan bahwa <strong>sebagian penulis adalah guru</strong>."
+    },
+    {
+      no: 26,
+      text: "Semua musim berlangsung selama tiga bulan. Sebagian musim terasa dingin. Jadi ....",
+      options: {
+        A: "Semua musim dingin tidak berlangsung tiga bulan.",
+        B: "Tidak semua musim berlangsung tiga bulan.",
+        C: "Semua musim terasa dingin dalam tiga bulan.",
+        D: "Sebagian musim tidak berlangsung selama tiga bulan.",
+        E: "Semua musim yang terasa dingin berlangsung selama tiga bulan."
+      },
+      answer: "E",
+      explanation: "Jawaban A, B, dan D berlawanan dengan pernyataan semua musim berlangsung selama tiga bulan.<br><strong>Kesimpulan:</strong> Semua musim yang terasa dingin berlangsung selama tiga bulan."
+    },
+    {
+      no: 27,
+      text: "Semua rumput adalah ilalang. Beberapa ilalang berduri. Jadi ....",
+      options: {
+        A: "Semua rumput berduri.",
+        B: "Semua ilalang adalah rumput.",
+        C: "Sebagian rumput bukan ilalang.",
+        D: "Semua yang berduri adalah rumput.",
+        E: "Sebagian yang berduri bukan rumput."
+      },
+      answer: "E",
+      visual: `<svg width="280" height="150" viewBox="0 0 280 150" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <mask id="mask-q27">
+            <rect x="0" y="0" width="280" height="150" fill="white"/>
+            <circle cx="95" cy="70" r="48" fill="black"/>
+          </mask>
+        </defs>
+        <circle cx="155" cy="70" r="42" fill="#94a3b8" mask="url(#mask-q27)"/>
+        <circle cx="95" cy="70" r="48" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <circle cx="155" cy="70" r="42" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <text x="95" y="16" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">Rumput = ilalang</text>
+        <text x="195" y="25" text-anchor="middle" font-size="11.5" font-weight="700" fill="#0f172a">Berduri</text>
+        <path d="M 172 95 Q 168 132 135 138" fill="none" stroke="#0f172a" stroke-width="1.3"/>
+        <polygon points="135,138 141,134 140,141" fill="#0f172a"/>
+        <text x="15" y="140" font-size="10.5" font-weight="600" fill="#0f172a">Yang diarsir: Sebagian yang berduri bukan rumput.</text>
+      </svg>`,
+      explanation: "Semua rumput adalah ilalang. Beberapa ilalang berduri.<br>Kesimpulan partikular: Beberapa rumput berduri &rarr; Sebagian yang berduri rumput; Beberapa rumput tidak berduri &rarr; <strong>Sebagian yang berduri bukan rumput</strong>."
+    },
+    {
+      no: 28,
+      text: "Jika merasa lapar maka harus makan. Jika makan maka perlu mencuci tangan. Jadi ....",
+      options: {
+        A: "Sebagian yang makan merasa lapar.",
+        B: "Semua yang mencuci tangan tentu lapar.",
+        C: "Semua yang mencuci tangan, tidak lapar.",
+        D: "Semua yang merasa lapar mencuci tangan.",
+        E: "Sebagian yang merasa lapar mencuci tangan."
+      },
+      answer: "D",
+      explanation: "Jika merasa lapar maka harus makan.<br>Jika makan maka perlu mencuci tangan.<br>Menggunakan silogisme: Jika merasa lapar maka perlu mencuci tangan, berarti &rarr; <strong>Semua yang merasa lapar mencuci tangan</strong>."
+    },
+    {
+      no: 29,
+      text: "Semua lapangan luas dan terbuka. Sebagian lapangan dijadikan ladang. Jadi ....",
+      options: {
+        A: "Semua lapangan dijadikan ladang.",
+        B: "Semua yang luas dan terbuka adalah lapangan.",
+        C: "Semua yang dijadikan ladang adalah lapangan.",
+        D: "Semua yang luas dan terbuka dijadikan ladang.",
+        E: "Sebagian yang luas dan terbuka dijadikan ladang."
+      },
+      answer: "E",
+      explanation: "Semua lapangan luas dan terbuka.<br>Sebagian lapangan dijadikan ladang.<br>Kesimpulan partikular: <strong>Sebagian yang luas dan terbuka dijadikan ladang.</strong>"
+    },
+    {
+      no: 30,
+      text: "Jika bepergian ke Timbuktu maka harus datang ke Patena. Jika datang ke Patena maka harus melalui jembatan Torosi. Jadi ....",
+      options: {
+        A: "Sebagian yang datang ke Patena, melalui jembatan Torosi.",
+        B: "Sebagian yang pergi ke Timbuktu melalui jembatan Torosi.",
+        C: "Semua yang melalui jembatan Torosi tentu bepergian ke Timbuktu.",
+        D: "Semua yang bepergian ke Timbuktu harus melalui jembatan Torosi.",
+        E: "Semua yang tidak bepergian ke Timbuktu tidak melalui jembatan Torosi."
+      },
+      answer: "D",
+      explanation: "Jika bepergian ke Timbuktu maka harus datang ke Patena.<br>Jika datang ke Patena maka harus melalui jembatan Torosi.<br>Menggunakan silogisme: Jika bepergian ke Timbuktu maka harus melalui jembatan Torosi, berarti &rarr; <strong>Semua yang bepergian ke Timbuktu harus melalui jembatan Torosi</strong>."
+    },
+    {
+      no: 31,
+      text: "Maya selalu memberi hadiah barang-barang mahal. Andi diberi hadiah dasi oleh Maya. Jadi ....",
+      options: {
+        A: "Maya selalu membeli dasi.",
+        B: "Dasi adalah barang mahal.",
+        C: "Andi selalu diberi hadiah barang-barang mahal.",
+        D: "Tak ada hadiah yang tidak mahal.",
+        E: "Dasi pemberian Maya mahal."
+      },
+      answer: "E",
+      explanation: "Maya selalu memberi hadiah barang-barang mahal. Andi diberi hadiah dasi oleh Maya.<br>Dasi untuk Andi berasal dari Maya dan karena Maya selalu memberi hadiah barang-barang mahal maka dasi tersebut mahal.<br>Jadi, <strong>Dasi pemberian Maya mahal</strong>."
+    },
+    {
+      no: 32,
+      text: "Tidak ada tanaman sayur yang bisa tumbuh di padang pasir. Kaktus bukan tanaman sayur. Jadi ....",
+      options: {
+        A: "Kaktus bukan tanaman padang pasir.",
+        B: "Kaktus bisa tumbuh di padang pasir.",
+        C: "Tidak ada kaktus yang tumbuh di padang pasir.",
+        D: "Semua kaktus hanya tumbuh di padang pasir.",
+        E: "Semua kaktus tidak dapat tumbuh di padang pasir."
+      },
+      answer: "B",
+      explanation: "Tidak ada tanaman sayur yang bisa tumbuh di padang pasir.<br>Kaktus bukan tanaman sayur.<br>Karena bukan tanaman sayur maka <strong>kaktus bisa tumbuh di padang pasir</strong>."
+    },
+    {
+      no: 33,
+      text: "Semua aliran sungai menuju ke laut. Sebagian sungai memiliki aliran deras. Jadi ....",
+      options: {
+        A: "Beberapa sungai yang memiliki aliran deras tidak menuju ke laut.",
+        B: "Sebagian aliran sungai yang tidak menuju ke laut beraliran deras.",
+        C: "Sebagian sungai yang memiliki aliran deras tidak menuju ke laut.",
+        D: "Semua aliran sungai menuju ke laut dan beraliran deras.",
+        E: "Sebagian aliran sungai menuju ke laut dan memiliki aliran deras."
+      },
+      answer: "E",
+      explanation: "Semua aliran sungai menuju ke laut.<br>Sebagian sungai memiliki aliran deras.<br>Kesimpulan partikular: Jadi, <strong>sebagian aliran sungai menuju ke laut dan memiliki aliran deras</strong>."
+    },
+    {
+      no: 34,
+      text: "Semua buah yang manis berulat. Sebagian buah yang telah masak rasanya manis. Jadi ....",
+      options: {
+        A: "Sebagian buah yang telah masak berulat.",
+        B: "Sebagian buah yang manis berulat.",
+        C: "Semua buah yang telah masak berulat.",
+        D: "Sebagian buah yang berulat rasanya manis.",
+        E: "Semua buah yang masak berulat dan manis."
+      },
+      answer: "A",
+      explanation: "Semua buah yang manis berulat.<br>Sebagian buah yang telah masak rasanya manis.<br>Kesimpulan partikular: Jadi, <strong>sebagian buah yang telah masak berulat</strong>."
+    },
+    {
+      no: 35,
+      text: "Semua Kepala Sekolah adalah sarjana. Sementara Kepala Sekolah adalah guru. Jadi ....",
+      options: {
+        A: "Sementara guru adalah sarjana.",
+        B: "Sementara sarjana adalah Kepala Sekolah.",
+        C: "Sementara guru adalah Kepala Sekolah.",
+        D: "Semua guru adalah sarjana.",
+        E: "Semua Kepala Sekolah sarjana dan guru."
+      },
+      answer: "A",
+      explanation: "Semua Kepala Sekolah adalah sarjana.<br>Sementara (sebagian) Kepala Sekolah adalah guru.<br>Kesimpulan partikular: Jadi, <strong>sementara guru adalah sarjana</strong>."
+    },
+    {
+      no: 36,
+      text: "Semua polisi berbadan tegap. Sebagian polisi adalah polisi lalu lintas. Jadi ....",
+      options: {
+        A: "Polisi lalu lintas pasti berbadan tegap.",
+        B: "Ada polisi yang tidak berbadan tegap.",
+        C: "Semua polisi pasti polisi lalu lintas.",
+        D: "Sebagian polisi lalu lintas berbadan tegap.",
+        E: "Semua polisi berbadan tegap dan polisi lalu lintas."
+      },
+      answer: "A",
+      explanation: "Semua polisi berbadan tegap. Sebagian polisi adalah polisi lalu lintas.<br>Jadi, <strong>polisi lalu lintas pasti berbadan tegap</strong> (karena polisi lalu lintas merupakan bagian dari polisi yang berbadan tegap)."
+    },
+    {
+      no: 37,
+      text: "Semua pejabat tidak miskin. Semua mahasiswa tidak dapat dibohongi. Maka ....",
+      options: {
+        A: "Pejabat tidak dapat dibohongi.",
+        B: "Mahasiswa tidak miskin.",
+        C: "Pejabat dan mahasiswa tidak miskin dan tidak dapat dibohongi.",
+        D: "Semua pejabat adalah mahasiswa.",
+        E: "Tidak dapat ditarik kesimpulan."
+      },
+      answer: "E",
+      explanation: "Semua pejabat tidak miskin. Semua mahasiswa tidak dapat dibohongi.<br>Tidak ada term penengah (hubungan) antara pejabat dan mahasiswa sehingga <strong>tidak dapat ditarik kesimpulan</strong>."
+    },
+    {
+      no: 38,
+      text: "Semua ponsel ada fasilitas SMS. Sebagian ponsel ada fasilitas internet. Jadi ....",
+      options: {
+        A: "Semua ponsel ada fasilitas SMS dan internet.",
+        B: "Sebagian ponsel ada fasilitas SMS dan internet.",
+        C: "Sebagian ponsel ada fasilitas internet namun tidak ada fasilitas SMS.",
+        D: "Semua yang ada fasilitas internet selalu ada fasilitas SMS.",
+        E: "Semua ponsel yang ada fasilitas SMS pasti ada fasilitas internet."
+      },
+      answer: "B",
+      explanation: "Semua ponsel ada fasilitas SMS. Sebagian ponsel ada fasilitas internet.<br>Kesimpulan partikular:<br>&bull; <strong>Sebagian ponsel ada fasilitas SMS dan internet.</strong><br>&bull; Sebagian ponsel ada SMS, tetapi tidak ada fasilitas internet."
+    },
+    {
+      no: 39,
+      text: "Semua dosen adalah sarjana. Sementara dosen adalah ahli bahasa. Jadi ....",
+      options: {
+        A: "Sementara dosen adalah sarjana dan ahli bahasa.",
+        B: "Sementara sarjana adalah dosen.",
+        C: "Sementara ahli bahasa adalah dosen.",
+        D: "Semua ahli bahasa adalah sarjana.",
+        E: "Semua dosen adalah sarjana dan ahli bahasa."
+      },
+      answer: "A",
+      explanation: "Semua dosen adalah sarjana. Sementara (sebagian) dosen adalah ahli bahasa.<br>Kesimpulan pasti partikular: Jadi, <strong>Sementara dosen adalah sarjana dan ahli bahasa</strong>."
+    },
+    {
+      no: 40,
+      text: "Semua insinyur sipil pandai matematika. Sarwono bukan insinyur sipil. Jadi ....",
+      options: {
+        A: "Sarwono tidak pandai dalam matematika.",
+        B: "Sarwono adalah sarjana sastra.",
+        C: "Tidak ada kesimpulan yang benar.",
+        D: "Sarwono pandai dalam matematika.",
+        E: "Sarwono adalah ahli hukum."
+      },
+      answer: "C",
+      explanation: "Analisis setiap pilihan:<br>A. Sarwono tidak pandai dalam matematika (pernyataan 1 belum tentu mengakibatkan selain insinyur sipil tidak pandai matematika)<br>B. Sarwono adalah sarjana sastra (tidak ada keterangan pada pernyataan)<br><strong>C. Tidak ada kesimpulan yang benar</strong><br>D. Sarwono pandai dalam matematika (pernyataan 1 belum tentu mengakibatkan selain insinyur sipil juga pandai matematika)<br>E. Sarwono adalah ahli hukum (tidak ada keterangan pada pernyataan)"
+    },
+    {
+      no: 41,
+      text: "Olahragawan yang baik bersifat sportif dalam bertanding. Orang yang sportif belum tentu olahragawan. Abdullah Hasan adalah juara tinju kelas ringan. Abdullah Hasan adalah pegawai Bank Andalas. Seorang juara belum tentu sportif dalam bertanding. Jadi ....",
+      options: {
+        A: "Abdullah Hasan mungkin bukan olahragawan yang baik.",
+        B: "Abdullah Hasan bersifat sportif dalam bekerja.",
+        C: "Bank Andalas mempunyai pegawai yang sportif.",
+        D: "Abdullah Hasan bukan olahragawan yang baik.",
+        E: "Bank Andalas mengharuskan pegawainya olahragawan."
+      },
+      answer: "A",
+      explanation: "Tidak ada hubungan kepastian antara juara dan olahragawan yang baik (seorang juara belum tentu sportif, sedangkan olahragawan yang baik bersifat sportif). Sehingga <strong>Abdullah Hasan mungkin bukan olahragawan yang baik</strong>, walaupun juara tinju kelas ringan."
+    },
+    {
+      no: 42,
+      text: "Semua ilmuwan selalu memiliki wawasan yang luas. Ilham seorang ilmuwan yang tidak suka membaca. Jadi ....",
+      options: {
+        A: "Ilham seorang ilmuwan yang tidak suka memiliki wawasan luas.",
+        B: "Walaupun tidak suka membaca Ilham memiliki wawasan yang luas.",
+        C: "Semua ilmuwan tidak suka membaca.",
+        D: "Membaca tidak menambah wawasan seorang ilmuwan.",
+        E: "Membaca adalah kegiatan utama ilmuwan."
+      },
+      answer: "B",
+      explanation: "Semua ilmuwan selalu memiliki wawasan yang luas. Ilham seorang ilmuwan yang tidak suka membaca.<br>Jadi, <strong>walaupun tidak suka membaca Ilham memiliki wawasan yang luas</strong>."
+    },
+    {
+      no: 43,
+      text: "Semua harimau adalah pemakan daging. Sebagian binatang adalah harimau. Jadi ....",
+      options: {
+        A: "Semua pemakan daging adalah harimau.",
+        B: "Sebagian harimau adalah pemakan daging.",
+        C: "Sebagian binatang pemakan daging.",
+        D: "Semua binatang pemakan daging.",
+        E: "A, B, C, D bukan jawaban yang benar."
+      },
+      answer: "C",
+      explanation: "Semua harimau adalah pemakan daging.<br>Sebagian binatang adalah harimau.<br>Jadi, <strong>sebagian binatang pemakan daging</strong>."
+    },
+    {
+      no: 44,
+      text: "Kontraposisi dari pernyataan \"Jika semua siswa menyukai matematika maka guru senang mengajar\" adalah ....",
+      options: {
+        A: "Jika guru senang mengajar pasti ada siswa yang tidak suka matematika.",
+        B: "Jika tidak semua siswa suka matematika maka guru tidak senang mengajar.",
+        C: "Jika guru tidak senang mengajar maka ada siswa yang suka matematika.",
+        D: "Jika guru senang mengajar maka ada siswa yang tidak suka matematika.",
+        E: "Jika guru tidak senang mengajar maka ada siswa yang tidak suka matematika."
+      },
+      answer: "E",
+      explanation: "Ingat rumus kontraposisi: Pernyataan <em>p &rArr; q</em> memiliki kontraposisi <em>~q &rArr; ~p</em>.<br>p = Semua siswa menyukai matematika (&rarr; ~p = Ada siswa yang tidak suka matematika).<br>q = Guru senang mengajar (&rarr; ~q = Guru tidak senang mengajar).<br>Sehingga kontraposisinya adalah: <strong>Jika guru tidak senang mengajar maka ada siswa yang tidak suka matematika</strong> (terdapat pada opsi <strong>E</strong>)."
+    },
+    {
+      no: 45,
+      text: "Ingkaran dari pernyataan \"Semua peserta tes berdoa sebelum mengerjakan soal\" adalah ....",
+      options: {
+        A: "Semua peserta tes tidak berdoa sebelum mengerjakan tugas.",
+        B: "Beberapa peserta tes berdoa sebelum mengerjakan soal.",
+        C: "Beberapa peserta tes tidak berdoa sebelum mengerjakan soal.",
+        D: "Beberapa peserta tes berdoa setelah mengerjakan soal.",
+        E: "Beberapa peserta tes tidak berdoa setelah mengerjakan soal."
+      },
+      answer: "C",
+      explanation: "Ingat: Ingkaran dari kuantor universal (Semua) adalah kuantor eksistensial (Beberapa/Ada ... tidak).<br>Jadi, ingkaran dari pernyataan \"Semua peserta tes berdoa sebelum mengerjakan soal\" adalah: <strong>Beberapa peserta tes tidak berdoa sebelum mengerjakan soal</strong>."
+    },
+    {
+      no: 46,
+      text: "Jika binatang itu kuda maka binatang itu berkaki empat. Ternyata binatang itu tidak berkaki empat. Kesimpulannya adalah ....",
+      options: {
+        A: "Binatang itu kuda.",
+        B: "Binatang itu bebek.",
+        C: "Binatang itu pasti bukan ayam.",
+        D: "Binatang itu bukan kuda.",
+        E: "Pasti itu kuda nil."
+      },
+      answer: "D",
+      explanation: "Menggunakan modus tollens:<br>Premis 1: <em>p &rArr; q</em> (Jika binatang itu kuda maka berkaki empat)<br>Premis 2: <em>~q</em> (Ternyata binatang itu tidak berkaki empat)<br>Kesimpulan: <em>~p</em> &rarr; <strong>Binatang itu bukan kuda</strong>."
+    },
+    {
+      no: 47,
+      text: "Pernyataan: \"Jika laba tinggi maka karyawan sejahtera\" mempunyai invers yaitu ....",
+      options: {
+        A: "Jika laba tinggi maka karyawan tidak sejahtera.",
+        B: "Jika laba rendah maka karyawan tidak sejahtera.",
+        C: "Jika laba rendah maka karyawan sejahtera.",
+        D: "Jika laba tinggi maka karyawan sejahtera.",
+        E: "Jika laba tinggi maka karyawan tidak sejahtera."
+      },
+      answer: "B",
+      explanation: "Ingat rumus invers: Pernyataan <em>p &rArr; q</em> memiliki invers <em>~p &rArr; ~q</em>.<br>Pernyataan \"Jika laba tinggi maka karyawan sejahtera\" mempunyai invers: Jika laba tidak tinggi maka karyawan tidak sejahtera (tidak tinggi = rendah) &rarr; <strong>Jika laba rendah maka karyawan tidak sejahtera</strong>."
+    },
+    {
+      no: 48,
+      text: "Konvers pernyataan \"Jika saya mengantuk maka saya akan tidur\" adalah ....",
+      options: {
+        A: "Jika tidak mengantuk, saya tidak tidur.",
+        B: "Saya mengantuk, saya nonton liga Inggris.",
+        C: "Saya tidak mengantuk dan saya tidak tidur.",
+        D: "Jika saya akan tidur maka saya mengantuk.",
+        E: "Jika saya tidak tidur maka saya tidak mengantuk."
+      },
+      answer: "D",
+      explanation: "Ingat rumus konvers: Pernyataan <em>p &rArr; q</em> memiliki konvers <em>q &rArr; p</em>.<br>Konvers pernyataan \"Jika saya mengantuk saya akan tidur\" adalah <strong>\"Jika saya akan tidur maka saya mengantuk.\"</strong>"
+    },
+    {
+      no: 49,
+      text: "Pernyataan \"Jika laut pasang maka tiang dermaga tenggelam\" ekuivalen dengan ....",
+      options: {
+        A: "Jika laut pasang maka dermaga tenggelam.",
+        B: "Jika laut pasang maka tiang dermaga tidak tenggelam.",
+        C: "Jika laut tidak pasang maka tiang dermaga tenggelam.",
+        D: "Jika laut tidak pasang maka tiang dermaga tidak tenggelam.",
+        E: "Jika tiang dermaga tidak tenggelam maka laut tidak pasang."
+      },
+      answer: "E",
+      explanation: "Kontraposisi memiliki nilai kebenaran yang ekuivalen dengan implikasi (<em>p &rArr; q &equiv; ~q &rArr; ~p</em>).<br>Kontraposisi dari pernyataan \"Jika laut pasang maka tiang dermaga tenggelam\" adalah: <strong>Jika tiang dermaga tidak tenggelam maka laut tidak pasang</strong>."
+    },
+    {
+      no: 50,
+      text: "Diberikan pernyataan-pernyataan sebagai berikut:<br>1. Jika penguasaan matematika rendah maka sulit untuk menguasai IPA.<br>2. IPA tidak sulit dikuasai atau IPTEK tidak berkembang.<br>3. Jika IPTEK tidak berkembang maka negara akan semakin tertinggal.<br>Dari ketiga pernyataan di atas, dapat disimpulkan ....",
+      options: {
+        A: "Jika penguasaan matematika rendah maka negara akan semakin tertinggal.",
+        B: "Jika penguasaan matematika rendah maka IPTEK berkembang.",
+        C: "IPTEK dan IPA berkembang.",
+        D: "IPTEK dan IPA tidak berkembang.",
+        E: "Sulit untuk memajukan negara."
+      },
+      answer: "A",
+      explanation: "Pernyataan 2: \"IPA tidak sulit dikuasai atau IPTEK tidak berkembang\" (<em>~q &or; r</em>) ekuivalen dengan \"Jika IPA sulit dikuasai maka IPTEK tidak berkembang\" (<em>q &rArr; r</em>).<br>1. Jika penguasaan matematika rendah maka sulit untuk menguasai IPA (<em>p &rArr; q</em>).<br>2. Jika IPA sulit dikuasai maka IPTEK tidak berkembang (<em>q &rArr; r</em>).<br>Silogisme (1 &amp; 2): Jika penguasaan matematika rendah maka IPTEK tidak berkembang (<em>p &rArr; r</em>).<br>3. Jika IPTEK tidak berkembang maka negara akan semakin tertinggal (<em>r &rArr; s</em>).<br>Silogisme akhir: <strong>Jika penguasaan matematika rendah maka negara akan semakin tertinggal</strong>."
+    },
+    {
+      no: 51,
+      text: "Diberikan pernyataan-pernyataan sebagai berikut:<br>1. Jika Upik rajin belajar maka naik kelas.<br>2. Jika Upik tidak dapat hadiah maka tidak naik kelas.<br>3. Upik rajin belajar.<br>Kesimpulan yang sah adalah ....",
+      options: {
+        A: "Upik naik kelas",
+        B: "Upik dapat hadiah",
+        C: "Upik tidak dapat hadiah",
+        D: "Upik naik kelas dan dapat hadiah",
+        E: "Upik dapat hadiah atau naik kelas"
+      },
+      answer: "B",
+      explanation: "Pernyataan 2: \"Jika Upik tidak dapat hadiah maka tidak naik kelas\" ekuivalen dengan kontraposisinya: \"Jika naik kelas maka Upik dapat hadiah\".<br>1. Jika Upik rajin belajar maka naik kelas.<br>2. Jika naik kelas maka Upik dapat hadiah.<br>Silogisme: Jika Upik rajin belajar maka Upik dapat hadiah.<br>3. Upik rajin belajar.<br>Modus ponens: <strong>Upik dapat hadiah</strong>."
+    },
+    {
+      no: 52,
+      text: "Diberikan pernyataan-pernyataan sebagai berikut:<br>1. Jika hari panas maka Ani memakai topi.<br>2. Ani tidak memakai topi atau ia memakai payung.<br>3. Ani tidak memakai payung.<br>Kesimpulan yang sah adalah ....",
+      options: {
+        A: "Hari panas",
+        B: "Hari tidak panas",
+        C: "Ani memakai topi",
+        D: "Hari panas dan Ani memakai topi",
+        E: "Hari tidak panas dan Ani memakai topi"
+      },
+      answer: "B",
+      explanation: "1. Jika hari panas maka Ani memakai topi.<br>2. Ani tidak memakai topi atau ia memakai payung ekuivalen dengan \"Jika Ani memakai topi maka ia memakai payung\".<br>Menggunakan silogisme pada pernyataan 1 dan 2 diperoleh: Jika hari panas maka ia memakai payung.<br>3. Ani tidak memakai payung.<br>Menggunakan modus tollens maka: <strong>Hari tidak panas</strong>."
+    },
+    {
+      no: 53,
+      text: "Dalam sebuah kelas, sebagian besar murid pandai berenang, sebagian besar juga pandai mendayung. Jadi ....",
+      options: {
+        A: "Sebagian besar murid tidak pandai berenang dan tidak pandai mendayung.",
+        B: "Sebagian besar murid pandai berenang saja.",
+        C: "Sebagian tertentu dari murid-murid itu pandai berenang dan pandai mendayung.",
+        D: "Sebagian besar murid pandai berenang pandai dan mendayung.",
+        E: "Tidak dapat ditarik kesimpulan."
+      },
+      answer: "C",
+      visual: `<svg width="310" height="150" viewBox="0 0 310 150" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <clipPath id="clip-q53">
+            <ellipse cx="105" cy="65" rx="70" ry="42"/>
+          </clipPath>
+        </defs>
+        <ellipse cx="205" cy="65" rx="70" ry="42" fill="#94a3b8" clip-path="url(#clip-q53)"/>
+        <ellipse cx="105" cy="65" rx="70" ry="42" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <ellipse cx="205" cy="65" rx="70" ry="42" fill="none" stroke="#0f172a" stroke-width="2"/>
+        <text x="85" y="55" text-anchor="middle" font-size="10.5" font-weight="600" fill="#0f172a">Sebagian besar</text>
+        <text x="85" y="68" text-anchor="middle" font-size="10.5" font-weight="600" fill="#0f172a">murid pandai</text>
+        <text x="85" y="81" text-anchor="middle" font-size="10.5" font-weight="600" fill="#0f172a">berenang.</text>
+        <text x="225" y="55" text-anchor="middle" font-size="10.5" font-weight="600" fill="#0f172a">Sebagian besar</text>
+        <text x="225" y="68" text-anchor="middle" font-size="10.5" font-weight="600" fill="#0f172a">juga pandai</text>
+        <text x="225" y="81" text-anchor="middle" font-size="10.5" font-weight="600" fill="#0f172a">mendayung.</text>
+        <path d="M 155 88 Q 155 125 175 135" fill="none" stroke="#0f172a" stroke-width="1.3"/>
+        <polygon points="175,135 168,133 171,128" fill="#0f172a"/>
+        <text x="155" y="146" text-anchor="middle" font-size="10" font-weight="600" fill="#0f172a">Yang diarsir: Sebagian tertentu pandai berenang &amp; mendayung</text>
+      </svg>`,
+      explanation: "Sebagian besar berarti lebih dari 50%. Oleh karenanya, pasti ada irisan di antara yang pandai berenang dan yang pandai mendayung.<br><strong>Kesimpulan:</strong> Sebagian tertentu dari murid-murid itu pandai berenang dan pandai mendayung."
+    },
+    {
+      no: 54,
+      text: "Semua penonton konser memakai pita kertas. Ani adalah penonton konser. Jadi ....",
+      options: {
+        A: "Ani memakai pita kertas.",
+        B: "Ani tidak memakai pita kertas.",
+        C: "Bukan Ani yang memakai pita kertas.",
+        D: "Ani memakai bukan hanya pita kertas.",
+        E: "Kecuali Ani, penonton memakai pita kertas."
+      },
+      answer: "A",
+      explanation: "Semua penonton konser memakai pita kertas. Ani adalah penonton konser.<br><strong>Kesimpulan:</strong> Ani memakai pita kertas."
+    },
+    {
+      no: 55,
+      text: "Bila melewati pasar atau lorong, harus berselimut atau berjaket. Anis melewati lorong. Jadi ....",
+      options: {
+        A: "Anis memakai jaket.",
+        B: "Anis memakai jaket dan berselimut.",
+        C: "Anis memakai baju yang bukan jaket.",
+        D: "Anis tidak memakai jaket atau selimut.",
+        E: "Bukan jaket atau selimut yang dipakai Anis."
+      },
+      answer: "A",
+      explanation: "Bila melewati pasar atau lorong, harus berselimut atau berjaket. Anis melewati lorong.<br>Yang melewati lorong berselimut atau berjaket, tetapi tidak dua-duanya.<br>Berdasarkan pilihan, <strong>Anis memakai jaket</strong>."
+    },
+    {
+      no: 56,
+      text: "Semua sungai dihuni oleh ikan lele. Mahakam adalah sungai. Jadi ....",
+      options: {
+        A: "Mahakam dihuni oleh ikan lele.",
+        B: "Mahakam tidak dihuni oleh ikan lele.",
+        C: "Mahakam dihuni oleh bukan ikan lele.",
+        D: "Bukan Mahakam yang dihuni oleh ikan lele.",
+        E: "Hanya Mahakam yang tidak dihuni oleh ikan lele."
+      },
+      answer: "A",
+      explanation: "Semua sungai dihuni oleh ikan lele. Mahakam adalah sungai.<br><strong>Kesimpulan:</strong> Mahakam dihuni oleh ikan lele."
+    },
+    {
+      no: 57,
+      text: "Jika padi tumbuh subur, tikus datang. Jika tikus datang, Joko pergi. Jadi ....",
+      options: {
+        A: "Jika padi tumbuh subur maka Joko pergi.",
+        B: "Jika padi tidak tumbuh subur maka Joko pergi.",
+        C: "Jika padi tumbuh subur maka Joko tidak pergi.",
+        D: "Jika bukan padi yang tumbuh subur maka tikus datang.",
+        E: "Jika tikus datang, padi tumbuh subur."
+      },
+      answer: "A",
+      explanation: "Jika padi tumbuh subur, tikus datang.<br>Jika tikus datang, Joko pergi.<br>Menggunakan silogisme: <strong>Jika padi tumbuh subur maka Joko pergi</strong>."
+    },
+    {
+      no: 58,
+      text: "Semua sumbu berada di tengah. Sebagian sumbu menyebabkan berputar. Jadi ....",
+      options: {
+        A: "Semua yang berada di tengah adalah sumbu.",
+        B: "Semua sumbu menyebabkan dapat berputar.",
+        C: "Semua yang menyebabkan berputar adalah sumbu.",
+        D: "Semua yang berada di tengah menyebabkan berputar.",
+        E: "Sebagian yang berada di tengah menyebabkan berputar."
+      },
+      answer: "E",
+      explanation: "Semua sumbu berada di tengah. Sebagian sumbu menyebabkan berputar.<br>Kesimpulan partikular:<br>&bull; <strong>Sebagian yang berada di tengah menyebabkan berputar.</strong><br>&bull; Sebagian yang berada di tengah tidak menyebabkan berputar."
+    },
+    {
+      no: 59,
+      text: "Semua awan mengandung air. Sebagian mendung adalah awan. Jadi ....",
+      options: {
+        A: "Semua awan adalah mendung.",
+        B: "Semua mendung mengandung air.",
+        C: "Sebagian mendung mengandung air.",
+        D: "Semua yang mengandung air adalah awan.",
+        E: "Semua yang mengandung air adalah mendung."
+      },
+      answer: "C",
+      explanation: "Semua awan mengandung air. Sebagian mendung adalah awan.<br>Kesimpulan partikular: <strong>Sebagian mendung mengandung air</strong>."
+    },
+    {
+      no: 60,
+      text: "Semua penduduk kota makan nasi dari beras sebagian makanan pokok. Sebagian penduduk kota seminggu sekali makan ketela. Jadi ....",
+      options: {
+        A: "Semua yang seminggu sekali makan ketela adalah penduduk kota.",
+        B: "Sebagian yang seminggu sekali makan ketela adalah penduduk kota.",
+        C: "Semua yang seminggu sekali tidak makan ketela adalah penduduk kota.",
+        D: "Semua yang seminggu sekali makan ketela adalah penduduk bukan kota.",
+        E: "Sebagian yang hanya seminggu sekali makan ketela adalah penduduk kota."
+      },
+      answer: "B",
+      explanation: "Sebagian penduduk kota seminggu sekali makan ketela, ekuivalen (konversi partikular) dengan: <strong>Sebagian yang seminggu sekali makan ketela adalah penduduk kota</strong>."
+    }
+  ];
+
+  // =========================================================================
+  // RENDER VISUAL PENDUKUNG PEMBAHASAN
+  // =========================================================================
+  function renderVisualHelper(visualHtml) {
+    if (!visualHtml) return "";
+    return `<div class="diagram-scroll">${visualHtml}</div>`;
+  }
+
+  // =========================================================================
+  // STATE & LOGIKA APLIKASI CAT
+  // =========================================================================
+  const EXAM_DURATION_SECONDS = 60 * 60; // 60 Menit (60 Soal)
+  let currentUser = { user: "", nama: "" };
+  let currentIndex = 0;
+  let userAnswers = new Array(questions.length).fill(null);
+  let doubtStatus = new Array(questions.length).fill(false);
+  let timeLeft = EXAM_DURATION_SECONDS;
+  let timerInterval = null;
+
+  // Fungsi Modal Custom (Pengganti alert & confirm agar aman di semua iframe/browser)
+  function showModal(title, message, buttons) {
+    const overlay = document.getElementById("custom-modal");
+    document.getElementById("modal-title").textContent = title;
+    document.getElementById("modal-message").textContent = message;
+    const btnContainer = document.getElementById("modal-buttons");
+    btnContainer.innerHTML = "";
+
+    buttons.forEach(b => {
+      const btn = document.createElement("button");
+      btn.className = "btn " + (b.className || "btn-primary");
+      btn.style.width = "auto";
+      btn.textContent = b.text;
+      btn.onclick = () => {
+        overlay.style.display = "none";
+        if (b.onClick) b.onClick();
+      };
+      btnContainer.appendChild(btn);
+    });
+
+    overlay.style.display = "flex";
+  }
+
+  // Handle Login ke Google Sheet
+  document.getElementById("login-form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const userVal = document.getElementById("username").value.trim();
+    const passVal = document.getElementById("password").value.trim();
+    const btn = document.getElementById("btn-login");
+    const errBox = document.getElementById("login-error");
+
+    btn.disabled = true;
+    btn.textContent = "Memverifikasi...";
+    errBox.style.display = "none";
+
+    try {
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({ username: userVal, password: passVal })
+      });
+      
+      const textRes = await response.text();
+      let result;
+      try {
+        result = JSON.parse(textRes);
+      } catch (parseErr) {
+        throw new Error("Format respons server tidak valid.");
+      }
+
+      if (result.status === "success") {
+        currentUser = { user: result.user, nama: result.nama };
+        startExam();
+      } else {
+        errBox.style.display = "block";
+        errBox.textContent = result.message || "Username atau Password salah!";
+      }
+    } catch (error) {
+      errBox.style.display = "block";
+      errBox.textContent = "Gagal memproses login. Pastikan Web App sudah di-deploy ulang dengan 'Who has access' diset ke 'Anyone'.";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Masuk Ujian";
+    }
+  });
+
+  function resetExamState() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    currentIndex = 0;
+    userAnswers = new Array(questions.length).fill(null);
+    doubtStatus = new Array(questions.length).fill(false);
+    timeLeft = EXAM_DURATION_SECONDS;
+
+    const timerEl = document.getElementById("timer");
+    timerEl.textContent = "60:00";
+    timerEl.style.color = "white";
+  }
+
+  function startExam() {
+    resetExamState();
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("exam-screen").style.display = "block";
+    document.getElementById("peserta-info").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+
+    initNumberGrid();
+    renderQuestion(0);
+    startTimer();
+  }
+
+  function retryExam() {
+    startExam();
+  }
+
+  function confirmLogout() {
+    showModal(
+      "Konfirmasi Logout",
+      "Apakah Anda yakin ingin keluar dari ujian? Progres jawaban Anda saat ini akan direset.",
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Logout", className: "btn-logout", onClick: logoutUser }
+      ]
+    );
+  }
+
+  function logoutUser() {
+    resetExamState();
+    currentUser = { user: "", nama: "" };
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("login-error").style.display = "none";
+
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("login-screen").style.display = "flex";
+  }
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+      const s = (timeLeft % 60).toString().padStart(2, '0');
+      document.getElementById("timer").textContent = `${m}:${s}`;
+
+      if (timeLeft <= 300) {
+        document.getElementById("timer").style.color = "#fca5a5";
+      }
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        showModal(
+          "Waktu Habis",
+          "Waktu ujian telah habis! Jawaban Anda akan dikumpulkan otomatis.",
+          [{ text: "Lihat Hasil", className: "btn-primary", onClick: finishExam }]
+        );
+      }
+    }, 1000);
+  }
+
+  function initNumberGrid() {
+    const grid = document.getElementById("number-grid");
+    grid.innerHTML = "";
+    questions.forEach((q, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "num-btn";
+      btn.id = `num-btn-${idx}`;
+      btn.textContent = q.no;
+      btn.onclick = () => renderQuestion(idx);
+      grid.appendChild(btn);
+    });
+  }
+
+  function updateNumberGrid() {
+    questions.forEach((_, idx) => {
+      const btn = document.getElementById(`num-btn-${idx}`);
+      if (!btn) return;
+      btn.className = "num-btn";
+      if (idx === currentIndex) btn.classList.add("active");
+      if (doubtStatus[idx]) {
+        btn.classList.add("doubt");
+      } else if (userAnswers[idx] !== null) {
+        btn.classList.add("answered");
+      }
+    });
+  }
+
+  function renderQuestion(index) {
+    currentIndex = index;
+    const q = questions[index];
+
+    document.getElementById("q-number").textContent = `Soal No. ${q.no} dari ${questions.length}`;
+    document.getElementById("q-text").innerHTML = q.text;
+
+    const statusEl = document.getElementById("q-status");
+    if (doubtStatus[index]) {
+      statusEl.textContent = "Ditandai Ragu-Ragu";
+      statusEl.style.color = "#b45309";
+    } else if (userAnswers[index]) {
+      statusEl.textContent = `Terjawab (${userAnswers[index]})`;
+      statusEl.style.color = "var(--success)";
+    } else {
+      statusEl.textContent = "Belum dijawab";
+      statusEl.style.color = "var(--muted)";
+    }
+
+    const optContainer = document.getElementById("q-options");
+    optContainer.innerHTML = "";
+
+    ["A", "B", "C", "D", "E"].forEach(letter => {
+      const div = document.createElement("div");
+      div.className = "option-item" + (userAnswers[index] === letter ? " selected" : "");
+      div.onclick = () => selectOption(letter);
+      div.innerHTML = `
+        <div class="option-letter">${letter}</div>
+        <div>${q.options[letter]}</div>
+      `;
+      optContainer.appendChild(div);
+    });
+
+    document.getElementById("btn-prev").disabled = (index === 0);
+    document.getElementById("btn-next").disabled = (index === questions.length - 1);
+    updateNumberGrid();
+  }
+
+  function selectOption(letter) {
+    userAnswers[currentIndex] = letter;
+    renderQuestion(currentIndex);
+  }
+
+  function toggleDoubt() {
+    doubtStatus[currentIndex] = !doubtStatus[currentIndex];
+    renderQuestion(currentIndex);
+  }
+
+  function prevQuestion() {
+    if (currentIndex > 0) renderQuestion(currentIndex - 1);
+  }
+
+  function nextQuestion() {
+    if (currentIndex < questions.length - 1) renderQuestion(currentIndex + 1);
+  }
+
+  function confirmFinish() {
+    const unanswered = userAnswers.filter(a => a === null).length;
+    const msg = unanswered > 0 
+      ? `Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin mengakhiri ujian?`
+      : "Apakah Anda yakin ingin mengumpulkan semua jawaban sekarang?";
+    
+    showModal(
+      "Kumpulkan Jawaban",
+      msg,
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Kumpulkan", className: "btn-finish", onClick: finishExam }
+      ]
+    );
+  }
+
+  function finishExam() {
+    clearInterval(timerInterval);
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "block";
+
+    let benar = 0, salah = 0, kosong = 0;
+    const reviewContainer = document.getElementById("review-container");
+    reviewContainer.innerHTML = "";
+
+    questions.forEach((q, idx) => {
+      const uAns = userAnswers[idx];
+      const isCorrect = uAns === q.answer;
+
+      if (uAns === null) kosong++;
+      else if (isCorrect) benar++;
+      else salah++;
+
+      const card = document.createElement("div");
+      card.className = `card review-card ${isCorrect ? 'correct' : 'wrong'}`;
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+          <strong>Soal No. ${q.no}</strong>
+          <span style="font-weight:bold; color:${isCorrect ? 'var(--success)' : 'var(--danger)'}">
+            ${uAns === null ? 'Tidak Dijawab' : (isCorrect ? 'BENAR' : 'SALAH')}
+          </span>
+        </div>
+        <p style="margin-bottom:10px;">${q.text}</p>
+        <p><strong>Jawaban Anda:</strong> ${uAns ? `${uAns}. ${q.options[uAns]}` : '-'} | 
+           <strong style="color:var(--success)">Kunci Jawaban:</strong> ${q.answer}. ${q.options[q.answer]}</p>
+        <div class="pembahasan-box">
+          <strong>Pembahasan:</strong>
+          ${renderVisualHelper(q.visual)}
+          <div style="margin-top:6px;">${q.explanation}</div>
+          <div style="margin-top:8px; font-weight:700; color:#0f172a;">&#9632; Jawaban: ${q.answer}</div>
+        </div>
+      `;
+      reviewContainer.appendChild(card);
+    });
+
+    const skor = Math.round((benar / questions.length) * 100);
+    document.getElementById("res-peserta").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+    document.getElementById("res-score").textContent = `${skor} / 100`;
+    document.getElementById("res-detail").textContent = `Benar: ${benar} | Salah: ${salah} | Kosong: ${kosong}`;
+  }
+</script>
+</body>
+</html>

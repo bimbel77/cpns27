@@ -1,0 +1,1496 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAT - DERET HURUF</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+      --warning: #eab308;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); line-height: 1.6; }
+
+    /* Login Screen */
+    #login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .login-box {
+      background: var(--card); padding: 35px; border-radius: 12px; width: 100%; max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+    .login-box h2 { text-align: center; color: var(--primary); margin-bottom: 5px; }
+    .login-box p { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 25px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+    .form-group input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;
+    }
+    .btn {
+      display: inline-block; padding: 10px 18px; border: none; border-radius: 6px; font-size: 0.95rem;
+      font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; text-decoration: none;
+    }
+    .btn-primary { background: var(--primary); color: white; width: 100%; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+    .btn-logout {
+      background: var(--danger); color: white; padding: 7px 14px; font-size: 0.85rem;
+    }
+    .btn-logout:hover { background: var(--danger-hover); }
+    .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 10px; text-align: center; display: none; }
+
+    .register-link-box {
+      margin-top: 18px; padding-top: 15px; border-top: 1px solid #e2e8f0;
+      text-align: center; font-size: 0.9rem; color: var(--muted);
+    }
+    .register-link-box a {
+      color: var(--primary); font-weight: 700; text-decoration: none;
+    }
+    .register-link-box a:hover {
+      text-decoration: underline; color: var(--primary-hover);
+    }
+
+    /* Header CAT */
+    header {
+      background: var(--primary); color: white; padding: 15px 25px; display: flex;
+      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header-title h1 { font-size: 1.2rem; }
+    .header-info { display: flex; align-items: center; gap: 15px; }
+    .timer-box {
+      background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 6px;
+      font-weight: bold; font-size: 1.1rem; letter-spacing: 1px;
+    }
+
+    /* Main Container */
+    #exam-screen, #result-screen { display: none; max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+    .exam-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+    @media (max-width: 850px) { .exam-layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card); border-radius: 10px; padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
+    }
+
+    /* Soal Area */
+    .question-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 2px solid var(--bg); padding-bottom: 12px; margin-bottom: 18px;
+    }
+    .badge-no { background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; }
+    .question-text { font-size: 1.05rem; margin-bottom: 15px; }
+
+    /* Opsi Jawaban */
+    .options-list { display: flex; flex-direction: column; gap: 10px; }
+    .option-item {
+      display: flex; align-items: center; gap: 12px; padding: 12px 15px;
+      border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: 0.15s;
+    }
+    .option-item:hover { background: #f8fafc; border-color: var(--primary); }
+    .option-item.selected { background: #eff6ff; border-color: var(--primary); font-weight: 600; }
+    .option-letter {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+    }
+    .option-item.selected .option-letter { background: var(--primary); color: white; }
+
+    /* Navigasi Bawah Soal */
+    .nav-actions {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 25px;
+      padding-top: 15px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;
+    }
+    .btn-nav { background: #e2e8f0; color: var(--text); }
+    .btn-nav:hover { background: #cbd5e1; }
+    .btn-ragu { background: var(--warning); color: #000; }
+    .btn-finish { background: var(--success); color: white; width: 100%; margin-top: 15px; }
+    .btn-finish:hover { background: #15803d; }
+
+    /* Grid Nomor Soal */
+    .grid-numbers {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px;
+      max-height: 360px; overflow-y: auto; padding-right: 4px;
+    }
+    .num-btn {
+      padding: 8px 0; border: 1px solid var(--border); border-radius: 6px;
+      background: white; font-weight: 600; cursor: pointer; text-align: center;
+    }
+    .num-btn.active { border: 2px solid var(--primary); }
+    .num-btn.answered { background: var(--success); color: white; border-color: var(--success); }
+    .num-btn.doubt { background: var(--warning); color: black; border-color: var(--warning); }
+
+    .legend { display: flex; gap: 12px; font-size: 0.8rem; margin-top: 15px; flex-wrap: wrap; }
+    .legend span { display: flex; align-items: center; gap: 5px; }
+    .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+    /* Result & Pembahasan */
+    .score-banner {
+      text-align: center; padding: 30px; background: linear-gradient(135deg, #1e40af, #3b82f6);
+      color: white; border-radius: 12px; margin-bottom: 25px;
+    }
+    .score-big { font-size: 3.5rem; font-weight: bold; margin: 10px 0; }
+    .result-actions {
+      display: flex; justify-content: center; gap: 12px; margin-top: 15px; flex-wrap: wrap;
+    }
+    .review-card { margin-bottom: 20px; border-left: 5px solid var(--border); }
+    .review-card.correct { border-left-color: var(--success); }
+    .review-card.wrong { border-left-color: var(--danger); }
+    .pembahasan-box {
+      background: #f8fafc; padding: 15px; border-radius: 8px; margin-top: 12px;
+      border: 1px dashed #94a3b8; font-size: 0.95rem;
+    }
+    .diagram-scroll {
+      overflow-x: auto;
+      margin: 10px 0 8px 0;
+      padding: 8px 4px;
+      background: #ffffff;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+    .diagram-scroll svg {
+      display: block;
+      max-width: none;
+    }
+
+    /* Custom Modal Dialog (Pengganti alert/confirm) */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6); display: none; align-items: center;
+      justify-content: center; z-index: 999; padding: 20px;
+    }
+    .modal-card {
+      background: white; padding: 25px; border-radius: 12px; max-width: 400px;
+      width: 100%; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .modal-card h3 { color: var(--primary); margin-bottom: 10px; }
+    .modal-card p { color: var(--text); font-size: 0.95rem; margin-bottom: 20px; }
+    .modal-btns { display: flex; gap: 10px; justify-content: center; }
+  </style>
+</head>
+<body>
+
+  <!-- HALAMAN LOGIN -->
+  <div id="login-screen">
+    <div class="login-box">
+      <h2>Portal Ujian CAT</h2>
+      <p>Subtes TIU: Deret Huruf (30 Soal)</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Username/Email</label>
+          <input type="text" id="username" required placeholder="Masukkan username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="Masukkan password">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-login">Masuk Ujian</button>
+        <div class="error-msg" id="login-error"></div>
+        <div class="register-link-box">
+          Belum punya akun? <a href="http://lynk.id/seputar_guru/4g73189dndge/checkout" target="_blank" rel="noopener noreferrer">Daftar di sini</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- HALAMAN UJIAN CAT -->
+  <div id="exam-screen">
+    <header>
+      <div class="header-title">
+        <h1>CAT - DERET HURUF</h1>
+        <small id="peserta-info">Peserta: -</small>
+      </div>
+      <div class="header-info">
+        <div class="timer-box" id="timer">30:00</div>
+        <button type="button" class="btn btn-logout" onclick="confirmLogout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="exam-layout" style="margin-top: 20px;">
+      <!-- Kolom Kiri: Soal -->
+      <div class="card">
+        <div class="question-header">
+          <span class="badge-no" id="q-number">Soal No. 1</span>
+          <span id="q-status" style="font-size: 0.85rem; color: var(--muted);">Belum dijawab</span>
+        </div>
+        <div class="question-text" id="q-text"></div>
+        <div class="options-list" id="q-options"></div>
+
+        <div class="nav-actions">
+          <button class="btn btn-nav" id="btn-prev" onclick="prevQuestion()">&laquo; Sebelumnya</button>
+          <button class="btn btn-ragu" id="btn-doubt" onclick="toggleDoubt()">Ragu-Ragu</button>
+          <button class="btn btn-nav" id="btn-next" onclick="nextQuestion()">Selanjutnya &raquo;</button>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Navigasi Nomor -->
+      <div class="card">
+        <h3>Navigasi Soal</h3>
+        <div class="grid-numbers" id="number-grid"></div>
+        <div class="legend">
+          <span><i class="dot" style="background: var(--success);"></i> Dijawab</span>
+          <span><i class="dot" style="background: var(--warning);"></i> Ragu</span>
+          <span><i class="dot" style="background: #fff; border: 1px solid #cbd5e1;"></i> Kosong</span>
+        </div>
+        <button class="btn btn-finish" onclick="confirmFinish()">Selesai & Kumpulkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN HASIL & PEMBAHASAN -->
+  <div id="result-screen">
+    <div class="score-banner">
+      <h2>Hasil Ujian CAT Anda</h2>
+      <p id="res-peserta"></p>
+      <div class="score-big" id="res-score">0</div>
+      <p id="res-detail">Benar: 0 | Salah: 0 | Kosong: 0</p>
+      <div class="result-actions">
+        <button class="btn" style="background: white; color: var(--primary);" onclick="retryExam()">Ulangi Ujian</button>
+        <button class="btn btn-logout" onclick="logoutUser()">Logout</button>
+      </div>
+    </div>
+    <h3 style="margin-bottom: 15px;">Kunci Jawaban & Pembahasan Lengkap</h3>
+    <div id="review-container"></div>
+  </div>
+
+  <!-- CUSTOM MODAL -->
+  <div class="modal-overlay" id="custom-modal">
+    <div class="modal-card">
+      <h3 id="modal-title">Konfirmasi</h3>
+      <p id="modal-message">Pesan konfirmasi</p>
+      <div class="modal-btns" id="modal-buttons"></div>
+    </div>
+  </div>
+
+<script>
+  // =========================================================================
+  // URL GOOGLE APPS SCRIPT ANDA YANG AKTIF
+  // =========================================================================
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxB6Th7GHlD9o8ABbYcK2mdV7mv4ufy2i-SYXUg3jVqS0Q1bkXa_pkseMhqmIzgCTx7/exec";
+
+  // =========================================================================
+  // BANK SOAL, KUNCI JAWABAN & PEMBAHASAN (30 SOAL DERET HURUF DARI PDF)
+  // =========================================================================
+  const questions = [
+    {
+      no: 1,
+      text: "Tentukan huruf yang tepat untuk melengkapi deret berikut:<br><strong>G, A, G, B, G, C, ....</strong>",
+      options: {
+        A: "H",
+        B: "K",
+        C: "G",
+        D: "D",
+        E: "M"
+      },
+      answer: "C",
+      diagram: {
+        nums: ["G", "A", "G", "B", "G", "C", "G"],
+        bold: [6],
+        arcs: [
+          { from: 0, to: 2, label: "tetap", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "tetap", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "tetap", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+1", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+1", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik ganjil berisi huruf <strong>G</strong> yang tetap (tidak berubah), sedangkan larik genap berurutan +1 (A, B, C). Huruf berikutnya adalah <strong>G</strong>."
+    },
+    {
+      no: 2,
+      text: "Tentukan huruf yang tepat untuk melengkapi deret berikut:<br><strong>W, G, T, J, Q, M, ....</strong>",
+      options: {
+        A: "M",
+        B: "N",
+        C: "O",
+        D: "P",
+        E: "S"
+      },
+      answer: "B",
+      diagram: {
+        nums: ["W", "G", "T", "J", "Q", "M", "N"],
+        bold: [6],
+        arcs: [
+          { from: 0, to: 2, label: "-3", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "-3", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "-3", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+3", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+3", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik atas (ganjil) selalu mundur <strong>-3</strong> huruf (W &rarr; T &rarr; Q &rarr; <strong>N</strong>), sedangkan larik bawah (genap) maju <strong>+3</strong> huruf (G &rarr; J &rarr; M)."
+    },
+    {
+      no: 3,
+      text: "Tentukan dua huruf yang tepat untuk melengkapi deret berikut:<br><strong>X, A, T, F, P, K, ..., ....</strong>",
+      options: {
+        A: "L, P",
+        B: "M, P",
+        C: "J, P",
+        D: "F, P",
+        E: "P, P"
+      },
+      answer: "A",
+      diagram: {
+        nums: ["X", "A", "T", "F", "P", "K", "L", "P"],
+        bold: [6, 7],
+        arcs: [
+          { from: 0, to: 2, label: "-4", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "-4", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "-4", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+5", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+5", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "+5", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik atas mundur <strong>-4</strong> huruf (X &rarr; T &rarr; P &rarr; <strong>L</strong>) dan larik bawah maju <strong>+5</strong> huruf (A &rarr; F &rarr; K &rarr; <strong>P</strong>)."
+    },
+    {
+      no: 4,
+      text: "Tentukan dua huruf yang tepat untuk melengkapi deret berikut:<br><strong>H, Q, K, T, O, W, ..., ....</strong>",
+      options: {
+        A: "S, X",
+        B: "T, Y",
+        C: "S, Z",
+        D: "U, X",
+        E: "T, Z"
+      },
+      answer: "E",
+      diagram: {
+        nums: ["H", "Q", "K", "T", "O", "W", "T", "Z"],
+        bold: [6, 7],
+        arcs: [
+          { from: 0, to: 2, label: "+3", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+4", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+5", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+1", pos: "top", tier: 2 },
+          { from: 3, to: 5, label: "+1", pos: "top", tier: 2 },
+          { from: 1, to: 3, label: "+3", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+3", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "+3", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik atas bertingkat +3, +4, +5 (O + 5 = <strong>T</strong>) dan larik bawah tetap +3 (W + 3 = <strong>Z</strong>)."
+    },
+    {
+      no: 5,
+      text: "Tentukan dua huruf yang tepat untuk melengkapi deret berikut:<br><strong>F, M, G, L, I, J, L, G, ..., ....</strong>",
+      options: {
+        A: "P, A",
+        B: "Q, B",
+        C: "P, C",
+        D: "S, C",
+        E: "R, B"
+      },
+      answer: "C",
+      diagram: {
+        nums: ["F", "M", "G", "L", "I", "J", "L", "G", "P", "C"],
+        bold: [8, 9],
+        arcs: [
+          { from: 0, to: 2, label: "+1", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+2", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+3", pos: "top", tier: 1 },
+          { from: 6, to: 8, label: "+4", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+1", pos: "top", tier: 2 },
+          { from: 3, to: 5, label: "+1", pos: "top", tier: 2 },
+          { from: 5, to: 7, label: "+1", pos: "top", tier: 2 },
+          { from: 1, to: 3, label: "-1", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "-2", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "-3", pos: "bottom", tier: 1 },
+          { from: 7, to: 9, label: "-4", pos: "bottom", tier: 1 },
+          { from: 2, to: 4, label: "-1", pos: "bottom", tier: 2 },
+          { from: 4, to: 6, label: "-1", pos: "bottom", tier: 2 },
+          { from: 6, to: 8, label: "-1", pos: "bottom", tier: 2 }
+        ]
+      },
+      explanation: "Larik atas maju +1, +2, +3, +4 (L + 4 = <strong>P</strong>) dan larik bawah mundur -1, -2, -3, -4 (G - 4 = <strong>C</strong>)."
+    },
+    {
+      no: 6,
+      text: "Tentukan huruf yang tepat untuk melengkapi deret berikut:<br><strong>A, A, B, C, D, F, G, ....</strong>",
+      options: {
+        A: "L",
+        B: "F",
+        C: "J",
+        D: "S",
+        E: "E"
+      },
+      answer: "C",
+      diagram: {
+        nums: ["A", "A", "B", "C", "D", "F", "G", "J"],
+        bold: [7],
+        arcs: [
+          { from: 0, to: 2, label: "+1", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+2", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+3", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+1", pos: "top", tier: 2 },
+          { from: 3, to: 5, label: "+1", pos: "top", tier: 2 },
+          { from: 1, to: 3, label: "+2", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+3", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "+4", pos: "bottom", tier: 1 },
+          { from: 2, to: 4, label: "+1", pos: "bottom", tier: 2 },
+          { from: 4, to: 6, label: "+1", pos: "bottom", tier: 2 }
+        ]
+      },
+      explanation: "Larik bawah bertingkat +2, +3, +4 (A &rarr; C &rarr; F &rarr; <strong>J</strong>)."
+    },
+    {
+      no: 7,
+      text: "Tentukan dua huruf yang tepat untuk melengkapi deret berikut:<br><strong>Z, Y, X, W, V, U, T, S, R, Q, ..., ....</strong>",
+      options: {
+        A: "M, N",
+        B: "P, O",
+        C: "O, N",
+        D: "L, M",
+        E: "L, J"
+      },
+      answer: "B",
+      diagram: {
+        nums: ["Z", "Y", "X", "W", "V", "U", "T", "S", "R", "Q", "P", "O"],
+        bold: [10, 11],
+        arcs: [
+          { from: 0, to: 1, label: "-1", pos: "top", tier: 1 },
+          { from: 1, to: 2, label: "-1", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "-1", pos: "top", tier: 1 },
+          { from: 3, to: 4, label: "-1", pos: "top", tier: 1 },
+          { from: 4, to: 5, label: "-1", pos: "top", tier: 1 },
+          { from: 5, to: 6, label: "-1", pos: "top", tier: 1 },
+          { from: 6, to: 7, label: "-1", pos: "top", tier: 1 },
+          { from: 7, to: 8, label: "-1", pos: "top", tier: 1 },
+          { from: 8, to: 9, label: "-1", pos: "top", tier: 1 },
+          { from: 9, to: 10, label: "-1", pos: "top", tier: 1 },
+          { from: 10, to: 11, label: "-1", pos: "top", tier: 1 }
+        ]
+      },
+      explanation: "Deret abjad terbalik berurutan mundur satu huruf (-1) dari Z: setelah Q adalah <strong>P, O</strong>."
+    },
+    {
+      no: 8,
+      text: "Tentukan huruf yang tepat untuk melengkapi deret berikut:<br><strong>P, K, Q, M, S, P, V, ....</strong>",
+      options: {
+        A: "S",
+        B: "U",
+        C: "T",
+        D: "R",
+        E: "N"
+      },
+      answer: "C",
+      diagram: {
+        nums: ["P", "K", "Q", "M", "S", "P", "V", "T"],
+        bold: [7],
+        arcs: [
+          { from: 0, to: 2, label: "+1", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+2", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+3", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+1", pos: "top", tier: 2 },
+          { from: 3, to: 5, label: "+1", pos: "top", tier: 2 },
+          { from: 1, to: 3, label: "+2", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+3", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "+4", pos: "bottom", tier: 1 },
+          { from: 2, to: 4, label: "+1", pos: "bottom", tier: 2 },
+          { from: 4, to: 6, label: "+1", pos: "bottom", tier: 2 }
+        ]
+      },
+      explanation: "Larik bawah bertingkat +2, +3, +4: setelah P maju 4 huruf adalah <strong>T</strong>."
+    },
+    {
+      no: 9,
+      text: "Tentukan huruf yang tepat untuk melengkapi deret berikut:<br><strong>S, N, O, P, K, R, ....</strong>",
+      options: {
+        A: "H",
+        B: "J",
+        C: "T",
+        D: "G",
+        E: "S"
+      },
+      answer: "D",
+      diagram: {
+        nums: ["S", "N", "O", "P", "K", "R", "G"],
+        bold: [6],
+        arcs: [
+          { from: 0, to: 2, label: "-4", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "-4", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "-4", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+2", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+2", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik atas (ganjil) mundur tetap <strong>-4</strong> huruf (S &rarr; O &rarr; K &rarr; <strong>G</strong>), larik bawah maju <strong>+2</strong> huruf."
+    },
+    {
+      no: 10,
+      text: "Tentukan dua huruf yang tepat untuk melengkapi deret berikut:<br><strong>H, D, J, F, L, J, ..., ....</strong>",
+      options: {
+        A: "N, I",
+        B: "M, N",
+        C: "N, Q",
+        D: "N, P",
+        E: "O, P"
+      },
+      answer: "D",
+      diagram: {
+        nums: ["H", "D", "J", "F", "L", "J", "N", "P"],
+        bold: [6, 7],
+        arcs: [
+          { from: 0, to: 2, label: "+2", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+2", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+2", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+2", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+4", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "+6", pos: "bottom", tier: 1 },
+          { from: 2, to: 4, label: "+2", pos: "bottom", tier: 2 },
+          { from: 4, to: 6, label: "+2", pos: "bottom", tier: 2 }
+        ]
+      },
+      explanation: "Larik atas tetap +2 (L + 2 = <strong>N</strong>) dan larik bawah bertingkat +2, +4, +6 (J + 6 = <strong>P</strong>)."
+    },
+    {
+      no: 11,
+      text: "Tentukan huruf yang tepat untuk melengkapi deret berikut:<br><strong>G, J, M, P, ....</strong>",
+      options: {
+        A: "K",
+        B: "R",
+        C: "T",
+        D: "L",
+        E: "S"
+      },
+      answer: "E",
+      diagram: {
+        nums: ["G", "J", "M", "P", "S"],
+        bold: [4],
+        arcs: [
+          { from: 0, to: 1, label: "+3", pos: "top", tier: 1 },
+          { from: 1, to: 2, label: "+3", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "+3", pos: "top", tier: 1 },
+          { from: 3, to: 4, label: "+3", pos: "top", tier: 1 }
+        ]
+      },
+      explanation: "Deret satu larik maju tetap <strong>+3</strong> huruf: P + 3 = <strong>S</strong>."
+    },
+    {
+      no: 12,
+      text: "Tentukan huruf yang tepat untuk melengkapi deret berikut:<br><strong>A, D, H, M, ....</strong>",
+      options: {
+        A: "N",
+        B: "R",
+        C: "S",
+        D: "T",
+        E: "Q"
+      },
+      answer: "C",
+      diagram: {
+        nums: ["A", "D", "H", "M", "S"],
+        bold: [4],
+        arcs: [
+          { from: 0, to: 1, label: "+3", pos: "top", tier: 1 },
+          { from: 1, to: 2, label: "+4", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "+5", pos: "top", tier: 1 },
+          { from: 3, to: 4, label: "+6", pos: "top", tier: 1 },
+          { from: 0.5, to: 1.5, label: "+1", pos: "top", tier: 2 },
+          { from: 1.5, to: 2.5, label: "+1", pos: "top", tier: 2 },
+          { from: 2.5, to: 3.5, label: "+1", pos: "top", tier: 2 }
+        ]
+      },
+      explanation: "Pola bertingkat +3, +4, +5, +6: setelah M maju 6 huruf adalah <strong>S</strong>."
+    },
+    {
+      no: 13,
+      text: "Tentukan huruf yang tepat untuk melengkapi deret berikut:<br><strong>E, G, K, Q, ....</strong>",
+      options: {
+        A: "W",
+        B: "T",
+        C: "S",
+        D: "Y",
+        E: "V"
+      },
+      answer: "D",
+      diagram: {
+        nums: ["E", "G", "K", "Q", "Y"],
+        bold: [4],
+        arcs: [
+          { from: 0, to: 1, label: "+2", pos: "top", tier: 1 },
+          { from: 1, to: 2, label: "+4", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "+6", pos: "top", tier: 1 },
+          { from: 3, to: 4, label: "+8", pos: "top", tier: 1 },
+          { from: 0.5, to: 1.5, label: "+2", pos: "top", tier: 2 },
+          { from: 1.5, to: 2.5, label: "+2", pos: "top", tier: 2 },
+          { from: 2.5, to: 3.5, label: "+2", pos: "top", tier: 2 }
+        ]
+      },
+      explanation: "Penambah bertambah +2 tiap langkah (+2, +4, +6, +8): setelah Q maju 8 huruf adalah <strong>Y</strong>."
+    },
+    {
+      no: 14,
+      text: "Tentukan dua huruf yang tepat untuk melengkapi deret berikut:<br><strong>C, D, E, G, G, K, ..., ....</strong>",
+      options: {
+        A: "E, P",
+        B: "I, R",
+        C: "G, Q",
+        D: "I, P",
+        E: "K, M"
+      },
+      answer: "D",
+      diagram: {
+        nums: ["C", "D", "E", "G", "G", "K", "I", "P"],
+        bold: [6, 7],
+        arcs: [
+          { from: 0, to: 2, label: "+2", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+2", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+2", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+3", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+4", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "+5", pos: "bottom", tier: 1 },
+          { from: 2, to: 4, label: "+1", pos: "bottom", tier: 2 },
+          { from: 4, to: 6, label: "+1", pos: "bottom", tier: 2 }
+        ]
+      },
+      explanation: "Larik atas tetap +2 (G + 2 = <strong>I</strong>) dan larik bawah bertingkat +3, +4, +5 (K + 5 = <strong>P</strong>)."
+    },
+    {
+      no: 15,
+      text: "Tentukan huruf yang tepat untuk melengkapi deret berikut:<br><strong>X, U, X, R, X, O, X, ....</strong>",
+      options: {
+        A: "L",
+        B: "N",
+        C: "K",
+        D: "X",
+        E: "M"
+      },
+      answer: "A",
+      diagram: {
+        nums: ["X", "U", "X", "R", "X", "O", "X", "L"],
+        bold: [7],
+        arcs: [
+          { from: 0, to: 2, label: "tetap", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "tetap", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "tetap", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "-3", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "-3", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "-3", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik ganjil tetap huruf <strong>X</strong>, sedangkan larik genap mundur <strong>-3</strong> huruf (U &rarr; R &rarr; O &rarr; <strong>L</strong>)."
+    },
+    {
+      no: 16,
+      text: "Tentukan dua huruf yang tepat untuk melengkapi deret berikut:<br><strong>B, S, C, Q, F, N, K, J, ..., ....</strong>",
+      options: {
+        A: "M, E",
+        B: "R, E",
+        C: "N, D",
+        D: "R, D",
+        E: "N, F"
+      },
+      answer: "B",
+      diagram: {
+        nums: ["B", "S", "C", "Q", "F", "N", "K", "J", "R", "E"],
+        bold: [8, 9],
+        arcs: [
+          { from: 0, to: 2, label: "+1", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+3", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+5", pos: "top", tier: 1 },
+          { from: 6, to: 8, label: "+7", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+2", pos: "top", tier: 2 },
+          { from: 3, to: 5, label: "+2", pos: "top", tier: 2 },
+          { from: 5, to: 7, label: "+2", pos: "top", tier: 2 },
+          { from: 1, to: 3, label: "-2", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "-3", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "-4", pos: "bottom", tier: 1 },
+          { from: 7, to: 9, label: "-5", pos: "bottom", tier: 1 },
+          { from: 2, to: 4, label: "-1", pos: "bottom", tier: 2 },
+          { from: 4, to: 6, label: "-1", pos: "bottom", tier: 2 },
+          { from: 6, to: 8, label: "-1", pos: "bottom", tier: 2 }
+        ]
+      },
+      explanation: "Larik atas maju +1, +3, +5, +7 (K + 7 = <strong>R</strong>) dan larik bawah mundur -2, -3, -4, -5 (J - 5 = <strong>E</strong>)."
+    },
+    {
+      no: 17,
+      text: "Tentukan pasangan huruf yang tepat untuk melengkapi deret berikut:<br><strong>AB, DE, GH, JK, ....</strong>",
+      options: {
+        A: "MO",
+        B: "LN",
+        C: "NO",
+        D: "LM",
+        E: "MN"
+      },
+      answer: "E",
+      diagram: {
+        nums: ["AB", "DE", "GH", "JK", "MN"],
+        bold: [4],
+        arcs: [
+          { from: 0, to: 1, label: "+3", pos: "top", tier: 1 },
+          { from: 1, to: 2, label: "+3", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "+3", pos: "top", tier: 1 },
+          { from: 3, to: 4, label: "+3", pos: "top", tier: 1 }
+        ],
+        notes: [
+          { idx: 0, label: "urut", pos: "bottom" },
+          { idx: 1, label: "urut", pos: "bottom" },
+          { idx: 2, label: "urut", pos: "bottom" },
+          { idx: 3, label: "urut", pos: "bottom" },
+          { idx: 4, label: "urut", pos: "bottom" }
+        ]
+      },
+      explanation: "Setiap pasangan adalah 2 huruf berurutan yang melompati 1 huruf di antaranya (C, F, I, L dilewati): setelah JK (lewati L) adalah <strong>MN</strong>."
+    },
+    {
+      no: 18,
+      text: "Tentukan pasangan huruf yang tepat untuk melengkapi deret berikut:<br><strong>BD, EG, IK, NP, ....</strong>",
+      options: {
+        A: "TV",
+        B: "TU",
+        C: "UU",
+        D: "UV",
+        E: "WV"
+      },
+      answer: "A",
+      diagram: {
+        nums: ["BD", "EG", "IK", "NP", "TV"],
+        bold: [4],
+        arcs: [
+          { from: 0, to: 1, label: "+1", pos: "top", tier: 1 },
+          { from: 1, to: 2, label: "+2", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "+3", pos: "top", tier: 1 },
+          { from: 3, to: 4, label: "+4", pos: "top", tier: 1 },
+          { from: 0.5, to: 1.5, label: "+1", pos: "top", tier: 2 },
+          { from: 1.5, to: 2.5, label: "+1", pos: "top", tier: 2 },
+          { from: 2.5, to: 3.5, label: "+1", pos: "top", tier: 2 }
+        ],
+        notes: [
+          { idx: 0, label: "+2", pos: "bottom" },
+          { idx: 1, label: "+2", pos: "bottom" },
+          { idx: 2, label: "+2", pos: "bottom" },
+          { idx: 3, label: "+2", pos: "bottom" },
+          { idx: 4, label: "+2", pos: "bottom" }
+        ]
+      },
+      explanation: "Setiap pasangan memiliki jarak +2 huruf di dalamnya, sementara jarak antar pasangan bertingkat +1, +2, +3, +4 (P + 4 = <strong>T</strong>, T + 2 = <strong>V</strong>) &rarr; <strong>TV</strong>."
+    },
+    {
+      no: 19,
+      text: "Tentukan dua huruf yang tepat untuk melengkapi deret berikut:<br><strong>A, B, D, G, K, ..., ....</strong>",
+      options: {
+        A: "P, W",
+        B: "R, W",
+        C: "R, V",
+        D: "Q, U",
+        E: "P, V"
+      },
+      answer: "E",
+      diagram: {
+        nums: ["A", "B", "D", "G", "K", "P", "V"],
+        bold: [5, 6],
+        arcs: [
+          { from: 0, to: 1, label: "+1", pos: "bottom", tier: 1 },
+          { from: 1, to: 2, label: "+2", pos: "bottom", tier: 1 },
+          { from: 2, to: 3, label: "+3", pos: "bottom", tier: 1 },
+          { from: 3, to: 4, label: "+4", pos: "bottom", tier: 1 },
+          { from: 4, to: 5, label: "+5", pos: "bottom", tier: 1 },
+          { from: 5, to: 6, label: "+6", pos: "bottom", tier: 1 },
+          { from: 0.5, to: 1.5, label: "+1", pos: "top", tier: 1 },
+          { from: 1.5, to: 2.5, label: "+1", pos: "top", tier: 1 },
+          { from: 2.5, to: 3.5, label: "+1", pos: "top", tier: 1 },
+          { from: 3.5, to: 4.5, label: "+1", pos: "top", tier: 1 },
+          { from: 4.5, to: 5.5, label: "+1", pos: "top", tier: 1 }
+        ]
+      },
+      explanation: "Penambah bertambah +1 setiap langkah (+1, +2, +3, +4, +5, +6): K + 5 = <strong>P</strong> dan P + 6 = <strong>V</strong>."
+    },
+    {
+      no: 20,
+      text: "Tentukan kelompok huruf yang tepat untuk melengkapi deret berikut:<br><strong>ABD, FGI, KLN, PQS, ....</strong>",
+      options: {
+        A: "WXZ",
+        B: "UVW",
+        C: "TUV",
+        D: "TUW",
+        E: "UVX"
+      },
+      answer: "E",
+      diagram: {
+        nums: ["ABD", "FGI", "KLN", "PQS", "UVX"],
+        bold: [4],
+        arcs: [
+          { from: 0, to: 1, label: "+2", pos: "top", tier: 1 },
+          { from: 1, to: 2, label: "+2", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "+2", pos: "top", tier: 1 },
+          { from: 3, to: 4, label: "+2", pos: "top", tier: 1 }
+        ],
+        notes: [
+          { idx: 0, label: "+1, +2", pos: "bottom" },
+          { idx: 1, label: "+1, +2", pos: "bottom" },
+          { idx: 2, label: "+1, +2", pos: "bottom" },
+          { idx: 3, label: "+1, +2", pos: "bottom" },
+          { idx: 4, label: "+1, +2", pos: "bottom" }
+        ]
+      },
+      explanation: "Setiap kelompok berpola +1 lalu +2 (U + 1 = V, V + 2 = X) dengan lompatan +2 antar kelompok (S + 2 = U): <strong>UVX</strong>."
+    },
+    {
+      no: 21,
+      text: "Tentukan dua huruf yang tepat untuk melengkapi deret berikut:<br><strong>C, E, G, I, K, ..., ....</strong>",
+      options: {
+        A: "M, N",
+        B: "K, O",
+        C: "L, O",
+        D: "M, O",
+        E: "M, M"
+      },
+      answer: "D",
+      diagram: {
+        nums: ["C", "E", "G", "I", "K", "M", "O"],
+        bold: [5, 6],
+        arcs: [
+          { from: 0, to: 1, label: "+2", pos: "top", tier: 1 },
+          { from: 1, to: 2, label: "+2", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "+2", pos: "top", tier: 1 },
+          { from: 3, to: 4, label: "+2", pos: "top", tier: 1 },
+          { from: 4, to: 5, label: "+2", pos: "top", tier: 1 },
+          { from: 5, to: 6, label: "+2", pos: "top", tier: 1 }
+        ]
+      },
+      explanation: "Deret satu larik maju tetap <strong>+2</strong> huruf: K + 2 = <strong>M</strong> dan M + 2 = <strong>O</strong>."
+    },
+    {
+      no: 22,
+      text: "Tentukan dua huruf yang tepat untuk melengkapi deret berikut:<br><strong>H, J, L, N, P, ..., ....</strong>",
+      options: {
+        A: "S, R",
+        B: "R, T",
+        C: "P, T",
+        D: "Q, T",
+        E: "R, S"
+      },
+      answer: "B",
+      diagram: {
+        nums: ["H", "J", "L", "N", "P", "R", "T"],
+        bold: [5, 6],
+        arcs: [
+          { from: 0, to: 1, label: "+2", pos: "top", tier: 1 },
+          { from: 1, to: 2, label: "+2", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "+2", pos: "top", tier: 1 },
+          { from: 3, to: 4, label: "+2", pos: "top", tier: 1 },
+          { from: 4, to: 5, label: "+2", pos: "top", tier: 1 },
+          { from: 5, to: 6, label: "+2", pos: "top", tier: 1 }
+        ]
+      },
+      explanation: "Deret satu larik maju tetap <strong>+2</strong> huruf: P + 2 = <strong>R</strong> dan R + 2 = <strong>T</strong>."
+    },
+    {
+      no: 23,
+      text: "Tentukan dua huruf yang tepat untuk melengkapi deret berikut:<br><strong>H, H, D, H, H, E, H, ..., ....</strong>",
+      options: {
+        A: "H, E",
+        B: "G, F",
+        C: "H, F",
+        D: "G, H",
+        E: "F, F"
+      },
+      answer: "C",
+      diagram: {
+        nums: ["H", "H", "D", "H", "H", "E", "H", "H", "F"],
+        bold: [7, 8],
+        arcs: [
+          { from: 0, to: 3, label: "tetap", pos: "top", tier: 1 },
+          { from: 3, to: 6, label: "tetap", pos: "top", tier: 1 },
+          { from: 2, to: 5, label: "+1", pos: "top", tier: 2 },
+          { from: 5, to: 8, label: "+1", pos: "top", tier: 2 },
+          { from: 1, to: 4, label: "tetap", pos: "bottom", tier: 1 },
+          { from: 4, to: 7, label: "tetap", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Pola kelompok 3 huruf (H, H, X) di mana dua huruf pertama tetap <strong>H</strong> dan huruf ketiga maju berurutan (D &rarr; E &rarr; <strong>F</strong>): <strong>H, F</strong>."
+    },
+    {
+      no: 24,
+      text: "Tentukan dua huruf yang tepat untuk melengkapi deret berikut:<br><strong>D, G, F, H, H, I, ..., ....</strong>",
+      options: {
+        A: "J, K",
+        B: "J, G",
+        C: "I, J",
+        D: "H, I",
+        E: "J, J"
+      },
+      answer: "E",
+      diagram: {
+        nums: ["D", "G", "F", "H", "H", "I", "J", "J"],
+        bold: [6, 7],
+        arcs: [
+          { from: 0, to: 2, label: "+2", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+2", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+2", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+1", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+1", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "+1", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik atas maju <strong>+2</strong> huruf (D &rarr; F &rarr; H &rarr; <strong>J</strong>) dan larik bawah maju <strong>+1</strong> huruf (G &rarr; H &rarr; I &rarr; <strong>J</strong>)."
+    },
+    {
+      no: 25,
+      text: "Tentukan dua huruf yang tepat untuk melengkapi deret berikut:<br><strong>D, K, E, N, F, Q, ..., ....</strong>",
+      options: {
+        A: "G, S",
+        B: "H, T",
+        C: "I, S",
+        D: "H, S",
+        E: "G, T"
+      },
+      answer: "E",
+      diagram: {
+        nums: ["D", "K", "E", "N", "F", "Q", "G", "T"],
+        bold: [6, 7],
+        arcs: [
+          { from: 0, to: 2, label: "+1", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+1", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+1", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+3", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+3", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "+3", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik atas maju <strong>+1</strong> huruf (D &rarr; E &rarr; F &rarr; <strong>G</strong>) dan larik bawah maju <strong>+3</strong> huruf (K &rarr; N &rarr; Q &rarr; <strong>T</strong>)."
+    },
+    {
+      no: 26,
+      text: "Tentukan dua huruf yang tepat untuk melengkapi deret berikut:<br><strong>B, N, G, P, L, R, ..., ....</strong>",
+      options: {
+        A: "Q, T",
+        B: "N, U",
+        C: "N, T",
+        D: "Q, S",
+        E: "P, S"
+      },
+      answer: "A",
+      diagram: {
+        nums: ["B", "N", "G", "P", "L", "R", "Q", "T"],
+        bold: [6, 7],
+        arcs: [
+          { from: 0, to: 2, label: "+5", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+5", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+5", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+2", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+2", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "+2", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik atas maju <strong>+5</strong> huruf (B &rarr; G &rarr; L &rarr; <strong>Q</strong>) dan larik bawah maju <strong>+2</strong> huruf (N &rarr; P &rarr; R &rarr; <strong>T</strong>)."
+    },
+    {
+      no: 27,
+      text: "Tentukan tiga huruf yang tepat untuk melengkapi deret berikut:<br><strong>E, F, G, S, F, G, H, T, G, H, I, U, ..., ..., ....</strong>",
+      options: {
+        A: "H, I, J",
+        B: "F, G, H",
+        C: "H, J, K",
+        D: "J, K, L",
+        E: "I, J, K"
+      },
+      answer: "A",
+      diagram: {
+        nums: ["E", "F", "G", "S", "F", "G", "H", "T", "G", "H", "I", "U", "H", "I", "J"],
+        bold: [12, 13, 14],
+        arcs: [
+          { from: 0, to: 4, label: "+1", pos: "top", tier: 1 },
+          { from: 4, to: 8, label: "+1", pos: "top", tier: 1 },
+          { from: 8, to: 12, label: "+1", pos: "top", tier: 1 },
+          { from: 2, to: 6, label: "+1", pos: "top", tier: 2 },
+          { from: 6, to: 10, label: "+1", pos: "top", tier: 2 },
+          { from: 10, to: 14, label: "+1", pos: "top", tier: 2 },
+          { from: 1, to: 5, label: "+1", pos: "bottom", tier: 1 },
+          { from: 5, to: 9, label: "+1", pos: "bottom", tier: 1 },
+          { from: 9, to: 13, label: "+1", pos: "bottom", tier: 1 },
+          { from: 3, to: 7, label: "+1", pos: "bottom", tier: 2 },
+          { from: 7, to: 11, label: "+1", pos: "bottom", tier: 2 }
+        ]
+      },
+      explanation: "Setiap kelompok terdiri dari 3 huruf berurutan yang bergeser +1 diselingi huruf (S, T, U): setelah G, H, I, U adalah <strong>H, I, J</strong>."
+    },
+    {
+      no: 28,
+      text: "Tentukan tiga huruf yang tepat untuk melengkapi deret berikut:<br><strong>C, A, D, B, F, E, I, J, ..., ..., ....</strong>",
+      options: {
+        A: "L, Q, R",
+        B: "M, R, N",
+        C: "M, R, S",
+        D: "N, O, R",
+        E: "M, Q, R"
+      },
+      answer: "E",
+      diagram: {
+        nums: ["C", "A", "D", "B", "F", "E", "I", "J", "M", "Q", "R"],
+        bold: [8, 9, 10],
+        arcs: [
+          { from: 0, to: 2, label: "+1", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+2", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+3", pos: "top", tier: 1 },
+          { from: 6, to: 8, label: "+4", pos: "top", tier: 1 },
+          { from: 8, to: 10, label: "+5", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+1", pos: "top", tier: 2 },
+          { from: 3, to: 5, label: "+1", pos: "top", tier: 2 },
+          { from: 5, to: 7, label: "+1", pos: "top", tier: 2 },
+          { from: 7, to: 9, label: "+1", pos: "top", tier: 2 },
+          { from: 1, to: 3, label: "+1", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+3", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "+5", pos: "bottom", tier: 1 },
+          { from: 7, to: 9, label: "+7", pos: "bottom", tier: 1 },
+          { from: 2, to: 4, label: "+2", pos: "bottom", tier: 2 },
+          { from: 4, to: 6, label: "+2", pos: "bottom", tier: 2 },
+          { from: 6, to: 8, label: "+2", pos: "bottom", tier: 2 }
+        ]
+      },
+      explanation: "Larik atas (+1, +2, +3, +4, +5 &rarr; I + 4 = <strong>M</strong>, M + 5 = <strong>R</strong>) dan larik bawah (+1, +3, +5, +7 &rarr; J + 7 = <strong>Q</strong>): <strong>M, Q, R</strong>."
+    },
+    {
+      no: 29,
+      text: "Tentukan tiga huruf yang tepat untuk melengkapi deret berikut:<br><strong>A, B, C, G, H, I, N, O, P, ..., ..., ....</strong>",
+      options: {
+        A: "W, X, Y",
+        B: "V, W, X",
+        C: "X, Y, Z",
+        D: "U, V, W",
+        E: "T, U, V"
+      },
+      answer: "B",
+      diagram: {
+        nums: ["A", "B", "C", "G", "H", "I", "N", "O", "P", "V", "W", "X"],
+        bold: [9, 10, 11],
+        arcs: [
+          { from: 0, to: 1, label: "+1", pos: "top", tier: 1 },
+          { from: 1, to: 2, label: "+1", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "+4", pos: "top", tier: 1 },
+          { from: 3, to: 4, label: "+1", pos: "top", tier: 1 },
+          { from: 4, to: 5, label: "+1", pos: "top", tier: 1 },
+          { from: 5, to: 6, label: "+5", pos: "top", tier: 1 },
+          { from: 6, to: 7, label: "+1", pos: "top", tier: 1 },
+          { from: 7, to: 8, label: "+1", pos: "top", tier: 1 },
+          { from: 8, to: 9, label: "+6", pos: "top", tier: 1 },
+          { from: 9, to: 10, label: "+1", pos: "top", tier: 1 },
+          { from: 10, to: 11, label: "+1", pos: "top", tier: 1 },
+          { from: 2.5, to: 5.5, label: "+1", pos: "bottom", tier: 1 },
+          { from: 5.5, to: 8.5, label: "+1", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Setiap kelompok 3 huruf berurutan dipisahkan lompatan bertingkat +4, +5, +6 (P + 6 = <strong>V</strong>): <strong>V, W, X</strong>."
+    },
+    {
+      no: 30,
+      text: "Tentukan tiga huruf yang tepat untuk melengkapi deret berikut:<br><strong>F, F, G, F, K, L, L, K, P, R, Q, P, ..., ..., ....</strong>",
+      options: {
+        A: "U, U, Y",
+        B: "T, X, W",
+        C: "V, V, W",
+        D: "U, X, V",
+        E: "T, T, V"
+      },
+      answer: "D",
+      diagram: {
+        nums: ["F", "F", "G", "F", "K", "L", "L", "K", "P", "R", "Q", "P", "U", "X", "V"],
+        bold: [12, 13, 14],
+        arcs: [
+          { from: 0, to: 4, label: "+5", pos: "top", tier: 1 },
+          { from: 4, to: 8, label: "+5", pos: "top", tier: 1 },
+          { from: 8, to: 12, label: "+5", pos: "top", tier: 1 },
+          { from: 2, to: 6, label: "+5", pos: "top", tier: 2 },
+          { from: 6, to: 10, label: "+5", pos: "top", tier: 2 },
+          { from: 10, to: 14, label: "+5", pos: "top", tier: 2 },
+          { from: 1, to: 5, label: "+6", pos: "bottom", tier: 1 },
+          { from: 5, to: 9, label: "+6", pos: "bottom", tier: 1 },
+          { from: 9, to: 13, label: "+6", pos: "bottom", tier: 1 },
+          { from: 3, to: 7, label: "+5", pos: "bottom", tier: 2 },
+          { from: 7, to: 11, label: "+5", pos: "bottom", tier: 2 }
+        ]
+      },
+      explanation: "Pola melompati 3 huruf: P + 5 = <strong>U</strong>, R + 6 = <strong>X</strong>, dan Q + 5 = <strong>V</strong> &rarr; <strong>U, X, V</strong>."
+    }
+  ];
+
+  // =========================================================================
+  // GENERATOR DIAGRAM POLA DERET SVG (VISUAL LENGKUNGAN ATAS/BAWAH & PANAH)
+  // =========================================================================
+  function renderPatternSVG(diagram) {
+    if (!diagram || !diagram.nums) return "";
+    const nums = diagram.nums;
+    const arcs = diagram.arcs || [];
+    const notes = diagram.notes || [];
+    const boldSet = new Set(diagram.bold || []);
+
+    const maxLen = Math.max(...nums.map(n => String(n).length));
+    const stepX = maxLen >= 5 ? 58 : (maxLen === 4 ? 50 : 42);
+    const padX = 28;
+    const width = padX * 2 + (nums.length - 1) * stepX;
+
+    let maxTopTier = 0;
+    let maxBotTier = 0;
+    arcs.forEach(a => {
+      if (a.pos === "top") maxTopTier = Math.max(maxTopTier, a.tier || 1);
+      if (a.pos === "bottom") maxBotTier = Math.max(maxBotTier, a.tier || 1);
+    });
+    const hasTopNotes = notes.some(n => n.pos === "top");
+    const hasBotNotes = notes.some(n => n.pos === "bottom");
+
+    const topSpace = Math.max(18, maxTopTier * 34 + (hasTopNotes ? 34 : 10));
+    const botSpace = Math.max(16, maxBotTier * 34 + (hasBotNotes ? 34 : 10));
+    const numY = topSpace + 14;
+    const height = numY + botSpace + 8;
+
+    const getX = idx => padX + idx * stepX;
+    let svgContent = "";
+
+    // Gambar lengkungan atas & bawah beserta label polanya
+    arcs.forEach(a => {
+      const x1 = getX(a.from);
+      const x2 = getX(a.to);
+      const midX = (x1 + x2) / 2;
+      const tier = a.tier || 1;
+      const span = Math.abs(x2 - x1);
+      const curveLift = Math.min(24, Math.max(14, span * 0.22));
+
+      if (a.pos === "top") {
+        const baseY = numY - 16 - (tier - 1) * 30;
+        const ctrlY = baseY - curveLift * 1.6;
+        const peakY = (baseY + ctrlY) / 2;
+        svgContent += `<path d="M ${x1} ${baseY} Q ${midX} ${ctrlY} ${x2} ${baseY}" fill="none" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round"/>`;
+        svgContent += `<text x="${midX}" y="${peakY - 4}" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">${a.label}</text>`;
+      } else {
+        const baseY = numY + 8 + (tier - 1) * 30;
+        const ctrlY = baseY + curveLift * 1.6;
+        const peakY = (baseY + ctrlY) / 2;
+        svgContent += `<path d="M ${x1} ${baseY} Q ${midX} ${ctrlY} ${x2} ${baseY}" fill="none" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round"/>`;
+        svgContent += `<text x="${midX}" y="${peakY + 13}" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">${a.label}</text>`;
+      }
+    });
+
+    // Gambar panah vertikal & keterangan tambahan bila ada
+    notes.forEach(n => {
+      const x = getX(n.idx);
+      if (n.pos === "top") {
+        const yText = numY - 34;
+        svgContent += `<text x="${x}" y="${yText}" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">${n.label}</text>`;
+        svgContent += `<line x1="${x}" y1="${yText + 4}" x2="${x}" y2="${numY - 17}" stroke="#0f172a" stroke-width="1.4"/>`;
+        svgContent += `<polyline points="${x - 3},${numY - 21} ${x},${numY - 16} ${x + 3},${numY - 21}" fill="none" stroke="#0f172a" stroke-width="1.4"/>`;
+      } else {
+        const yText = numY + 34;
+        svgContent += `<line x1="${x}" y1="${numY + 6}" x2="${x}" y2="${yText - 13}" stroke="#0f172a" stroke-width="1.4"/>`;
+        svgContent += `<polyline points="${x - 3},${yText - 17} ${x},${yText - 12} ${x + 3},${yText - 17}" fill="none" stroke="#0f172a" stroke-width="1.4"/>`;
+        svgContent += `<text x="${x}" y="${yText}" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">${n.label}</text>`;
+      }
+    });
+
+    // Gambar deretan huruf (huruf jawaban dicetak tebal & warna biru gelap)
+    nums.forEach((val, idx) => {
+      const x = getX(idx);
+      const isBold = boldSet.has(idx);
+      svgContent += `<text x="${x}" y="${numY}" text-anchor="middle" font-size="15.5" font-weight="${isBold ? '800' : '500'}" fill="${isBold ? '#1e40af' : '#0f172a'}">${val}</text>`;
+    });
+
+    return `<div class="diagram-scroll"><svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">${svgContent}</svg></div>`;
+  }
+
+  // =========================================================================
+  // STATE & LOGIKA APLIKASI CAT
+  // =========================================================================
+  const EXAM_DURATION_SECONDS = 30 * 60; // 30 Menit
+  let currentUser = { user: "", nama: "" };
+  let currentIndex = 0;
+  let userAnswers = new Array(questions.length).fill(null);
+  let doubtStatus = new Array(questions.length).fill(false);
+  let timeLeft = EXAM_DURATION_SECONDS;
+  let timerInterval = null;
+
+  // Fungsi Modal Custom (Pengganti alert & confirm agar aman di semua iframe/browser)
+  function showModal(title, message, buttons) {
+    const overlay = document.getElementById("custom-modal");
+    document.getElementById("modal-title").textContent = title;
+    document.getElementById("modal-message").textContent = message;
+    const btnContainer = document.getElementById("modal-buttons");
+    btnContainer.innerHTML = "";
+
+    buttons.forEach(b => {
+      const btn = document.createElement("button");
+      btn.className = "btn " + (b.className || "btn-primary");
+      btn.style.width = "auto";
+      btn.textContent = b.text;
+      btn.onclick = () => {
+        overlay.style.display = "none";
+        if (b.onClick) b.onClick();
+      };
+      btnContainer.appendChild(btn);
+    });
+
+    overlay.style.display = "flex";
+  }
+
+  // Handle Login ke Google Sheet
+  document.getElementById("login-form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const userVal = document.getElementById("username").value.trim();
+    const passVal = document.getElementById("password").value.trim();
+    const btn = document.getElementById("btn-login");
+    const errBox = document.getElementById("login-error");
+
+    btn.disabled = true;
+    btn.textContent = "Memverifikasi...";
+    errBox.style.display = "none";
+
+    try {
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({ username: userVal, password: passVal })
+      });
+      
+      const textRes = await response.text();
+      let result;
+      try {
+        result = JSON.parse(textRes);
+      } catch (parseErr) {
+        throw new Error("Format respons server tidak valid.");
+      }
+
+      if (result.status === "success") {
+        currentUser = { user: result.user, nama: result.nama };
+        startExam();
+      } else {
+        errBox.style.display = "block";
+        errBox.textContent = result.message || "Username atau Password salah!";
+      }
+    } catch (error) {
+      errBox.style.display = "block";
+      errBox.textContent = "Gagal memproses login. Pastikan Web App sudah di-deploy ulang dengan 'Who has access' diset ke 'Anyone'.";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Masuk Ujian";
+    }
+  });
+
+  function resetExamState() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    currentIndex = 0;
+    userAnswers = new Array(questions.length).fill(null);
+    doubtStatus = new Array(questions.length).fill(false);
+    timeLeft = EXAM_DURATION_SECONDS;
+
+    const timerEl = document.getElementById("timer");
+    timerEl.textContent = "30:00";
+    timerEl.style.color = "white";
+  }
+
+  function startExam() {
+    resetExamState();
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("exam-screen").style.display = "block";
+    document.getElementById("peserta-info").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+
+    initNumberGrid();
+    renderQuestion(0);
+    startTimer();
+  }
+
+  function retryExam() {
+    startExam();
+  }
+
+  function confirmLogout() {
+    showModal(
+      "Konfirmasi Logout",
+      "Apakah Anda yakin ingin keluar dari ujian? Progres jawaban Anda saat ini akan direset.",
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Logout", className: "btn-logout", onClick: logoutUser }
+      ]
+    );
+  }
+
+  function logoutUser() {
+    resetExamState();
+    currentUser = { user: "", nama: "" };
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("login-error").style.display = "none";
+
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("login-screen").style.display = "flex";
+  }
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+      const s = (timeLeft % 60).toString().padStart(2, '0');
+      document.getElementById("timer").textContent = `${m}:${s}`;
+
+      if (timeLeft <= 300) {
+        document.getElementById("timer").style.color = "#fca5a5";
+      }
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        showModal(
+          "Waktu Habis",
+          "Waktu ujian telah habis! Jawaban Anda akan dikumpulkan otomatis.",
+          [{ text: "Lihat Hasil", className: "btn-primary", onClick: finishExam }]
+        );
+      }
+    }, 1000);
+  }
+
+  function initNumberGrid() {
+    const grid = document.getElementById("number-grid");
+    grid.innerHTML = "";
+    questions.forEach((q, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "num-btn";
+      btn.id = `num-btn-${idx}`;
+      btn.textContent = q.no;
+      btn.onclick = () => renderQuestion(idx);
+      grid.appendChild(btn);
+    });
+  }
+
+  function updateNumberGrid() {
+    questions.forEach((_, idx) => {
+      const btn = document.getElementById(`num-btn-${idx}`);
+      if (!btn) return;
+      btn.className = "num-btn";
+      if (idx === currentIndex) btn.classList.add("active");
+      if (doubtStatus[idx]) {
+        btn.classList.add("doubt");
+      } else if (userAnswers[idx] !== null) {
+        btn.classList.add("answered");
+      }
+    });
+  }
+
+  function renderQuestion(index) {
+    currentIndex = index;
+    const q = questions[index];
+
+    document.getElementById("q-number").textContent = `Soal No. ${q.no} dari ${questions.length}`;
+    document.getElementById("q-text").innerHTML = q.text;
+
+    const statusEl = document.getElementById("q-status");
+    if (doubtStatus[index]) {
+      statusEl.textContent = "Ditandai Ragu-Ragu";
+      statusEl.style.color = "#b45309";
+    } else if (userAnswers[index]) {
+      statusEl.textContent = `Terjawab (${userAnswers[index]})`;
+      statusEl.style.color = "var(--success)";
+    } else {
+      statusEl.textContent = "Belum dijawab";
+      statusEl.style.color = "var(--muted)";
+    }
+
+    const optContainer = document.getElementById("q-options");
+    optContainer.innerHTML = "";
+
+    ["A", "B", "C", "D", "E"].forEach(letter => {
+      const div = document.createElement("div");
+      div.className = "option-item" + (userAnswers[index] === letter ? " selected" : "");
+      div.onclick = () => selectOption(letter);
+      div.innerHTML = `
+        <div class="option-letter">${letter}</div>
+        <div>${q.options[letter]}</div>
+      `;
+      optContainer.appendChild(div);
+    });
+
+    document.getElementById("btn-prev").disabled = (index === 0);
+    document.getElementById("btn-next").disabled = (index === questions.length - 1);
+    updateNumberGrid();
+  }
+
+  function selectOption(letter) {
+    userAnswers[currentIndex] = letter;
+    renderQuestion(currentIndex);
+  }
+
+  function toggleDoubt() {
+    doubtStatus[currentIndex] = !doubtStatus[currentIndex];
+    renderQuestion(currentIndex);
+  }
+
+  function prevQuestion() {
+    if (currentIndex > 0) renderQuestion(currentIndex - 1);
+  }
+
+  function nextQuestion() {
+    if (currentIndex < questions.length - 1) renderQuestion(currentIndex + 1);
+  }
+
+  function confirmFinish() {
+    const unanswered = userAnswers.filter(a => a === null).length;
+    const msg = unanswered > 0 
+      ? `Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin mengakhiri ujian?`
+      : "Apakah Anda yakin ingin mengumpulkan semua jawaban sekarang?";
+    
+    showModal(
+      "Kumpulkan Jawaban",
+      msg,
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Kumpulkan", className: "btn-finish", onClick: finishExam }
+      ]
+    );
+  }
+
+  function finishExam() {
+    clearInterval(timerInterval);
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "block";
+
+    let benar = 0, salah = 0, kosong = 0;
+    const reviewContainer = document.getElementById("review-container");
+    reviewContainer.innerHTML = "";
+
+    questions.forEach((q, idx) => {
+      const uAns = userAnswers[idx];
+      const isCorrect = uAns === q.answer;
+
+      if (uAns === null) kosong++;
+      else if (isCorrect) benar++;
+      else salah++;
+
+      const card = document.createElement("div");
+      card.className = `card review-card ${isCorrect ? 'correct' : 'wrong'}`;
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+          <strong>Soal No. ${q.no}</strong>
+          <span style="font-weight:bold; color:${isCorrect ? 'var(--success)' : 'var(--danger)'}">
+            ${uAns === null ? 'Tidak Dijawab' : (isCorrect ? 'BENAR' : 'SALAH')}
+          </span>
+        </div>
+        <p style="margin-bottom:10px;">${q.text}</p>
+        <p><strong>Jawaban Anda:</strong> ${uAns ? `${uAns}. ${q.options[uAns]}` : '-'} | 
+           <strong style="color:var(--success)">Kunci Jawaban:</strong> ${q.answer}. ${q.options[q.answer]}</p>
+        <div class="pembahasan-box">
+          <strong>Pola deret:</strong>
+          ${renderPatternSVG(q.diagram)}
+          <div style="margin-top:6px;">${q.explanation}</div>
+          <div style="margin-top:8px; font-weight:700; color:#0f172a;">&#9632; Jawaban: ${q.answer}</div>
+        </div>
+      `;
+      reviewContainer.appendChild(card);
+    });
+
+    const skor = Math.round((benar / questions.length) * 100);
+    document.getElementById("res-peserta").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+    document.getElementById("res-score").textContent = `${skor} / 100`;
+    document.getElementById("res-detail").textContent = `Benar: ${benar} | Salah: ${salah} | Kosong: ${kosong}`;
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,1217 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAT - SINONIM</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+      --warning: #eab308;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); line-height: 1.6; }
+
+    /* Login Screen */
+    #login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .login-box {
+      background: var(--card); padding: 35px; border-radius: 12px; width: 100%; max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+    .login-box h2 { text-align: center; color: var(--primary); margin-bottom: 5px; }
+    .login-box p { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 25px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+    .form-group input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;
+    }
+    .btn {
+      display: inline-block; padding: 10px 18px; border: none; border-radius: 6px; font-size: 0.95rem;
+      font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; text-decoration: none;
+    }
+    .btn-primary { background: var(--primary); color: white; width: 100%; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+    .btn-logout {
+      background: var(--danger); color: white; padding: 7px 14px; font-size: 0.85rem;
+    }
+    .btn-logout:hover { background: var(--danger-hover); }
+    .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 10px; text-align: center; display: none; }
+
+    .register-link-box {
+      margin-top: 18px; padding-top: 15px; border-top: 1px solid #e2e8f0;
+      text-align: center; font-size: 0.9rem; color: var(--muted);
+    }
+    .register-link-box a {
+      color: var(--primary); font-weight: 700; text-decoration: none;
+    }
+    .register-link-box a:hover {
+      text-decoration: underline; color: var(--primary-hover);
+    }
+
+    /* Header CAT */
+    header {
+      background: var(--primary); color: white; padding: 15px 25px; display: flex;
+      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header-title h1 { font-size: 1.2rem; }
+    .header-info { display: flex; align-items: center; gap: 15px; }
+    .timer-box {
+      background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 6px;
+      font-weight: bold; font-size: 1.1rem; letter-spacing: 1px;
+    }
+
+    /* Main Container */
+    #exam-screen, #result-screen { display: none; max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+    .exam-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+    @media (max-width: 850px) { .exam-layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card); border-radius: 10px; padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
+    }
+
+    /* Soal Area */
+    .question-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 2px solid var(--bg); padding-bottom: 12px; margin-bottom: 18px;
+    }
+    .badge-no { background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; }
+    .question-text { font-size: 1.05rem; margin-bottom: 15px; }
+
+    /* Opsi Jawaban */
+    .options-list { display: flex; flex-direction: column; gap: 10px; }
+    .option-item {
+      display: flex; align-items: center; gap: 12px; padding: 12px 15px;
+      border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: 0.15s;
+    }
+    .option-item:hover { background: #f8fafc; border-color: var(--primary); }
+    .option-item.selected { background: #eff6ff; border-color: var(--primary); font-weight: 600; }
+    .option-letter {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+    }
+    .option-item.selected .option-letter { background: var(--primary); color: white; }
+
+    /* Navigasi Bawah Soal */
+    .nav-actions {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 25px;
+      padding-top: 15px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;
+    }
+    .btn-nav { background: #e2e8f0; color: var(--text); }
+    .btn-nav:hover { background: #cbd5e1; }
+    .btn-ragu { background: var(--warning); color: #000; }
+    .btn-finish { background: var(--success); color: white; width: 100%; margin-top: 15px; }
+    .btn-finish:hover { background: #15803d; }
+
+    /* Grid Nomor Soal */
+    .grid-numbers {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px;
+      max-height: 360px; overflow-y: auto; padding-right: 4px;
+    }
+    .num-btn {
+      padding: 8px 0; border: 1px solid var(--border); border-radius: 6px;
+      background: white; font-weight: 600; cursor: pointer; text-align: center;
+    }
+    .num-btn.active { border: 2px solid var(--primary); }
+    .num-btn.answered { background: var(--success); color: white; border-color: var(--success); }
+    .num-btn.doubt { background: var(--warning); color: black; border-color: var(--warning); }
+
+    .legend { display: flex; gap: 12px; font-size: 0.8rem; margin-top: 15px; flex-wrap: wrap; }
+    .legend span { display: flex; align-items: center; gap: 5px; }
+    .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+    /* Result & Pembahasan */
+    .score-banner {
+      text-align: center; padding: 30px; background: linear-gradient(135deg, #1e40af, #3b82f6);
+      color: white; border-radius: 12px; margin-bottom: 25px;
+    }
+    .score-big { font-size: 3.5rem; font-weight: bold; margin: 10px 0; }
+    .result-actions {
+      display: flex; justify-content: center; gap: 12px; margin-top: 15px; flex-wrap: wrap;
+    }
+    .review-card { margin-bottom: 20px; border-left: 5px solid var(--border); }
+    .review-card.correct { border-left-color: var(--success); }
+    .review-card.wrong { border-left-color: var(--danger); }
+    .pembahasan-box {
+      background: #f8fafc; padding: 15px; border-radius: 8px; margin-top: 12px;
+      border: 1px dashed #94a3b8; font-size: 0.95rem;
+    }
+
+    /* Custom Modal Dialog (Pengganti alert/confirm) */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6); display: none; align-items: center;
+      justify-content: center; z-index: 999; padding: 20px;
+    }
+    .modal-card {
+      background: white; padding: 25px; border-radius: 12px; max-width: 400px;
+      width: 100%; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .modal-card h3 { color: var(--primary); margin-bottom: 10px; }
+    .modal-card p { color: var(--text); font-size: 0.95rem; margin-bottom: 20px; }
+    .modal-btns { display: flex; gap: 10px; justify-content: center; }
+  </style>
+</head>
+<body>
+
+  <!-- HALAMAN LOGIN -->
+  <div id="login-screen">
+    <div class="login-box">
+      <h2>Portal Ujian CAT</h2>
+      <p>Subtes TIU: Sinonim (50 Soal)</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Username/Email</label>
+          <input type="text" id="username" required placeholder="Masukkan username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="Masukkan password">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-login">Masuk Ujian</button>
+        <div class="error-msg" id="login-error"></div>
+        <div class="register-link-box">
+          Belum punya akun? <a href="http://lynk.id/seputar_guru/4g73189dndge/checkout" target="_blank" rel="noopener noreferrer">Daftar di sini</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- HALAMAN UJIAN CAT -->
+  <div id="exam-screen">
+    <header>
+      <div class="header-title">
+        <h1>CAT - SINONIM</h1>
+        <small id="peserta-info">Peserta: -</small>
+      </div>
+      <div class="header-info">
+        <div class="timer-box" id="timer">45:00</div>
+        <button type="button" class="btn btn-logout" onclick="confirmLogout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="exam-layout" style="margin-top: 20px;">
+      <!-- Kolom Kiri: Soal -->
+      <div class="card">
+        <div class="question-header">
+          <span class="badge-no" id="q-number">Soal No. 1</span>
+          <span id="q-status" style="font-size: 0.85rem; color: var(--muted);">Belum dijawab</span>
+        </div>
+        <div class="question-text" id="q-text"></div>
+        <div class="options-list" id="q-options"></div>
+
+        <div class="nav-actions">
+          <button class="btn btn-nav" id="btn-prev" onclick="prevQuestion()">&laquo; Sebelumnya</button>
+          <button class="btn btn-ragu" id="btn-doubt" onclick="toggleDoubt()">Ragu-Ragu</button>
+          <button class="btn btn-nav" id="btn-next" onclick="nextQuestion()">Selanjutnya &raquo;</button>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Navigasi Nomor -->
+      <div class="card">
+        <h3>Navigasi Soal</h3>
+        <div class="grid-numbers" id="number-grid"></div>
+        <div class="legend">
+          <span><i class="dot" style="background: var(--success);"></i> Dijawab</span>
+          <span><i class="dot" style="background: var(--warning);"></i> Ragu</span>
+          <span><i class="dot" style="background: #fff; border: 1px solid #cbd5e1;"></i> Kosong</span>
+        </div>
+        <button class="btn btn-finish" onclick="confirmFinish()">Selesai & Kumpulkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN HASIL & PEMBAHASAN -->
+  <div id="result-screen">
+    <div class="score-banner">
+      <h2>Hasil Ujian CAT Anda</h2>
+      <p id="res-peserta"></p>
+      <div class="score-big" id="res-score">0</div>
+      <p id="res-detail">Benar: 0 | Salah: 0 | Kosong: 0</p>
+      <div class="result-actions">
+        <button class="btn" style="background: white; color: var(--primary);" onclick="retryExam()">Ulangi Ujian</button>
+        <button class="btn btn-logout" onclick="logoutUser()">Logout</button>
+      </div>
+    </div>
+    <h3 style="margin-bottom: 15px;">Kunci Jawaban & Pembahasan Lengkap</h3>
+    <div id="review-container"></div>
+  </div>
+
+  <!-- CUSTOM MODAL -->
+  <div class="modal-overlay" id="custom-modal">
+    <div class="modal-card">
+      <h3 id="modal-title">Konfirmasi</h3>
+      <p id="modal-message">Pesan konfirmasi</p>
+      <div class="modal-btns" id="modal-buttons"></div>
+    </div>
+  </div>
+
+<script>
+  // =========================================================================
+  // URL GOOGLE APPS SCRIPT ANDA YANG AKTIF
+  // =========================================================================
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxB6Th7GHlD9o8ABbYcK2mdV7mv4ufy2i-SYXUg3jVqS0Q1bkXa_pkseMhqmIzgCTx7/exec";
+
+  // =========================================================================
+  // BANK SOAL, KUNCI JAWABAN & PEMBAHASAN (50 SOAL SINONIM DARI PDF)
+  // =========================================================================
+  const questions = [
+    {
+      no: 1,
+      text: "Carilah persamaan katanya! <strong>SABOTASE</strong>",
+      options: {
+        A: "Penculikan",
+        B: "Pemusnahan",
+        C: "Penggelapan",
+        D: "Penutupan",
+        E: "Perusakan"
+      },
+      answer: "E",
+      explanation: "SABOTASE adalah PERUSAKAN milik orang lain atau dapat juga diartikan sebagai penghalangan produksi perusahaan oleh kaum buruh yang tidak puas."
+    },
+    {
+      no: 2,
+      text: "Carilah persamaan katanya! <strong>BULSAK</strong>",
+      options: {
+        A: "Bantal",
+        B: "Kasur",
+        C: "Rusak",
+        D: "Rotan",
+        E: "Curang"
+      },
+      answer: "B",
+      explanation: "Arti kata BULSAK sama dengan KASUR."
+    },
+    {
+      no: 3,
+      text: "Carilah persamaan katanya! <strong>ADAGIO</strong>",
+      options: {
+        A: "Lambat",
+        B: "Cepat",
+        C: "Kering",
+        D: "Tinggi",
+        E: "Indah"
+      },
+      answer: "A",
+      explanation: "ADAGIO adalah istilah musik untuk tempo yang LAMBAT dan penuh ekspresi."
+    },
+    {
+      no: 4,
+      text: "Carilah persamaan katanya! <strong>LOBA</strong>",
+      options: {
+        A: "Kikir",
+        B: "Dermawan",
+        C: "Lubang",
+        D: "Serakah",
+        E: "Keuntungan"
+      },
+      answer: "D",
+      explanation: "LOBA artinya selalu ingin mendapat/memiliki banyak-banyak, SERAKAH, atau tamak."
+    },
+    {
+      no: 5,
+      text: "Carilah persamaan katanya! <strong>KONTAMINASI</strong>",
+      options: {
+        A: "Perusakan",
+        B: "Pemusnahan",
+        C: "Pencemaran",
+        D: "Pemberian",
+        E: "Pengaruh"
+      },
+      answer: "C",
+      explanation: "KONTAMINASI dapat diartikan sebagai pengotoran atau PENCEMARAN."
+    },
+    {
+      no: 6,
+      text: "Carilah persamaan katanya! <strong>ALEGRO</strong>",
+      options: {
+        A: "Lambat",
+        B: "Cepat",
+        C: "Simfoni",
+        D: "Suara",
+        E: "Tinggi"
+      },
+      answer: "B",
+      explanation: "ALEGRO adalah komposisi musik dalam tempo CEPAT."
+    },
+    {
+      no: 7,
+      text: "Carilah persamaan katanya! <strong>OBLAK</strong>",
+      options: {
+        A: "Luas",
+        B: "Sempit",
+        C: "Panjang",
+        D: "Tinggi",
+        E: "Rendah"
+      },
+      answer: "A",
+      explanation: "OBLAK sama dengan lebar, atau LUAS."
+    },
+    {
+      no: 8,
+      text: "Carilah persamaan katanya! <strong>NAHI</strong>",
+      options: {
+        A: "Tidak",
+        B: "Perintah",
+        C: "Boleh",
+        D: "Larangan",
+        E: "Luar Biasa"
+      },
+      answer: "D",
+      explanation: "NAHI berarti yang terlarang, atau LARANGAN oleh agama."
+    },
+    {
+      no: 9,
+      text: "Carilah persamaan katanya! <strong>ADAGIUM</strong>",
+      options: {
+        A: "Lambat",
+        B: "Cepat",
+        C: "Peribahasa",
+        D: "Puisi",
+        E: "Roman"
+      },
+      answer: "C",
+      explanation: "ADAGIUM sama dengan pepatah, atau PERIBAHASA."
+    },
+    {
+      no: 10,
+      text: "Carilah persamaan katanya! <strong>BULDAN</strong>",
+      options: {
+        A: "Pedesaan",
+        B: "Negeri",
+        C: "Wilayah",
+        D: "Distrik",
+        E: "Perumahan"
+      },
+      answer: "B",
+      explanation: "BULDAN dapat diartikan sebagai NEGERI, atau kota."
+    },
+    {
+      no: 11,
+      text: "Carilah persamaan katanya! <strong>MARKA</strong>",
+      options: {
+        A: "Tanda",
+        B: "Larangan",
+        C: "Perintah",
+        D: "Petunjuk",
+        E: "Markas"
+      },
+      answer: "A",
+      explanation: "Arti kata MARKA antara lain TANDA, merek, atau tanda pada tali penduga."
+    },
+    {
+      no: 12,
+      text: "Carilah persamaan katanya! <strong>PROFIT</strong>",
+      options: {
+        A: "Rabat",
+        B: "Keuntungan",
+        C: "Potongan harga",
+        D: "Solusi",
+        E: "Kerugian"
+      },
+      answer: "B",
+      explanation: "PROFIT adalah untung, KEUNTUNGAN, atau manfaat."
+    },
+    {
+      no: 13,
+      text: "Carilah persamaan katanya! <strong>DERAI</strong>",
+      options: {
+        A: "Angin",
+        B: "Udara",
+        C: "Butir-butir",
+        D: "Ombak",
+        E: "Nyiur"
+      },
+      answer: "C",
+      explanation: "Arti kata DERAI antara lain BUTIR-BUTIR (tanah, emas, dsb)."
+    },
+    {
+      no: 14,
+      text: "Carilah persamaan katanya! <strong>KONSIDERASI</strong>",
+      options: {
+        A: "Pembukaan",
+        B: "Awalan",
+        C: "Perumpamaan",
+        D: "Pertimbangan",
+        E: "Kebijaksanaan"
+      },
+      answer: "D",
+      explanation: "KONSIDERASI sama dengan PERTIMBANGAN."
+    },
+    {
+      no: 15,
+      text: "Carilah persamaan katanya! <strong>MANGKUS</strong>",
+      options: {
+        A: "Terlambat",
+        B: "Cawan",
+        C: "Kakek",
+        D: "Kadaluarsa",
+        E: "Manjur"
+      },
+      answer: "E",
+      explanation: "MANGKUS berarti manjur, atau cepat/mudah menyembuhkan."
+    },
+    {
+      no: 16,
+      text: "Carilah persamaan katanya! <strong>DE JURE</strong>",
+      options: {
+        A: "Berdasarkan Hukum",
+        B: "Formalitas",
+        C: "Pengakuan",
+        D: "Nyata",
+        E: "Pemerintahan"
+      },
+      answer: "A",
+      explanation: "DE JURE artinya BERDASARKAN HUKUM, misalnya tentang pengakuan atas suatu pemerintahan."
+    },
+    {
+      no: 17,
+      text: "Carilah persamaan katanya! <strong>IDENTITAS</strong>",
+      options: {
+        A: "Ciri-ciri",
+        B: "Kartu Tanda Penduduk",
+        C: "Gambar",
+        D: "Penampakan",
+        E: "Tanda Tangan"
+      },
+      answer: "A",
+      explanation: "IDENTITAS adalah CIRI-CIRI, atau keadaan khusus seseorang/suatu benda, atau jati diri."
+    },
+    {
+      no: 18,
+      text: "Carilah persamaan katanya! <strong>GENJAH</strong>",
+      options: {
+        A: "Lekas Berbuah",
+        B: "Berantakan",
+        C: "Ricuh",
+        D: "Bibit",
+        E: "Subur"
+      },
+      answer: "A",
+      explanation: "GENJAH berarti LEKAS BERBUAH (dalam hal ini tentang padi)."
+    },
+    {
+      no: 19,
+      text: "Carilah persamaan katanya! <strong>REMISI</strong>",
+      options: {
+        A: "Pengurangan Hukuman",
+        B: "Pengampunan Hukuman",
+        C: "Penambahan Hukuman",
+        D: "Penahanan",
+        E: "Pemberian Hukuman"
+      },
+      answer: "A",
+      explanation: "REMISI adalah PENGURANGAN HUKUMAN yang diberikan kepada orang yang terhukum."
+    },
+    {
+      no: 20,
+      text: "Carilah persamaan katanya! <strong>DEHIDRAT</strong>",
+      options: {
+        A: "Basah",
+        B: "Kurang Air",
+        C: "Kering",
+        D: "Dahaga",
+        E: "Berlebihan"
+      },
+      answer: "C",
+      explanation: "DEHIDRAT berarti KERING, semua airnya telah dikeluarkan."
+    },
+    {
+      no: 21,
+      text: "Carilah persamaan katanya! <strong>SEREMONI</strong>",
+      options: {
+        A: "Pelepasan",
+        B: "Upacara",
+        C: "Penghormatan",
+        D: "Pengangkatan",
+        E: "Formalitas"
+      },
+      answer: "B",
+      explanation: "SEREMONI sama dengan UPACARA."
+    },
+    {
+      no: 22,
+      text: "Carilah persamaan katanya! <strong>OBSOLET</strong>",
+      options: {
+        A: "Objektif",
+        B: "Pengamatan",
+        C: "Perlengkapan",
+        D: "Usang",
+        E: "Langka"
+      },
+      answer: "D",
+      explanation: "OBSOLET berarti tidak dipakai lagi, USANG, atau ketinggalan zaman."
+    },
+    {
+      no: 23,
+      text: "Carilah persamaan katanya! <strong>MANIPULASI</strong>",
+      options: {
+        A: "Tipuan",
+        B: "Kesalahan",
+        C: "Curang",
+        D: "Kebohongan",
+        E: "Kerusakan"
+      },
+      answer: "C",
+      explanation: "MANIPULASI adalah perbuatan CURANG dengan cara mencari kelemahan peraturan, menimbun barang, mengubah mutu barang."
+    },
+    {
+      no: 24,
+      text: "Carilah persamaan katanya! <strong>ODEM</strong>",
+      options: {
+        A: "Luka",
+        B: "Penyakit",
+        C: "Sama",
+        D: "Laki-laki",
+        E: "Busung"
+      },
+      answer: "E",
+      explanation: "ODEM sama dengan BUSUNG, dalam istilah kedokteran berarti pembengkakan sebagian pada badan karena berkumpulnya zat cair yang berlebihan."
+    },
+    {
+      no: 25,
+      text: "Carilah persamaan katanya! <strong>KOLUSI</strong>",
+      options: {
+        A: "Persekongkolan",
+        B: "Korupsi",
+        C: "Pencurian",
+        D: "Manipulasi",
+        E: "Penggelapan"
+      },
+      answer: "A",
+      explanation: "Menurut KBBI, KOLUSI adalah kerja sama secara tersembunyi untuk tujuan yang tidak terpuji, atau dapat dikatakan sebagai PERSEKONGKOLAN."
+    },
+    {
+      no: 26,
+      text: "Carilah persamaan katanya! <strong>OBROS</strong>",
+      options: {
+        A: "Komandan",
+        B: "Perwira",
+        C: "Petinggi",
+        D: "Pejabat",
+        E: "Jahitan"
+      },
+      answer: "B",
+      explanation: "OBROS, yaitu sebutan PERWIRA."
+    },
+    {
+      no: 27,
+      text: "Carilah persamaan katanya! <strong>OKNUM</strong>",
+      options: {
+        A: "Kumpulan",
+        B: "Perseorangan",
+        C: "Pimpinan",
+        D: "Korup",
+        E: "Penjahat"
+      },
+      answer: "B",
+      explanation: "OKNUM adalah orang perseorangan dengan arti yang kurang baik."
+    },
+    {
+      no: 28,
+      text: "Carilah persamaan katanya! <strong>NETRA</strong>",
+      options: {
+        A: "Telinga",
+        B: "Hidung",
+        C: "Mata",
+        D: "Mulut",
+        E: "Tangan"
+      },
+      answer: "C",
+      explanation: "NETRA sama dengan MATA."
+    },
+    {
+      no: 29,
+      text: "Carilah persamaan katanya! <strong>OGAM</strong>",
+      options: {
+        A: "Permainan",
+        B: "Kelereng",
+        C: "Tali",
+        D: "Besi",
+        E: "Sulap"
+      },
+      answer: "E",
+      explanation: "OGAM artinya bermain SULAP."
+    },
+    {
+      no: 30,
+      text: "Carilah persamaan katanya! <strong>DEKADENSI</strong>",
+      options: {
+        A: "Peningkatan",
+        B: "Penguasaan",
+        C: "Pemanfaatan",
+        D: "Kemerosotan",
+        E: "Kerugian"
+      },
+      answer: "D",
+      explanation: "DEKADENSI berarti KEMEROSOTAN (tentang akhlak), atau kemunduran (tentang seni, sastra)."
+    },
+    {
+      no: 31,
+      text: "Carilah persamaan katanya! <strong>GOBAR</strong>",
+      options: {
+        A: "Gembira",
+        B: "Suram",
+        C: "Puas",
+        D: "Semangat",
+        E: "Terluka"
+      },
+      answer: "B",
+      explanation: "GOBAR sama dengan SURAM atau sedih."
+    },
+    {
+      no: 32,
+      text: "Carilah persamaan katanya! <strong>BAGAK</strong>",
+      options: {
+        A: "Bangga",
+        B: "Sombong",
+        C: "Kecil Hati",
+        D: "Rendah Hati",
+        E: "Bahagia"
+      },
+      answer: "A",
+      explanation: "BAGAK sama dengan BANGGA, besar hati, berani."
+    },
+    {
+      no: 33,
+      text: "Carilah persamaan katanya! <strong>ODITUR</strong>",
+      options: {
+        A: "Bank",
+        B: "Kreditor",
+        C: "Debitor",
+        D: "Pengadilan",
+        E: "Penuntut Umum"
+      },
+      answer: "E",
+      explanation: "ODITUR dalam istilah hukum berarti PENUNTUT UMUM di lingkungan Pengadilan Militer."
+    },
+    {
+      no: 34,
+      text: "Carilah persamaan katanya! <strong>VIRGINITAS</strong>",
+      options: {
+        A: "Kebersihan",
+        B: "Kehormatan",
+        C: "Ketinggian",
+        D: "Kecantikan",
+        E: "Keindahan"
+      },
+      answer: "B",
+      explanation: "VIRGINITAS sama dengan kegadisan, KEHORMATAN, keperawanan, kesucian."
+    },
+    {
+      no: 35,
+      text: "Carilah persamaan katanya! <strong>MOBILITAS</strong>",
+      options: {
+        A: "Perubahan",
+        B: "Dinamika",
+        C: "Kendaraan",
+        D: "Perpindahan",
+        E: "Perkembangan"
+      },
+      answer: "D",
+      explanation: "MOBILITAS adalah kesiapsiagaan untuk bergerak, atau gerakan BERPINDAH-PINDAH."
+    },
+    {
+      no: 36,
+      text: "Carilah persamaan katanya! <strong>DELIK</strong>",
+      options: {
+        A: "Tindakan",
+        B: "Perbuatan Hukum",
+        C: "Tindak Pidana",
+        D: "Pelanggaran",
+        E: "Persembunyian"
+      },
+      answer: "C",
+      explanation: "DELIK dalam istilah hukum berarti TINDAK PIDANA, yaitu perbuatan yang dapat dikenakan hukuman karena merupakan pelanggaran terhadap undang-undang."
+    },
+    {
+      no: 37,
+      text: "Carilah persamaan katanya! <strong>HIBUK</strong>",
+      options: {
+        A: "Sibuk",
+        B: "Hirau",
+        C: "Ramai",
+        D: "Debu",
+        E: "Kotor"
+      },
+      answer: "A",
+      explanation: "HIBUK sama dengan SIBUK."
+    },
+    {
+      no: 38,
+      text: "Carilah persamaan katanya! <strong>FRIKSI</strong>",
+      options: {
+        A: "Pergeseran",
+        B: "Perubahan",
+        C: "Fiktif",
+        D: "Buatan",
+        E: "Paragraf"
+      },
+      answer: "A",
+      explanation: "FRIKSI adalah PERGESERAN yang menimbulkan perbedaan pendapat."
+    },
+    {
+      no: 39,
+      text: "Carilah persamaan katanya! <strong>OFISIAL</strong>",
+      options: {
+        A: "Resmi",
+        B: "Perkantoran",
+        C: "Formalitas",
+        D: "Keharusan",
+        E: "Bidang"
+      },
+      answer: "A",
+      explanation: "OFISIAL sama dengan RESMI."
+    },
+    {
+      no: 40,
+      text: "Carilah persamaan katanya! <strong>EKLIPS</strong>",
+      options: {
+        A: "Lingkaran",
+        B: "Bulan",
+        C: "Matahari",
+        D: "Rotasi",
+        E: "Gerhana"
+      },
+      answer: "E",
+      explanation: "EKLIPS sama dengan GERHANA, yaitu penutupan sebagian/seluruh sinar matahari apabila dilihat dari bumi (bulan berada di garis antara matahari dan bumi)."
+    },
+    {
+      no: 41,
+      text: "Carilah persamaan katanya! <strong>EKLEKTIK</strong>",
+      options: {
+        A: "Orbit",
+        B: "Memilih",
+        C: "Sementara",
+        D: "Terbaik",
+        E: "Pemilu"
+      },
+      answer: "B",
+      explanation: "EKLEKTIK artinya bersifat MEMILIH yang terbaik dari berbagai sumber (tentang orang, gaya, metode)."
+    },
+    {
+      no: 42,
+      text: "Carilah persamaan katanya! <strong>OFSET</strong>",
+      options: {
+        A: "Proses Cetak",
+        B: "Mendekati",
+        C: "Mengesampingkan",
+        D: "Akhiran",
+        E: "Pembuktian"
+      },
+      answer: "A",
+      explanation: "OFSET adalah PROSES CETAK (buku, koran, dan sebagainya) yang tinta cetaknya dari pelat dialihkan dulu ke kain karet kemudian pada kertas/bahan cetak lain."
+    },
+    {
+      no: 43,
+      text: "Carilah persamaan katanya! <strong>BIBLIOGRAFI</strong>",
+      options: {
+        A: "Biografi",
+        B: "Riwayat Hidup",
+        C: "Daftar Pustaka",
+        D: "Perpustakaan",
+        E: "Penulisan"
+      },
+      answer: "C",
+      explanation: "BIBLIOGRAFI sama dengan DAFTAR PUSTAKA, yaitu daftar buku/karangan dari seseorang pengarang atau tentang suatu subjek (ilmu)."
+    },
+    {
+      no: 44,
+      text: "Carilah persamaan katanya! <strong>SYAFAAT</strong>",
+      options: {
+        A: "Pemberian",
+        B: "Pahala",
+        C: "Pertolongan",
+        D: "Rezeki",
+        E: "Surga"
+      },
+      answer: "C",
+      explanation: "SYAFAAT adalah perantaraan (PERTOLONGAN) untuk menyampaikan permohonan kepada Tuhan."
+    },
+    {
+      no: 45,
+      text: "Carilah persamaan katanya! <strong>EKAMATRA</strong>",
+      options: {
+        A: "Mistar",
+        B: "Persegi",
+        C: "Segitiga",
+        D: "Garis",
+        E: "Balok"
+      },
+      answer: "D",
+      explanation: "EKAMATRA berarti mempunyai satu dimensi, misalnya GARIS."
+    },
+    {
+      no: 46,
+      text: "Carilah persamaan katanya! <strong>SELAMPAI</strong>",
+      options: {
+        A: "Tiba",
+        B: "Sapu Tangan",
+        C: "Jeda",
+        D: "Kain",
+        E: "Sepatu"
+      },
+      answer: "B",
+      explanation: "SELAMPAI sama dengan kain sutra berbentuk pita panjang yang lebarnya 4 cm atau SAPU TANGAN."
+    },
+    {
+      no: 47,
+      text: "Carilah persamaan katanya! <strong>AUTOBIOGRAFI</strong>",
+      options: {
+        A: "Tulisan",
+        B: "Karangan",
+        C: "Identitas",
+        D: "Buku",
+        E: "Riwayat Hidup"
+      },
+      answer: "E",
+      explanation: "AUTOBIOGRAFI adalah RIWAYAT HIDUP pribadi yang ditulis sendiri."
+    },
+    {
+      no: 48,
+      text: "Carilah persamaan katanya! <strong>OGA</strong>",
+      options: {
+        A: "Tidak Mau",
+        B: "Anak Laki-laki",
+        C: "Ular",
+        D: "Kosong",
+        E: "Pipa Tembakau"
+      },
+      answer: "E",
+      explanation: "OGA sama dengan PIPA TEMBAKAU, atau hookah."
+    },
+    {
+      no: 49,
+      text: "Carilah persamaan katanya! <strong>SANGKIL</strong>",
+      options: {
+        A: "Raksasa",
+        B: "Kemungkinan",
+        C: "Sulit",
+        D: "Efisien",
+        E: "Seimbang"
+      },
+      answer: "D",
+      explanation: "SANGKIL sama dengan sampai, kena, mengenai, berdaya guna, EFISIEN."
+    },
+    {
+      no: 50,
+      text: "Carilah persamaan katanya! <strong>OTONOMI</strong>",
+      options: {
+        A: "Pemerintah",
+        B: "Wilayah",
+        C: "Pemerintahan Sendiri",
+        D: "Konstitusi",
+        E: "Peraturan"
+      },
+      answer: "C",
+      explanation: "OTONOMI sama dengan PEMERINTAHAN SENDIRI."
+    }
+  ];
+
+  // =========================================================================
+  // STATE & LOGIKA APLIKASI CAT
+  // =========================================================================
+  const EXAM_DURATION_SECONDS = 45 * 60; // 45 Menit
+  let currentUser = { user: "", nama: "" };
+  let currentIndex = 0;
+  let userAnswers = new Array(questions.length).fill(null);
+  let doubtStatus = new Array(questions.length).fill(false);
+  let timeLeft = EXAM_DURATION_SECONDS;
+  let timerInterval = null;
+
+  // Fungsi Modal Custom (Pengganti alert & confirm agar aman di semua iframe/browser)
+  function showModal(title, message, buttons) {
+    const overlay = document.getElementById("custom-modal");
+    document.getElementById("modal-title").textContent = title;
+    document.getElementById("modal-message").textContent = message;
+    const btnContainer = document.getElementById("modal-buttons");
+    btnContainer.innerHTML = "";
+
+    buttons.forEach(b => {
+      const btn = document.createElement("button");
+      btn.className = "btn " + (b.className || "btn-primary");
+      btn.style.width = "auto";
+      btn.textContent = b.text;
+      btn.onclick = () => {
+        overlay.style.display = "none";
+        if (b.onClick) b.onClick();
+      };
+      btnContainer.appendChild(btn);
+    });
+
+    overlay.style.display = "flex";
+  }
+
+  // Handle Login ke Google Sheet
+  document.getElementById("login-form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const userVal = document.getElementById("username").value.trim();
+    const passVal = document.getElementById("password").value.trim();
+    const btn = document.getElementById("btn-login");
+    const errBox = document.getElementById("login-error");
+
+    btn.disabled = true;
+    btn.textContent = "Memverifikasi...";
+    errBox.style.display = "none";
+
+    try {
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({ username: userVal, password: passVal })
+      });
+      
+      const textRes = await response.text();
+      let result;
+      try {
+        result = JSON.parse(textRes);
+      } catch (parseErr) {
+        throw new Error("Format respons server tidak valid.");
+      }
+
+      if (result.status === "success") {
+        currentUser = { user: result.user, nama: result.nama };
+        startExam();
+      } else {
+        errBox.style.display = "block";
+        errBox.textContent = result.message || "Username atau Password salah!";
+      }
+    } catch (error) {
+      errBox.style.display = "block";
+      errBox.textContent = "Gagal memproses login. Pastikan Web App sudah di-deploy ulang dengan 'Who has access' diset ke 'Anyone'.";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Masuk Ujian";
+    }
+  });
+
+  function resetExamState() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    currentIndex = 0;
+    userAnswers = new Array(questions.length).fill(null);
+    doubtStatus = new Array(questions.length).fill(false);
+    timeLeft = EXAM_DURATION_SECONDS;
+
+    const timerEl = document.getElementById("timer");
+    timerEl.textContent = "45:00";
+    timerEl.style.color = "white";
+  }
+
+  function startExam() {
+    resetExamState();
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("exam-screen").style.display = "block";
+    document.getElementById("peserta-info").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+
+    initNumberGrid();
+    renderQuestion(0);
+    startTimer();
+  }
+
+  function retryExam() {
+    startExam();
+  }
+
+  function confirmLogout() {
+    showModal(
+      "Konfirmasi Logout",
+      "Apakah Anda yakin ingin keluar dari ujian? Progres jawaban Anda saat ini akan direset.",
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Logout", className: "btn-logout", onClick: logoutUser }
+      ]
+    );
+  }
+
+  function logoutUser() {
+    resetExamState();
+    currentUser = { user: "", nama: "" };
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("login-error").style.display = "none";
+
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("login-screen").style.display = "flex";
+  }
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+      const s = (timeLeft % 60).toString().padStart(2, '0');
+      document.getElementById("timer").textContent = `${m}:${s}`;
+
+      if (timeLeft <= 300) {
+        document.getElementById("timer").style.color = "#fca5a5";
+      }
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        showModal(
+          "Waktu Habis",
+          "Waktu ujian telah habis! Jawaban Anda akan dikumpulkan otomatis.",
+          [{ text: "Lihat Hasil", className: "btn-primary", onClick: finishExam }]
+        );
+      }
+    }, 1000);
+  }
+
+  function initNumberGrid() {
+    const grid = document.getElementById("number-grid");
+    grid.innerHTML = "";
+    questions.forEach((q, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "num-btn";
+      btn.id = `num-btn-${idx}`;
+      btn.textContent = q.no;
+      btn.onclick = () => renderQuestion(idx);
+      grid.appendChild(btn);
+    });
+  }
+
+  function updateNumberGrid() {
+    questions.forEach((_, idx) => {
+      const btn = document.getElementById(`num-btn-${idx}`);
+      if (!btn) return;
+      btn.className = "num-btn";
+      if (idx === currentIndex) btn.classList.add("active");
+      if (doubtStatus[idx]) {
+        btn.classList.add("doubt");
+      } else if (userAnswers[idx] !== null) {
+        btn.classList.add("answered");
+      }
+    });
+  }
+
+  function renderQuestion(index) {
+    currentIndex = index;
+    const q = questions[index];
+
+    document.getElementById("q-number").textContent = `Soal No. ${q.no} dari ${questions.length}`;
+    document.getElementById("q-text").innerHTML = q.text;
+
+    const statusEl = document.getElementById("q-status");
+    if (doubtStatus[index]) {
+      statusEl.textContent = "Ditandai Ragu-Ragu";
+      statusEl.style.color = "#b45309";
+    } else if (userAnswers[index]) {
+      statusEl.textContent = `Terjawab (${userAnswers[index]})`;
+      statusEl.style.color = "var(--success)";
+    } else {
+      statusEl.textContent = "Belum dijawab";
+      statusEl.style.color = "var(--muted)";
+    }
+
+    const optContainer = document.getElementById("q-options");
+    optContainer.innerHTML = "";
+
+    ["A", "B", "C", "D", "E"].forEach(letter => {
+      const div = document.createElement("div");
+      div.className = "option-item" + (userAnswers[index] === letter ? " selected" : "");
+      div.onclick = () => selectOption(letter);
+      div.innerHTML = `
+        <div class="option-letter">${letter}</div>
+        <div>${q.options[letter]}</div>
+      `;
+      optContainer.appendChild(div);
+    });
+
+    document.getElementById("btn-prev").disabled = (index === 0);
+    document.getElementById("btn-next").disabled = (index === questions.length - 1);
+    updateNumberGrid();
+  }
+
+  function selectOption(letter) {
+    userAnswers[currentIndex] = letter;
+    renderQuestion(currentIndex);
+  }
+
+  function toggleDoubt() {
+    doubtStatus[currentIndex] = !doubtStatus[currentIndex];
+    renderQuestion(currentIndex);
+  }
+
+  function prevQuestion() {
+    if (currentIndex > 0) renderQuestion(currentIndex - 1);
+  }
+
+  function nextQuestion() {
+    if (currentIndex < questions.length - 1) renderQuestion(currentIndex + 1);
+  }
+
+  function confirmFinish() {
+    const unanswered = userAnswers.filter(a => a === null).length;
+    const msg = unanswered > 0 
+      ? `Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin mengakhiri ujian?`
+      : "Apakah Anda yakin ingin mengumpulkan semua jawaban sekarang?";
+    
+    showModal(
+      "Kumpulkan Jawaban",
+      msg,
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Kumpulkan", className: "btn-finish", onClick: finishExam }
+      ]
+    );
+  }
+
+  function finishExam() {
+    clearInterval(timerInterval);
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "block";
+
+    let benar = 0, salah = 0, kosong = 0;
+    const reviewContainer = document.getElementById("review-container");
+    reviewContainer.innerHTML = "";
+
+    questions.forEach((q, idx) => {
+      const uAns = userAnswers[idx];
+      const isCorrect = uAns === q.answer;
+
+      if (uAns === null) kosong++;
+      else if (isCorrect) benar++;
+      else salah++;
+
+      const card = document.createElement("div");
+      card.className = `card review-card ${isCorrect ? 'correct' : 'wrong'}`;
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+          <strong>Soal No. ${q.no}</strong>
+          <span style="font-weight:bold; color:${isCorrect ? 'var(--success)' : 'var(--danger)'}">
+            ${uAns === null ? 'Tidak Dijawab' : (isCorrect ? 'BENAR' : 'SALAH')}
+          </span>
+        </div>
+        <p style="margin-bottom:10px;">${q.text}</p>
+        <p><strong>Jawaban Anda:</strong> ${uAns ? `${uAns}. ${q.options[uAns]}` : '-'} | 
+           <strong style="color:var(--success)">Kunci Jawaban:</strong> ${q.answer}. ${q.options[q.answer]}</p>
+        <div class="pembahasan-box">
+          <strong>Pembahasan:</strong><br>${q.explanation}
+        </div>
+      `;
+      reviewContainer.appendChild(card);
+    });
+
+    const skor = Math.round((benar / questions.length) * 100);
+    document.getElementById("res-peserta").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+    document.getElementById("res-score").textContent = `${skor} / 100`;
+    document.getElementById("res-detail").textContent = `Benar: ${benar} | Salah: ${salah} | Kosong: ${kosong}`;
+  }
+</script>
+</body>
+</html>

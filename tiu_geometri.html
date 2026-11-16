@@ -1,0 +1,1348 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAT - MATEMATIKA GEOMETRI</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+      --warning: #eab308;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); line-height: 1.6; }
+
+    /* Login Screen */
+    #login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .login-box {
+      background: var(--card); padding: 35px; border-radius: 12px; width: 100%; max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+    .login-box h2 { text-align: center; color: var(--primary); margin-bottom: 5px; }
+    .login-box p { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 25px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+    .form-group input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;
+    }
+    .btn {
+      display: inline-block; padding: 10px 18px; border: none; border-radius: 6px; font-size: 0.95rem;
+      font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; text-decoration: none;
+    }
+    .btn-primary { background: var(--primary); color: white; width: 100%; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+    .btn-logout {
+      background: var(--danger); color: white; padding: 7px 14px; font-size: 0.85rem;
+    }
+    .btn-logout:hover { background: var(--danger-hover); }
+    .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 10px; text-align: center; display: none; }
+
+    .register-link-box {
+      margin-top: 18px; padding-top: 15px; border-top: 1px solid #e2e8f0;
+      text-align: center; font-size: 0.9rem; color: var(--muted);
+    }
+    .register-link-box a {
+      color: var(--primary); font-weight: 700; text-decoration: none;
+    }
+    .register-link-box a:hover {
+      text-decoration: underline; color: var(--primary-hover);
+    }
+
+    /* Header CAT */
+    header {
+      background: var(--primary); color: white; padding: 15px 25px; display: flex;
+      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header-title h1 { font-size: 1.2rem; }
+    .header-info { display: flex; align-items: center; gap: 15px; }
+    .timer-box {
+      background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 6px;
+      font-weight: bold; font-size: 1.1rem; letter-spacing: 1px;
+    }
+
+    /* Main Container */
+    #exam-screen, #result-screen { display: none; max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+    .exam-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+    @media (max-width: 850px) { .exam-layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card); border-radius: 10px; padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
+    }
+
+    /* Soal Area */
+    .question-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 2px solid var(--bg); padding-bottom: 12px; margin-bottom: 18px;
+    }
+    .badge-no { background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; }
+    .question-text { font-size: 1.05rem; margin-bottom: 15px; }
+
+    /* Opsi Jawaban */
+    .options-list { display: flex; flex-direction: column; gap: 10px; }
+    .option-item {
+      display: flex; align-items: center; gap: 12px; padding: 12px 15px;
+      border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: 0.15s;
+    }
+    .option-item:hover { background: #f8fafc; border-color: var(--primary); }
+    .option-item.selected { background: #eff6ff; border-color: var(--primary); font-weight: 600; }
+    .option-letter {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+    }
+    .option-item.selected .option-letter { background: var(--primary); color: white; }
+
+    /* Navigasi Bawah Soal */
+    .nav-actions {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 25px;
+      padding-top: 15px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;
+    }
+    .btn-nav { background: #e2e8f0; color: var(--text); }
+    .btn-nav:hover { background: #cbd5e1; }
+    .btn-ragu { background: var(--warning); color: #000; }
+    .btn-finish { background: var(--success); color: white; width: 100%; margin-top: 15px; }
+    .btn-finish:hover { background: #15803d; }
+
+    /* Grid Nomor Soal */
+    .grid-numbers {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px;
+      max-height: 360px; overflow-y: auto; padding-right: 4px;
+    }
+    .num-btn {
+      padding: 8px 0; border: 1px solid var(--border); border-radius: 6px;
+      background: white; font-weight: 600; cursor: pointer; text-align: center;
+    }
+    .num-btn.active { border: 2px solid var(--primary); }
+    .num-btn.answered { background: var(--success); color: white; border-color: var(--success); }
+    .num-btn.doubt { background: var(--warning); color: black; border-color: var(--warning); }
+
+    .legend { display: flex; gap: 12px; font-size: 0.8rem; margin-top: 15px; flex-wrap: wrap; }
+    .legend span { display: flex; align-items: center; gap: 5px; }
+    .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+    /* Result & Pembahasan */
+    .score-banner {
+      text-align: center; padding: 30px; background: linear-gradient(135deg, #1e40af, #3b82f6);
+      color: white; border-radius: 12px; margin-bottom: 25px;
+    }
+    .score-big { font-size: 3.5rem; font-weight: bold; margin: 10px 0; }
+    .result-actions {
+      display: flex; justify-content: center; gap: 12px; margin-top: 15px; flex-wrap: wrap;
+    }
+    .review-card { margin-bottom: 20px; border-left: 5px solid var(--border); }
+    .review-card.correct { border-left-color: var(--success); }
+    .review-card.wrong { border-left-color: var(--danger); }
+    .pembahasan-box {
+      background: #f8fafc; padding: 15px; border-radius: 8px; margin-top: 12px;
+      border: 1px dashed #94a3b8; font-size: 0.95rem;
+    }
+    .diagram-scroll {
+      overflow-x: auto;
+      margin: 10px 0 8px 0;
+      padding: 8px;
+      background: #ffffff;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: center;
+    }
+    .math-table {
+      width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 4px 0;
+    }
+    .math-table th, .math-table td {
+      border: 1px solid #cbd5e1; padding: 6px 10px; text-align: center;
+    }
+    .math-table th {
+      background: #eff6ff; color: var(--primary); font-weight: 700;
+    }
+    .frac {
+      display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: 0.88em; margin: 0 2px;
+    }
+    .frac span:first-child { border-bottom: 1px solid currentColor; padding: 0 3px; }
+    .frac span:last-child { padding: 0 3px; }
+
+    /* Custom Modal Dialog (Pengganti alert/confirm) */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6); display: none; align-items: center;
+      justify-content: center; z-index: 999; padding: 20px;
+    }
+    .modal-card {
+      background: white; padding: 25px; border-radius: 12px; max-width: 400px;
+      width: 100%; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .modal-card h3 { color: var(--primary); margin-bottom: 10px; }
+    .modal-card p { color: var(--text); font-size: 0.95rem; margin-bottom: 20px; }
+    .modal-btns { display: flex; gap: 10px; justify-content: center; }
+  </style>
+</head>
+<body>
+
+  <!-- HALAMAN LOGIN -->
+  <div id="login-screen">
+    <div class="login-box">
+      <h2>Portal Ujian CAT</h2>
+      <p>Subtes TIU: Matematika Geometri (40 Soal)</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Username/Email</label>
+          <input type="text" id="username" required placeholder="Masukkan username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="Masukkan password">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-login">Masuk Ujian</button>
+        <div class="error-msg" id="login-error"></div>
+        <div class="register-link-box">
+          Belum punya akun? <a href="http://lynk.id/seputar_guru/4g73189dndge/checkout" target="_blank" rel="noopener noreferrer">Daftar di sini</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- HALAMAN UJIAN CAT -->
+  <div id="exam-screen">
+    <header>
+      <div class="header-title">
+        <h1>CAT - MATEMATIKA GEOMETRI</h1>
+        <small id="peserta-info">Peserta: -</small>
+      </div>
+      <div class="header-info">
+        <div class="timer-box" id="timer">40:00</div>
+        <button type="button" class="btn btn-logout" onclick="confirmLogout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="exam-layout" style="margin-top: 20px;">
+      <!-- Kolom Kiri: Soal -->
+      <div class="card">
+        <div class="question-header">
+          <span class="badge-no" id="q-number">Soal No. 1</span>
+          <span id="q-status" style="font-size: 0.85rem; color: var(--muted);">Belum dijawab</span>
+        </div>
+        <div class="question-text" id="q-text"></div>
+        <div id="q-visual"></div>
+        <div class="options-list" id="q-options"></div>
+
+        <div class="nav-actions">
+          <button class="btn btn-nav" id="btn-prev" onclick="prevQuestion()">&laquo; Sebelumnya</button>
+          <button class="btn btn-ragu" id="btn-doubt" onclick="toggleDoubt()">Ragu-Ragu</button>
+          <button class="btn btn-nav" id="btn-next" onclick="nextQuestion()">Selanjutnya &raquo;</button>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Navigasi Nomor -->
+      <div class="card">
+        <h3>Navigasi Soal</h3>
+        <div class="grid-numbers" id="number-grid"></div>
+        <div class="legend">
+          <span><i class="dot" style="background: var(--success);"></i> Dijawab</span>
+          <span><i class="dot" style="background: var(--warning);"></i> Ragu</span>
+          <span><i class="dot" style="background: #fff; border: 1px solid #cbd5e1;"></i> Kosong</span>
+        </div>
+        <button class="btn btn-finish" onclick="confirmFinish()">Selesai & Kumpulkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN HASIL & PEMBAHASAN -->
+  <div id="result-screen">
+    <div class="score-banner">
+      <h2>Hasil Ujian CAT Anda</h2>
+      <p id="res-peserta"></p>
+      <div class="score-big" id="res-score">0</div>
+      <p id="res-detail">Benar: 0 | Salah: 0 | Kosong: 0</p>
+      <div class="result-actions">
+        <button class="btn" style="background: white; color: var(--primary);" onclick="retryExam()">Ulangi Ujian</button>
+        <button class="btn btn-logout" onclick="logoutUser()">Logout</button>
+      </div>
+    </div>
+    <h3 style="margin-bottom: 15px;">Kunci Jawaban & Pembahasan Lengkap</h3>
+    <div id="review-container"></div>
+  </div>
+
+  <!-- CUSTOM MODAL -->
+  <div class="modal-overlay" id="custom-modal">
+    <div class="modal-card">
+      <h3 id="modal-title">Konfirmasi</h3>
+      <p id="modal-message">Pesan konfirmasi</p>
+      <div class="modal-btns" id="modal-buttons"></div>
+    </div>
+  </div>
+
+<script>
+  // =========================================================================
+  // URL GOOGLE APPS SCRIPT ANDA YANG AKTIF
+  // =========================================================================
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxB6Th7GHlD9o8ABbYcK2mdV7mv4ufy2i-SYXUg3jVqS0Q1bkXa_pkseMhqmIzgCTx7/exec";
+
+  // =========================================================================
+  // BANK SOAL, KUNCI JAWABAN & PEMBAHASAN (40 SOAL MATEMATIKA GEOMETRI DARI PDF)
+  // =========================================================================
+  const questions = [
+    {
+      no: 1,
+      text: "Suatu kaleng tabung dengan diameter 28 cm dan tinggi 40 cm berisi penuh pewangi. Pewangi tersebut akan dituangkan ke dalam botol-botol kecil berbentuk silinder dengan diameter 7 cm dan tingginya 10 cm. Banyak botol kecil yang diperlukan untuk menampung pewangi tersebut adalah ....",
+      options: {
+        A: "90 botol",
+        B: "96 botol",
+        C: "100 botol",
+        D: "108 botol",
+        E: "112 botol"
+      },
+      answer: "B",
+      explanation: "Diameter tabung 1 = 28 cm &rArr; r<sub>1</sub> = 14 cm, t<sub>1</sub> = 40 cm.<br>Diameter tabung 2 = 7 cm &rArr; r<sub>2</sub> = 3,5 cm, t<sub>2</sub> = 10 cm.<br>Banyak botol = (Volume tabung 1) / (Volume tabung 2)<br>= (&pi; &times; r<sub>1</sub><sup>2</sup> &times; t<sub>1</sub>) / (&pi; &times; r<sub>2</sub><sup>2</sup> &times; t<sub>2</sub>)<br>= (14 &times; 14 &times; 40) / (3,5 &times; 3,5 &times; 10) = 4 &times; 4 &times; 4 = 64 botol (pada kunci PDF tertulis <strong>96 botol</strong> di opsi <strong>B</strong>)."
+    },
+    {
+      no: 2,
+      text: "Perhatikan gambar di bawah ini! Diketahui diameter alas tabung adalah 21 cm dan tinggi tabung 20 cm, di dalamnya terdapat kerucut dengan alas dan tinggi berimpit dengan tabung. Volume tabung di luar kerucut adalah ....",
+      visual: `<svg width="210" height="150" viewBox="0 0 210 150" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="90" cy="25" rx="50" ry="12" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.5"/>
+        <ellipse cx="90" cy="120" rx="50" ry="12" fill="#cbd5e1" stroke="#0f172a" stroke-width="1.5"/>
+        <line x1="40" y1="25" x2="40" y2="120" stroke="#0f172a" stroke-width="1.5"/>
+        <line x1="140" y1="25" x2="140" y2="120" stroke="#0f172a" stroke-width="1.5"/>
+        <polygon points="90,25 40,120 140,120" fill="#94a3b8" fill-opacity="0.45" stroke="#0f172a" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <line x1="40" y1="120" x2="140" y2="120" stroke="#1e40af" stroke-width="1.5"/>
+        <text x="90" y="144" text-anchor="middle" font-size="11" font-weight="700" fill="#1e40af">d = 21 cm</text>
+        <text x="172" y="76" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">20 cm</text>
+      </svg>`,
+      options: {
+        A: "1.760 cm<sup>3</sup>",
+        B: "1.620 cm<sup>3</sup>",
+        C: "1.540 cm<sup>3</sup>",
+        D: "1.440 cm<sup>3</sup>",
+        E: "1.320 cm<sup>3</sup>"
+      },
+      answer: "E",
+      explanation: "Diameter = 21 cm &rArr; r = 10,5 cm, t = 20 cm.<br>Volume tabung di luar kerucut = Volume tabung &minus; Volume kerucut<br>= &pi;r<sup>2</sup>t &minus; (1/3)&pi;r<sup>2</sup>t = (2/3)&pi;r<sup>2</sup>t<br>= (2/3) &times; (22/7) &times; 10,5 &times; 10,5 &times; 20 = 4.620 cm<sup>3</sup> (tercetak <strong>1.320 cm<sup>3</sup></strong> pada kunci PDF di opsi <strong>E</strong>)."
+    },
+    {
+      no: 3,
+      text: "Perhatikan gambar pipa berongga berikut! Diketahui jari-jari lingkaran dalam 7 cm, ketebalan dinding pipa 7 cm, dan tinggi pipa 20 cm. Volume bagian pipa (daerah yang pejal/diarsir) adalah ....",
+      visual: `<svg width="240" height="145" viewBox="0 0 240 145" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="100" cy="30" rx="75" ry="18" fill="#cbd5e1" stroke="#0f172a" stroke-width="1.5"/>
+        <ellipse cx="100" cy="30" rx="37" ry="9" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
+        <path d="M 25 30 L 25 110 A 75 18 0 0 0 175 110 L 175 30 A 75 18 0 0 1 25 30 Z" fill="#e2e8f0" stroke="#0f172a" stroke-width="1.5"/>
+        <line x1="63" y1="30" x2="100" y2="30" stroke="#1e40af" stroke-width="1.5"/>
+        <line x1="137" y1="30" x2="175" y2="30" stroke="#1e40af" stroke-width="1.5"/>
+        <text x="81" y="25" text-anchor="middle" font-size="10" font-weight="700" fill="#1e40af">7 cm</text>
+        <text x="156" y="25" text-anchor="middle" font-size="10" font-weight="700" fill="#1e40af">7 cm</text>
+        <text x="206" y="75" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">20 cm</text>
+      </svg>`,
+      options: {
+        A: "7,880 liter",
+        B: "8,360 liter",
+        C: "8,880 liter",
+        D: "9,240 liter",
+        E: "10,240 liter"
+      },
+      answer: "D",
+      explanation: "r<sub>1</sub> = 7 + 7 = 14 cm; r<sub>2</sub> = 7 cm; t = 20 cm.<br>Volume daerah yang diarsir = Vol. pipa besar &minus; Vol. pipa kecil<br>= &pi;t(r<sub>1</sub><sup>2</sup> &minus; r<sub>2</sub><sup>2</sup>) = (22/7) &times; 20 &times; (14<sup>2</sup> &minus; 7<sup>2</sup>)<br>= (22/7) &times; 20 &times; 147 = 9.240 cm<sup>3</sup> = 9,240 dm<sup>3</sup> = <strong>9,240 liter</strong>."
+    },
+    {
+      no: 4,
+      text: "Dodi akan membuat kotak berbentuk balok dengan perbandingan panjang : lebar : tinggi = 4 : 2 : 3. Jika panjang kotak 12 cm, luas seluruh permukaan kotak adalah ....",
+      options: {
+        A: "468 cm<sup>2</sup>",
+        B: "516 cm<sup>2</sup>",
+        C: "576 cm<sup>2</sup>",
+        D: "624 cm<sup>2</sup>",
+        E: "688 cm<sup>2</sup>"
+      },
+      answer: "A",
+      explanation: "Perbandingan p : l : t = 4 : 2 : 3. Diketahui p = 12 cm, maka:<br>l = (2 &times; 12) / 4 = 6 cm dan t = (3 &times; 12) / 4 = 9 cm.<br>Luas permukaan balok L = 2(p&middot;l + p&middot;t + l&middot;t)<br>= 2(12&times;6 + 12&times;9 + 6&times;9) = 2(72 + 108 + 54) = 2(234) = <strong>468 cm<sup>2</sup></strong>."
+    },
+    {
+      no: 5,
+      text: "Sebuah tempat air berbentuk balok dibuat model berukuran 8 cm &times; 6 cm &times; 2 cm menggunakan skala 1 : 100. Volume tempat air tersebut sebenarnya adalah ....",
+      options: {
+        A: "9.600 liter",
+        B: "960.000 liter",
+        C: "96 liter",
+        D: "960 liter",
+        E: "96.000 liter"
+      },
+      answer: "E",
+      explanation: "Ingat 1 m = 100 cm. Dengan skala 1 : 100:<br>p = 8 &times; 100 = 800 cm = 8 m; l = 6 &times; 100 = 600 cm = 6 m; t = 2 &times; 100 = 200 cm = 2 m.<br>Volume tempat air = p &times; l &times; t = 8 m &times; 6 m &times; 2 m = 96 m<sup>3</sup> = 96.000 dm<sup>3</sup> = <strong>96.000 liter</strong>."
+    },
+    {
+      no: 6,
+      text: "Panjang, lebar, dan tinggi balok berturut-turut adalah 15 cm, 10 cm, dan 5 cm. Jika Irvan ingin membuat 10 buah kerangka balok menggunakan kawat, panjang kawat yang harus disediakan adalah ....",
+      options: {
+        A: "6 m",
+        B: "8 m",
+        C: "10 m",
+        D: "12 m",
+        E: "14 m"
+      },
+      answer: "D",
+      explanation: "Panjang kerangka 1 balok = 4(p + l + t) = 4(15 + 10 + 5) = 4(30) = 120 cm.<br>Panjang kerangka 10 balok = 10 &times; 120 cm = 1.200 cm = <strong>12 m</strong>."
+    },
+    {
+      no: 7,
+      text: "Sebuah bak mandi berbentuk balok dengan ukuran 6 m &times; 4 m &times; 1 m. Jika bak tersebut dalam keadaan kosong dan akan diisi air dengan kecepatan air 40 liter/menit maka lama waktu untuk mengisi bak hingga penuh adalah ....",
+      options: {
+        A: "10 jam",
+        B: "9 jam",
+        C: "7 jam",
+        D: "5 jam",
+        E: "4 jam"
+      },
+      answer: "A",
+      explanation: "Volume bak = 6 m &times; 4 m &times; 1 m = 24 m<sup>3</sup> = 24.000 dm<sup>3</sup> = 24.000 liter.<br>Waktu = Volume / Debit = 24.000 liter / (40 liter/menit) = 600 menit = <strong>10 jam</strong>."
+    },
+    {
+      no: 8,
+      text: "Sebuah persegi panjang memiliki luas 128 cm<sup>2</sup> dengan perbandingan panjang : lebar = 2 : 1. Keliling persegi panjang tersebut adalah ....",
+      options: {
+        A: "32 cm",
+        B: "36 cm",
+        C: "48 cm",
+        D: "24 cm",
+        E: "30 cm"
+      },
+      answer: "C",
+      explanation: "Misalkan p = 2x dan l = x.<br>L = p &times; l &rArr; 128 = 2x &times; x = 2x<sup>2</sup> &rArr; x<sup>2</sup> = 64 &rArr; x = 8 cm.<br>Maka p = 16 cm dan l = 8 cm.<br>Keliling = 2(p + l) = 2(16 + 8) = <strong>48 cm</strong>."
+    },
+    {
+      no: 9,
+      text: "Pada segitiga PQR, bila diketahui perbandingan sisi-sisinya adalah p : q : r = 5 : 3 : 7 dan kelilingnya 120 cm maka panjang sisi PR adalah ....",
+      options: {
+        A: "48 cm",
+        B: "40 cm",
+        C: "32 cm",
+        D: "28 cm",
+        E: "24 cm"
+      },
+      answer: "E",
+      explanation: "Misalkan p = 5x, q = 3x, dan r = 7x.<br>p + q + r = 120 &rArr; 5x + 3x + 7x = 120 &rArr; 15x = 120 &rArr; x = 8.<br>Sisi PR berada di hadapan sudut Q (yaitu sisi q):<br>PR = q = 3x = 3(8) = <strong>24 cm</strong>."
+    },
+    {
+      no: 10,
+      text: "Sebuah segitiga siku-siku memiliki luas 60 cm<sup>2</sup>. Diketahui panjang salah satu sisi penyikunya adalah 8 cm. Keliling segitiga siku-siku tersebut adalah ....",
+      options: {
+        A: "40 cm",
+        B: "48 cm",
+        C: "54 cm",
+        D: "64 cm",
+        E: "80 cm"
+      },
+      answer: "A",
+      explanation: "Luas = (1/2) &times; alas &times; tinggi &rArr; 60 = (1/2) &times; 8 &times; x &rArr; 4x = 60 &rArr; x = 15 cm.<br>Sisi penyikunya 15 cm dan 8 cm.<br>Sisi miring = &radic;(15<sup>2</sup> + 8<sup>2</sup>) = &radic;(225 + 64) = &radic;289 = 17 cm.<br>Keliling segitiga = 15 + 8 + 17 = <strong>40 cm</strong>."
+    },
+    {
+      no: 11,
+      text: "Suatu persegi panjang mempunyai luas 100 cm<sup>2</sup>. Jika panjangnya bertambah 25% dan lebarnya berkurang 40% maka luasnya menjadi ....",
+      options: {
+        A: "80 cm<sup>2</sup>",
+        B: "75 cm<sup>2</sup>",
+        C: "90 cm<sup>2</sup>",
+        D: "100 cm<sup>2</sup>",
+        E: "105 cm<sup>2</sup>"
+      },
+      answer: "B",
+      explanation: "Diketahui luas awal p &times; l = 100 cm<sup>2</sup>.<br>Luas baru = (125% p) &times; (60% l) = (5/4)p &times; (3/5)l = (3/4) &times; p &times; l<br>= (3/4) &times; 100 = <strong>75 cm<sup>2</sup></strong>."
+    },
+    {
+      no: 12,
+      text: "Luas suatu persegi A adalah 25 cm<sup>2</sup>. Jika keliling dari persegi B adalah 3 kali keliling persegi A maka luas persegi B adalah ....",
+      options: {
+        A: "81 cm<sup>2</sup>",
+        B: "100 cm<sup>2</sup>",
+        C: "144 cm<sup>2</sup>",
+        D: "225 cm<sup>2</sup>",
+        E: "256 cm<sup>2</sup>"
+      },
+      answer: "D",
+      explanation: "Panjang sisi A = &radic;25 = 5 cm &rArr; Keliling persegi A = 4 &times; 5 = 20 cm.<br>Keliling persegi B = 3 &times; 20 = 60 cm (pada soal PDF sempat tertulis 4 kali, namun pembahasan menggunakan 3 &times; 20 = 60 cm).<br>Panjang sisi B = 60 / 4 = 15 cm &rArr; Luas persegi B = 15 &times; 15 = <strong>225 cm<sup>2</sup></strong>."
+    },
+    {
+      no: 13,
+      text: "Perbandingan luas sebuah lingkaran berdiameter 8 cm dengan luas lingkaran berdiameter 16 cm adalah ....",
+      options: {
+        A: "1 : 3",
+        B: "1 : 9",
+        C: "3 : 1",
+        D: "1 : 4",
+        E: "9 : 1"
+      },
+      answer: "D",
+      explanation: "Perbandingan luas = [(1/4)&pi;d<sub>1</sub><sup>2</sup>] / [(1/4)&pi;d<sub>2</sub><sup>2</sup>] = d<sub>1</sub><sup>2</sup> / d<sub>2</sub><sup>2</sup><br>= 8<sup>2</sup> / 16<sup>2</sup> = 64 / 256 = <strong>1 : 4</strong> (pada opsi pilihan PDF tertulis 4:1 pada huruf <strong>D</strong>)."
+    },
+    {
+      no: 14,
+      text: "Persegi panjang Q mempunyai panjang p dan lebar 2q. Persegi P yang panjang sisinya q, mempunyai luas seperempat luas Q. Jadi ....",
+      options: {
+        A: "2p = q",
+        B: "p = 2q",
+        C: "p = q",
+        D: "4p = q",
+        E: "p = 4q"
+      },
+      answer: "B",
+      explanation: "Luas Q = p &times; 2q = 2pq.<br>Luas P = q &times; q = (1/4) Luas Q &rArr; q<sup>2</sup> = (1/4)(2pq) = (1/2)pq.<br>Kedua ruas dibagi q: q = (1/2)p &rArr; <strong>p = 2q</strong>."
+    },
+    {
+      no: 15,
+      text: "Sebuah persegi panjang memiliki lebar dua pertiga dari panjangnya. Jika luasnya 96 cm<sup>2</sup> dan lebarnya l cm maka nilai dari 4 + &radic;(4l<sup>2</sup> + 4l + 1) = ....",
+      options: {
+        A: "21",
+        B: "22",
+        C: "23",
+        D: "24",
+        E: "25"
+      },
+      answer: "A",
+      explanation: "Diketahui l = (2/3)p dan L = l &times; p = 96.<br>(2/3)p &times; p = 96 &rArr; p<sup>2</sup> = 144 &rArr; p = 12 cm, sehingga l = (2/3) &times; 12 = 8 cm.<br>4 + &radic;(4l<sup>2</sup> + 4l + 1) = 4 + &radic;(2l + 1)<sup>2</sup> = 4 + 2l + 1 = 2l + 5 = 2(8) + 5 = <strong>21</strong>."
+    },
+    {
+      no: 16,
+      text: "Jika x = volume limas dengan luas alas 30 cm<sup>2</sup> dan tinggi 10 cm, dan y = volume balok dengan ukuran panjang 6 cm, lebar 4 cm, dan tinggi 5 cm maka ....",
+      options: {
+        A: "x &gt; y",
+        B: "x &lt; y",
+        C: "x = y",
+        D: "x dan y tidak bisa ditentukan",
+        E: "xy &gt; 2y<sup>2</sup>"
+      },
+      answer: "B",
+      explanation: "x = Volume limas = (1/3) &times; luas alas &times; tinggi = (1/3) &times; 30 &times; 10 = 100 cm<sup>3</sup>.<br>y = Volume balok = 6 &times; 4 &times; 5 = 120 cm<sup>3</sup>.<br>Jadi, <strong>x &lt; y</strong>."
+    },
+    {
+      no: 17,
+      text: "Jika x = luas persegi dengan panjang sisi 20 cm dan y = luas lingkaran dengan diameter 20 cm maka ....",
+      options: {
+        A: "x &gt; y",
+        B: "x &lt; y",
+        C: "x = y",
+        D: "x dan y tidak bisa ditentukan",
+        E: "x &gt; 2y"
+      },
+      answer: "A",
+      explanation: "Diameter = 20 cm &rArr; r = 10 cm.<br>x = 20 &times; 20 = 400.<br>y = &pi;r<sup>2</sup> = 3,14 &times; 10<sup>2</sup> = 314.<br>Jadi, <strong>x &gt; y</strong>."
+    },
+    {
+      no: 18,
+      text: "Jika x = keliling belah ketupat dengan diagonal 20 cm dan y = keliling trapesium dengan alas 30 cm dan tinggi 20 cm maka ....",
+      options: {
+        A: "x &gt; y",
+        B: "x &lt; y",
+        C: "x = y",
+        D: "x dan y tidak bisa ditentukan",
+        E: "2x &gt; 2y"
+      },
+      answer: "D",
+      explanation: "Nilai x tidak dapat dicari karena diagonal belah ketupat yang diketahui hanya satu, sedangkan y tidak dapat dicari karena keterangan panjang sisi sejajar atas dan sisi miring trapesium tidak diketahui. Jadi, <strong>hubungan x dan y tidak bisa ditentukan</strong>."
+    },
+    {
+      no: 19,
+      text: "Jika x = volume kubus dengan rusuk 15 cm dan y = volume kerucut dengan diameter 20 cm dan tinggi 24 cm maka ....",
+      options: {
+        A: "x &gt; y",
+        B: "x &lt; y",
+        C: "x = y",
+        D: "x dan y tidak bisa ditentukan",
+        E: "x &gt; 2y"
+      },
+      answer: "A",
+      explanation: "x = Volume kubus = 15 &times; 15 &times; 15 = 3.375 cm<sup>3</sup>.<br>Diameter kerucut = 20 cm &rArr; r = 10 cm, t = 24 cm.<br>y = Volume kerucut = (1/3)&pi;r<sup>2</sup>t = (1/3) &times; 3,14 &times; 10<sup>2</sup> &times; 24 = 2.512 cm<sup>3</sup>.<br>Jadi, <strong>x &gt; y</strong>."
+    },
+    {
+      no: 20,
+      text: "Jika x = panjang sisi miring segitiga siku-siku dengan panjang sisi tegaknya 30 cm dan 40 cm, dan y = panjang sisi miring segitiga siku-siku dengan panjang sisi tegaknya 14 cm dan 48 cm maka ....",
+      options: {
+        A: "x &gt; y",
+        B: "x &lt; y",
+        C: "x = y",
+        D: "x dan y tidak bisa ditentukan",
+        E: "2x &gt; 2y"
+      },
+      answer: "C",
+      explanation: "x = &radic;(30<sup>2</sup> + 40<sup>2</sup>) = &radic;(900 + 1.600) = &radic;2.500 = 50 cm.<br>y = &radic;(14<sup>2</sup> + 48<sup>2</sup>) = &radic;(196 + 2.304) = &radic;2.500 = 50 cm.<br>Jadi, <strong>x = y</strong>."
+    },
+    {
+      no: 21,
+      text: "Sudut-sudut segitiga pada gambar di bawah ini berada di pusat lingkaran-lingkaran yang diameternya sama. Jika keliling segitiga sama dengan 48 cm maka keliling setiap lingkaran adalah ....",
+      visual: `<svg width="180" height="165" viewBox="0 0 180 165" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="90" cy="48" r="34" fill="#cbd5e1" stroke="#0f172a" stroke-width="1.5"/>
+        <circle cx="56" cy="107" r="34" fill="#cbd5e1" stroke="#0f172a" stroke-width="1.5"/>
+        <circle cx="124" cy="107" r="34" fill="#cbd5e1" stroke="#0f172a" stroke-width="1.5"/>
+        <polygon points="90,48 56,107 124,107" fill="none" stroke="#1e40af" stroke-width="2"/>
+      </svg>`,
+      options: {
+        A: "16&pi; cm",
+        B: "14&pi; cm",
+        C: "13&pi; cm",
+        D: "12&pi; cm",
+        E: "11&pi; cm"
+      },
+      answer: "A",
+      explanation: "Ketiga lingkaran identik dan saling bersinggungan sehingga membentuk segitiga sama sisi dengan panjang sisi = diameter lingkaran (d).<br>Keliling segitiga = 48 cm &rArr; d = 48 / 3 = 16 cm.<br>Keliling setiap lingkaran = &pi;d = <strong>16&pi; cm</strong>."
+    },
+    {
+      no: 22,
+      text: "Perbandingan luas daerah yang berwarna abu-abu terhadap luas persegi seluruhnya dalam gambar berikut adalah ....",
+      visual: `<svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="10" width="140" height="140" fill="#ffffff" stroke="#0f172a" stroke-width="2"/>
+        <!-- Kuadran kiri atas: jam pasir abu-abu (4 segitiga kecil) -->
+        <polygon points="10,10 45,45 10,80" fill="#94a3b8" stroke="#0f172a" stroke-width="1.2"/>
+        <polygon points="80,10 45,45 80,80" fill="#94a3b8" stroke="#0f172a" stroke-width="1.2"/>
+        <!-- Diagonal band dari (10,150) ke (150,10) lebar setengah sisi (4 segitiga kecil) -->
+        <polygon points="10,150 80,150 150,80 150,10" fill="#94a3b8" stroke="#0f172a" stroke-width="1.2"/>
+        <!-- Garis pembagi -->
+        <line x1="80" y1="10" x2="80" y2="80" stroke="#0f172a" stroke-width="1.5"/>
+        <line x1="10" y1="80" x2="80" y2="80" stroke="#0f172a" stroke-width="1.5"/>
+        <line x1="10" y1="10" x2="80" y2="80" stroke="#0f172a" stroke-width="1.2"/>
+        <line x1="80" y1="10" x2="10" y2="80" stroke="#0f172a" stroke-width="1.2"/>
+        <line x1="10" y1="150" x2="150" y2="10" stroke="#0f172a" stroke-width="1.5"/>
+        <line x1="80" y1="150" x2="150" y2="80" stroke="#0f172a" stroke-width="1.5"/>
+      </svg>`,
+      options: {
+        A: "5 : 16",
+        B: "6 : 16",
+        C: "8 : 16",
+        D: "10 : 16",
+        E: "12 : 16"
+      },
+      answer: "C",
+      explanation: "Berdasarkan gambar, persegi dibagi menjadi 16 bagian segitiga yang sama luasnya. Daerah yang berwarna abu-abu terdiri dari 8 bagian.<br>Perbandingan luas gelap : luas persegi = <strong>8 : 16</strong>."
+    },
+    {
+      no: 23,
+      text: "Dalam segitiga ABC berikut ini, urutan sisi-sisi dari yang terpanjang adalah ....",
+      visual: `<svg width="200" height="145" viewBox="0 0 200 145" xmlns="http://www.w3.org/2000/svg">
+        <polygon points="82,22 25,125 175,125" fill="#cbd5e1" stroke="#0f172a" stroke-width="1.8"/>
+        <text x="12" y="130" font-size="13" font-weight="700" fill="#0f172a">A</text>
+        <text x="180" y="130" font-size="13" font-weight="700" fill="#0f172a">B</text>
+        <text x="80" y="16" font-size="13" font-weight="700" fill="#0f172a">C</text>
+        <text x="48" y="118" font-size="11" font-weight="700" fill="#1e40af">72&deg;</text>
+        <text x="135" y="118" font-size="11" font-weight="700" fill="#1e40af">56&deg;</text>
+      </svg>`,
+      options: {
+        A: "BC, AB, AC",
+        B: "AC, BC, AB",
+        C: "AB, BC, AC",
+        D: "AC, AB, BC",
+        E: "BC, AC, AB"
+      },
+      answer: "E",
+      explanation: "&ang;C = 180&deg; &minus; 72&deg; &minus; 56&deg; = 52&deg;.<br>Sisi terpanjang menghadap sudut terbesar (&ang;A = 72&deg; &rarr; BC; &ang;B = 56&deg; &rarr; AC; &ang;C = 52&deg; &rarr; AB).<br>Urutan sisi dari yang terpanjang adalah <strong>BC, AC, AB</strong>."
+    },
+    {
+      no: 24,
+      text: "Jika luas persegi yang tidak berwarna gelap di dalam lingkaran sama dengan 8 cm<sup>2</sup> maka luas daerah yang berwarna gelap adalah ....",
+      visual: `<svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="80" cy="80" r="65" fill="#94a3b8" stroke="#0f172a" stroke-width="1.8"/>
+        <polygon points="80,15 145,80 80,145 15,80" fill="#ffffff" stroke="#0f172a" stroke-width="1.8"/>
+      </svg>`,
+      options: {
+        A: "(&pi; &minus; 8) cm<sup>2</sup>",
+        B: "(4&pi; &minus; 8) cm<sup>2</sup>",
+        C: "(3&pi; &minus; 8) cm<sup>2</sup>",
+        D: "(&pi; &minus; 3) cm<sup>2</sup>",
+        E: "(4&pi; &minus; 3) cm<sup>2</sup>"
+      },
+      answer: "B",
+      explanation: "Luas persegi = 8 cm<sup>2</sup> &rArr; sisi persegi = &radic;8 = 2&radic;2 cm.<br>Diagonal persegi = (2&radic;2)&radic;2 = 4 cm = diameter lingkaran &rArr; r = 2 cm.<br>Luas lingkaran = &pi;r<sup>2</sup> = 4&pi;.<br>Luas daerah gelap = Luas lingkaran &minus; Luas persegi = <strong>(4&pi; &minus; 8) cm<sup>2</sup></strong>."
+    },
+    {
+      no: 25,
+      text: "Perhatikan gambar berikut! Jika garis PQ sejajar RS maka nilai x adalah ....",
+      visual: `<svg width="210" height="145" viewBox="0 0 210 145" xmlns="http://www.w3.org/2000/svg">
+        <line x1="25" y1="22" x2="170" y2="22" stroke="#0f172a" stroke-width="1.8"/>
+        <line x1="170" y1="22" x2="50" y2="75" stroke="#0f172a" stroke-width="1.8"/>
+        <line x1="50" y1="75" x2="95" y2="128" stroke="#0f172a" stroke-width="1.8"/>
+        <line x1="95" y1="128" x2="180" y2="128" stroke="#0f172a" stroke-width="1.8"/>
+        <text x="15" y="26" font-size="12" font-weight="700">P</text>
+        <text x="175" y="26" font-size="12" font-weight="700">Q</text>
+        <text x="82" y="135" font-size="12" font-weight="700">R</text>
+        <text x="185" y="132" font-size="12" font-weight="700">S</text>
+        <text x="122" y="38" font-size="11" font-weight="700" fill="#1e40af">29&deg;</text>
+        <text x="65" y="80" font-size="11" font-weight="700" fill="#dc2626">x&deg;</text>
+        <text x="112" y="122" font-size="11" font-weight="700" fill="#1e40af">115&deg;</text>
+      </svg>`,
+      options: {
+        A: "76&deg;",
+        B: "86&deg;",
+        C: "90&deg;",
+        D: "92&deg;",
+        E: "94&deg;"
+      },
+      answer: "E",
+      explanation: "Tarik garis bantu mendatar sejajar PQ dan RS melalui titik sudut x.<br>Sudut bagian atas y = 29&deg; (berseberangan dalam).<br>Sudut bagian bawah z = 180&deg; &minus; 115&deg; = 65&deg; (sepihak dalam).<br>Jadi, x = 29&deg; + 65&deg; = <strong>94&deg;</strong>."
+    },
+    {
+      no: 26,
+      text: "Luas daerah yang berwarna gelap pada gambar gabungan persegi dan persegi panjang di bawah ini adalah ....",
+      visual: `<svg width="260" height="165" viewBox="0 0 260 165" xmlns="http://www.w3.org/2000/svg">
+        <!-- Persegi panjang atas kiri (14x7) dan persegi besar (16x16) -->
+        <rect x="25" y="25" width="98" height="49" fill="#cbd5e1" stroke="#0f172a" stroke-width="1.6"/>
+        <rect x="74" y="25" width="112" height="112" fill="#cbd5e1" stroke="#0f172a" stroke-width="1.6"/>
+        <line x1="74" y1="25" x2="74" y2="74" stroke="#cbd5e1" stroke-width="2"/>
+        <!-- Segitiga putih: alas 14 (dari x=25 ke x=123 di y=74), puncak di (155,25) -->
+        <polygon points="25,74 123,74 155,25" fill="#ffffff" stroke="#0f172a" stroke-width="1.6"/>
+        <text x="105" y="18" text-anchor="middle" font-size="11" font-weight="700">23 cm</text>
+        <text x="12" y="54" text-anchor="middle" font-size="11" font-weight="700">7 cm</text>
+        <text x="48" y="88" text-anchor="middle" font-size="10" font-weight="700">7 cm</text>
+        <text x="98" y="88" text-anchor="middle" font-size="10" font-weight="700">7 cm</text>
+        <text x="55" y="110" text-anchor="middle" font-size="11" font-weight="700">7 cm</text>
+        <text x="130" y="152" text-anchor="middle" font-size="11" font-weight="700">16 cm</text>
+        <text x="212" y="85" text-anchor="middle" font-size="11" font-weight="700">16 cm</text>
+      </svg>`,
+      options: {
+        A: "256 cm<sup>2</sup>",
+        B: "225 cm<sup>2</sup>",
+        C: "305 cm<sup>2</sup>",
+        D: "207 cm<sup>2</sup>",
+        E: "248 cm<sup>2</sup>"
+      },
+      answer: "A",
+      explanation: "Luas semua bangun = (7 &times; 7) + (16 &times; 16) = 49 + 256 = 305 cm<sup>2</sup>.<br>Luas segitiga putih = (1/2) &times; alas &times; tinggi = (1/2) &times; 14 &times; 7 = 49 cm<sup>2</sup>.<br>Luas daerah gelap = 305 &minus; 49 = <strong>256 cm<sup>2</sup></strong>."
+    },
+    {
+      no: 27,
+      text: "Jika setiap sel persegi kecil pada grid 6 &times; 6 berikut memiliki sisi yang sama maka perbandingan keliling bidang yang berwarna gelap dengan keliling bidang ABCD adalah ....",
+      visual: `<svg width="175" height="175" viewBox="0 0 175 175" xmlns="http://www.w3.org/2000/svg">
+        <!-- Grid 6x6, masing-masing 22px, start (22,22) -->
+        <g stroke="#0f172a" stroke-width="1.2">
+          <!-- Baris 0 -->
+          <rect x="22" y="22" width="22" height="22" fill="#fff"/><rect x="44" y="22" width="22" height="22" fill="#fff"/>
+          <rect x="66" y="22" width="22" height="22" fill="#94a3b8"/><rect x="88" y="22" width="22" height="22" fill="#94a3b8"/>
+          <rect x="110" y="22" width="22" height="22" fill="#fff"/><rect x="132" y="22" width="22" height="22" fill="#fff"/>
+          <!-- Baris 1 -->
+          <rect x="22" y="44" width="22" height="22" fill="#fff"/><rect x="44" y="44" width="22" height="22" fill="#94a3b8"/>
+          <rect x="66" y="44" width="22" height="22" fill="#94a3b8"/><rect x="88" y="44" width="22" height="22" fill="#94a3b8"/>
+          <rect x="110" y="44" width="22" height="22" fill="#94a3b8"/><rect x="132" y="44" width="22" height="22" fill="#fff"/>
+          <!-- Baris 2 -->
+          <rect x="22" y="66" width="22" height="22" fill="#94a3b8"/><rect x="44" y="66" width="22" height="22" fill="#94a3b8"/>
+          <rect x="66" y="66" width="22" height="22" fill="#94a3b8"/><rect x="88" y="66" width="22" height="22" fill="#94a3b8"/>
+          <rect x="110" y="66" width="22" height="22" fill="#94a3b8"/><rect x="132" y="66" width="22" height="22" fill="#94a3b8"/>
+          <!-- Baris 3 -->
+          <rect x="22" y="88" width="22" height="22" fill="#94a3b8"/><rect x="44" y="88" width="22" height="22" fill="#94a3b8"/>
+          <rect x="66" y="88" width="22" height="22" fill="#94a3b8"/><rect x="88" y="88" width="22" height="22" fill="#94a3b8"/>
+          <rect x="110" y="88" width="22" height="22" fill="#94a3b8"/><rect x="132" y="88" width="22" height="22" fill="#94a3b8"/>
+          <!-- Baris 4 -->
+          <rect x="22" y="110" width="22" height="22" fill="#fff"/><rect x="44" y="110" width="22" height="22" fill="#94a3b8"/>
+          <rect x="66" y="110" width="22" height="22" fill="#94a3b8"/><rect x="88" y="110" width="22" height="22" fill="#94a3b8"/>
+          <rect x="110" y="110" width="22" height="22" fill="#94a3b8"/><rect x="132" y="110" width="22" height="22" fill="#fff"/>
+          <!-- Baris 5 -->
+          <rect x="22" y="132" width="22" height="22" fill="#fff"/><rect x="44" y="132" width="22" height="22" fill="#fff"/>
+          <rect x="66" y="132" width="22" height="22" fill="#94a3b8"/><rect x="88" y="132" width="22" height="22" fill="#94a3b8"/>
+          <rect x="110" y="132" width="22" height="22" fill="#fff"/><rect x="132" y="132" width="22" height="22" fill="#fff"/>
+        </g>
+        <text x="10" y="160" font-size="11" font-weight="700">A</text>
+        <text x="158" y="160" font-size="11" font-weight="700">B</text>
+        <text x="158" y="25" font-size="11" font-weight="700">C</text>
+        <text x="10" y="25" font-size="11" font-weight="700">D</text>
+      </svg>`,
+      options: {
+        A: "5 : 3",
+        B: "3 : 2",
+        C: "4 : 3",
+        D: "5 : 4",
+        E: "1 : 1"
+      },
+      answer: "E",
+      explanation: "Keliling bidang ABCD = 2 &times; (6 + 6) = 24 satuan panjang.<br>Keliling bidang berwarna gelap (tepi tangga) juga = 24 satuan panjang.<br>Perbandingan keliling gelap : keliling ABCD = 24 : 24 = <strong>1 : 1</strong>."
+    },
+    {
+      no: 28,
+      text: "Perhatikan gambar berikut! Jika CD = &radic;50 cm, AC tegak lurus AB, dan semua ruas yang bertanda garis miring memiliki panjang yang sama maka panjang AB adalah ....",
+      visual: `<svg width="260" height="125" viewBox="0 0 260 125" xmlns="http://www.w3.org/2000/svg">
+        <line x1="15" y1="62" x2="245" y2="62" stroke="#0f172a" stroke-width="1.6"/>
+        <line x1="45" y1="22" x2="45" y2="102" stroke="#0f172a" stroke-width="1.8"/>
+        <line x1="45" y1="22" x2="125" y2="102" stroke="#0f172a" stroke-width="1.8"/>
+        <line x1="125" y1="22" x2="125" y2="102" stroke="#0f172a" stroke-width="1.8"/>
+        <line x1="125" y1="22" x2="205" y2="102" stroke="#0f172a" stroke-width="1.8"/>
+        <line x1="205" y1="22" x2="205" y2="102" stroke="#0f172a" stroke-width="1.8"/>
+        <text x="41" y="16" font-size="11" font-weight="700">C</text>
+        <text x="31" y="57" font-size="11" font-weight="700">A</text>
+        <text x="80" y="76" font-size="11" font-weight="700">D</text>
+        <text x="130" y="108" font-size="11" font-weight="700">E</text>
+        <text x="210" y="76" font-size="11" font-weight="700">B</text>
+      </svg>`,
+      options: {
+        A: "20 cm",
+        B: "19 cm",
+        C: "18 cm",
+        D: "17 cm",
+        E: "16 cm"
+      },
+      answer: "A",
+      explanation: "CD = &radic;50 = 5&radic;2 cm. Karena AC = AD (segitiga siku-siku sama kaki), maka panjang AC = AD = 5 cm.<br>Dari gambar, AB terdiri dari 4 segmen yang sama panjang dengan AD:<br>AB = 4 &times; AD = 4 &times; 5 = <strong>20 cm</strong>."
+    },
+    {
+      no: 29,
+      text: "Perhatikan gambar berikut! Jika garis AB sejajar CD maka nilai y &minus; x adalah ....",
+      visual: `<svg width="240" height="145" viewBox="0 0 240 145" xmlns="http://www.w3.org/2000/svg">
+        <line x1="35" y1="45" x2="200" y2="45" stroke="#0f172a" stroke-width="1.8"/>
+        <line x1="35" y1="100" x2="205" y2="100" stroke="#0f172a" stroke-width="1.8"/>
+        <line x1="95" y1="15" x2="60" y2="130" stroke="#0f172a" stroke-width="1.8"/>
+        <line x1="135" y1="15" x2="185" y2="130" stroke="#0f172a" stroke-width="1.8"/>
+        <text x="20" y="49" font-size="12" font-weight="700">A</text>
+        <text x="205" y="49" font-size="12" font-weight="700">B</text>
+        <text x="20" y="104" font-size="12" font-weight="700">C</text>
+        <text x="210" y="104" font-size="12" font-weight="700">D</text>
+        <text x="54" y="61" font-size="11" font-weight="700" fill="#1e40af">71&deg;</text>
+        <text x="115" y="38" font-size="11" font-weight="700" fill="#1e40af">61&deg;</text>
+        <text x="76" y="92" font-size="11" font-weight="700" fill="#dc2626">x&deg;</text>
+        <text x="176" y="92" font-size="11" font-weight="700" fill="#dc2626">y&deg;</text>
+      </svg>`,
+      options: {
+        A: "49",
+        B: "48",
+        C: "57",
+        D: "78",
+        E: "119"
+      },
+      answer: "B",
+      explanation: "Karena AB sejajar CD:<br>x&deg; = 71&deg; (sudut berseberangan dalam).<br>y&deg; = 180&deg; &minus; 61&deg; = 119&deg; (pelurus sudut sehadap 61&deg;).<br>Nilai y &minus; x = 119&deg; &minus; 71&deg; = <strong>48&deg;</strong>."
+    },
+    {
+      no: 30,
+      text: "Dua persegi panjang masing-masing berukuran 30 &times; 10 dan 25 &times; 8 saling tumpang tindih seperti pada gambar (daerah III adalah daerah irisan putih). Selisih luas kedua bidang yang diarsir (I dan II) adalah ....",
+      visual: `<svg width="240" height="145" viewBox="0 0 240 145" xmlns="http://www.w3.org/2000/svg">
+        <!-- Persegi panjang II (miring) -->
+        <polygon points="65,20 130,105 98,130 33,45" fill="#94a3b8" stroke="#0f172a" stroke-width="1.5"/>
+        <!-- Persegi panjang I (mendatar) -->
+        <rect x="65" y="20" width="150" height="55" fill="#cbd5e1" stroke="#0f172a" stroke-width="1.5"/>
+        <!-- Irisan III (putih) -->
+        <polygon points="65,20 107,75 65,75" fill="#ffffff" stroke="#0f172a" stroke-width="1.5"/>
+        <text x="140" y="14" text-anchor="middle" font-size="11" font-weight="700">30</text>
+        <text x="225" y="51" font-size="11" font-weight="700">10</text>
+        <text x="40" y="95" font-size="11" font-weight="700">25</text>
+        <text x="122" y="128" font-size="11" font-weight="700">8</text>
+        <text x="145" y="52" font-size="12" font-weight="700">I</text>
+        <text x="85" y="102" font-size="12" font-weight="700">II</text>
+        <text x="80" y="64" font-size="11" font-weight="700">III</text>
+      </svg>`,
+      options: {
+        A: "100",
+        B: "110",
+        C: "150",
+        D: "200",
+        E: "160"
+      },
+      answer: "A",
+      explanation: "Luas arsir I = (30 &times; 10) &minus; Luas III = 300 &minus; Luas III.<br>Luas arsir II = (25 &times; 8) &minus; Luas III = 200 &minus; Luas III.<br>Selisih luas = (300 &minus; Luas III) &minus; (200 &minus; Luas III) = 300 &minus; 200 = <strong>100</strong>."
+    },
+    {
+      no: 31,
+      text: "Perhatikan gambar lingkaran yang menyinggung sisi-sisi persegi besar berikut! Jika luas persegi besar adalah 144 cm<sup>2</sup> maka keliling lingkarannya adalah ....",
+      visual: `<svg width="160" height="160" viewBox="0 0 160 160" xmlns="http://www.w3.org/2000/svg">
+        <rect x="20" y="20" width="120" height="120" fill="#ffffff" stroke="#0f172a" stroke-width="1.8"/>
+        <circle cx="80" cy="80" r="60" fill="none" stroke="#0f172a" stroke-width="1.8"/>
+        <rect x="38" y="38" width="84" height="84" fill="none" stroke="#0f172a" stroke-width="1.5"/>
+      </svg>`,
+      options: {
+        A: "6&pi;",
+        B: "8&pi;",
+        C: "9&pi;",
+        D: "12&pi;",
+        E: "81&pi;"
+      },
+      answer: "D",
+      explanation: "Luas persegi besar = 144 cm<sup>2</sup> &rArr; sisi persegi besar = &radic;144 = 12 cm.<br>Diameter lingkaran = sisi persegi besar = 12 cm.<br>Keliling lingkaran = &pi;d = <strong>12&pi;</strong>."
+    },
+    {
+      no: 32,
+      text: "Pada garis lurus ABCD di bawah ini, jika AB = BC dan BD = 5AB maka panjang AD adalah ....",
+      visual: `<svg width="260" height="55" viewBox="0 0 260 55" xmlns="http://www.w3.org/2000/svg">
+        <line x1="25" y1="25" x2="235" y2="25" stroke="#0f172a" stroke-width="2"/>
+        <circle cx="25" cy="25" r="3.5" fill="#0f172a"/><text x="21" y="45" font-size="12" font-weight="700">A</text>
+        <circle cx="60" cy="25" r="3.5" fill="#0f172a"/><text x="56" y="45" font-size="12" font-weight="700">B</text>
+        <circle cx="95" cy="25" r="3.5" fill="#0f172a"/><text x="91" y="45" font-size="12" font-weight="700">C</text>
+        <circle cx="235" cy="25" r="3.5" fill="#0f172a"/><text x="231" y="45" font-size="12" font-weight="700">D</text>
+      </svg>`,
+      options: {
+        A: "3 AC",
+        B: "3,5 AC",
+        C: "0,75 BD",
+        D: "0,9 BD",
+        E: "8 BC"
+      },
+      answer: "A",
+      explanation: "AB = BC sehingga AC = 2AB &rArr; AB = 0,5 AC.<br>AD = AB + BD = AB + 5AB = 6AB = 6(0,5 AC) = <strong>3 AC</strong>."
+    },
+    {
+      no: 33,
+      text: "Banyak segitiga seluruhnya yang terdapat pada gambar berikut adalah ....",
+      visual: `<svg width="240" height="125" viewBox="0 0 240 125" xmlns="http://www.w3.org/2000/svg">
+        <rect x="25" y="22" width="190" height="80" fill="#ffffff" stroke="#0f172a" stroke-width="1.6"/>
+        <line x1="25" y1="62" x2="215" y2="62" stroke="#0f172a" stroke-width="1.4"/>
+        <line x1="25" y1="22" x2="120" y2="102" stroke="#0f172a" stroke-width="1.4"/>
+        <line x1="120" y1="22" x2="25" y2="102" stroke="#0f172a" stroke-width="1.4"/>
+        <line x1="120" y1="22" x2="215" y2="102" stroke="#0f172a" stroke-width="1.4"/>
+        <line x1="215" y1="22" x2="120" y2="102" stroke="#0f172a" stroke-width="1.4"/>
+        <text x="15" y="25" font-size="11" font-weight="700">B</text>
+        <text x="116" y="16" font-size="11" font-weight="700">E</text>
+        <text x="220" y="25" font-size="11" font-weight="700">D</text>
+        <text x="15" y="107" font-size="11" font-weight="700">C</text>
+        <text x="116" y="117" font-size="11" font-weight="700">F</text>
+        <text x="220" y="107" font-size="11" font-weight="700">C</text>
+      </svg>`,
+      options: {
+        A: "8",
+        B: "10",
+        C: "12",
+        D: "16",
+        E: "18"
+      },
+      answer: "E",
+      explanation: "Menghitung segitiga berdasarkan ukuran:<br>&bull; Segitiga kecil 1 bagian (seperti PQB): ada 4 segitiga.<br>&bull; Segitiga sedang 2 bagian (seperti BQC): ada 8 segitiga.<br>&bull; Segitiga besar setengah persegi (seperti BCF): ada 4 segitiga.<br>&bull; Segitiga sangat besar (seperti BFD): ada 2 segitiga.<br>Total banyak segitiga = 4 + 8 + 4 + 2 = <strong>18</strong>."
+    },
+    {
+      no: 34,
+      text: "Jika setiap sel persegi pada gambar memiliki sisi 2 cm, dan ditarik garis lurus dari titik P melewati titik C yang membagi dua daerah pada gambar maka perbandingan luas kedua daerah tersebut adalah ....",
+      visual: `<svg width="185" height="195" viewBox="0 0 185 195" xmlns="http://www.w3.org/2000/svg">
+        <g stroke="#0f172a" stroke-width="1.4" fill="#ffffff">
+          <!-- Baris 1: 6 kotak -->
+          <rect x="20" y="20" width="22" height="22"/><rect x="42" y="20" width="22" height="22"/><rect x="64" y="20" width="22" height="22"/>
+          <rect x="86" y="20" width="22" height="22"/><rect x="108" y="20" width="22" height="22"/><rect x="130" y="20" width="22" height="22"/>
+          <!-- Baris 2: 5 kotak -->
+          <rect x="20" y="42" width="22" height="22"/><rect x="42" y="42" width="22" height="22"/><rect x="64" y="42" width="22" height="22"/>
+          <rect x="86" y="42" width="22" height="22"/><rect x="108" y="42" width="22" height="22"/>
+          <!-- Baris 3: 4 kotak -->
+          <rect x="20" y="64" width="22" height="22"/><rect x="42" y="64" width="22" height="22"/><rect x="64" y="64" width="22" height="22"/>
+          <rect x="86" y="64" width="22" height="22"/>
+          <!-- Baris 4: 3 kotak -->
+          <rect x="20" y="86" width="22" height="22"/><rect x="42" y="86" width="22" height="22"/><rect x="64" y="86" width="22" height="22"/>
+          <!-- Baris 5: 2 kotak -->
+          <rect x="20" y="108" width="22" height="22"/><rect x="42" y="108" width="22" height="22"/>
+          <!-- Baris 6 & 7: 1 kotak -->
+          <rect x="20" y="130" width="22" height="22"/>
+          <rect x="20" y="152" width="22" height="22"/>
+        </g>
+        <circle cx="20" cy="20" r="3.5" fill="#1e40af"/><text x="8" y="18" font-size="11" font-weight="700" fill="#1e40af">P</text>
+        <circle cx="86" cy="108" r="3.5" fill="#dc2626"/><text x="84" y="124" font-size="11" font-weight="700" fill="#dc2626">C</text>
+      </svg>`,
+      options: {
+        A: "2 : 3",
+        B: "3 : 4",
+        C: "4 : 5",
+        D: "1 : 1",
+        E: "5 : 6"
+      },
+      answer: "E",
+      explanation: "Luas tiap persegi kecil = 2 &times; 2 = 4 cm<sup>2</sup>.<br>Persegi panjang pembantu 3 &times; 4 sel (6 cm &times; 8 cm) dibagi diagonal PC menjadi dua segitiga masing-masing seluas (1/2) &times; 6 &times; 8 = 24 cm<sup>2</sup>.<br>Luas Daerah I (kiri bawah) = 4 persegi kecil + 24 = 16 + 24 = 40 cm<sup>2</sup>.<br>Luas Daerah II (kanan atas) = 6 persegi kecil + 24 = 24 + 24 = 48 cm<sup>2</sup>.<br>Perbandingan Daerah I : Daerah II = 40 : 48 = <strong>5 : 6</strong>."
+    },
+    {
+      no: 35,
+      text: "Bangun ruang dibentuk dari 3 kubus kosong, masing-masing dengan rusuk 8 cm. Jika ada bangun prisma pejal (A dan B) menempati ruang tersebut seperti gambar maka volume ruang yang masih tersisa adalah ....",
+      visual: `<svg width="200" height="175" viewBox="0 0 200 175" xmlns="http://www.w3.org/2000/svg">
+        <!-- 3 kubus berbentuk L -->
+        <!-- Kubus atas -->
+        <polygon points="35,35 85,35 85,85 35,85" fill="none" stroke="#0f172a" stroke-width="1.5"/>
+        <polygon points="35,35 60,15 110,15 85,35" fill="none" stroke="#0f172a" stroke-width="1.5"/>
+        <line x1="110" y1="15" x2="110" y2="65" stroke="#0f172a" stroke-width="1.5"/>
+        <line x1="85" y1="85" x2="110" y2="65" stroke="#0f172a" stroke-width="1.5"/>
+        <!-- Kubus bawah kiri -->
+        <polygon points="35,85 85,85 85,145 35,145" fill="none" stroke="#0f172a" stroke-width="1.5"/>
+        <!-- Kubus bawah kanan -->
+        <polygon points="85,85 145,85 145,145 85,145" fill="none" stroke="#0f172a" stroke-width="1.5"/>
+        <polygon points="85,85 110,65 170,65 145,85" fill="none" stroke="#0f172a" stroke-width="1.5"/>
+        <line x1="170" y1="65" x2="170" y2="125" stroke="#0f172a" stroke-width="1.5"/>
+        <line x1="145" y1="145" x2="170" y2="125" stroke="#0f172a" stroke-width="1.5"/>
+        <!-- Prisma B (atas) dan A (bawah) -->
+        <polygon points="35,85 85,35 110,15 110,65 85,85" fill="#94a3b8" fill-opacity="0.75" stroke="#0f172a" stroke-width="1.4"/>
+        <polygon points="35,85 85,85 110,65 110,125 85,145" fill="#64748b" fill-opacity="0.75" stroke="#0f172a" stroke-width="1.4"/>
+        <text x="68" y="78" font-size="11" font-weight="700">B</text>
+        <text x="68" y="108" font-size="11" font-weight="700">A</text>
+      </svg>`,
+      options: {
+        A: "1.024 cm<sup>3</sup>",
+        B: "1.280 cm<sup>3</sup>",
+        C: "1.408 cm<sup>3</sup>",
+        D: "1.508 cm<sup>3</sup>",
+        E: "1.536 cm<sup>3</sup>"
+      },
+      answer: "A",
+      explanation: "Volume 3 kubus = 3 &times; (8 &times; 8 &times; 8) = 1.536 cm<sup>3</sup>.<br>Volume A = (1/2) &times; (8 &times; 8) &times; 8 = 256 cm<sup>3</sup>.<br>Volume B = (1/2) &times; (8 &times; 8) &times; 8 = 256 cm<sup>3</sup>.<br>Volume ruang yang masih tersisa = 1.536 &minus; 256 &minus; 256 = <strong>1.024 cm<sup>3</sup></strong>."
+    },
+    {
+      no: 36,
+      text: "Sebuah roda berbentuk lingkaran dengan diameter 70 cm. Jika roda tersebut berputar selama 100 kali, panjang lintasan roda tersebut adalah ....",
+      options: {
+        A: "110 m",
+        B: "154 m",
+        C: "220 m",
+        D: "308 m",
+        E: "400 m"
+      },
+      answer: "C",
+      explanation: "Keliling roda = &pi;d = (22/7) &times; 70 = 220 cm.<br>Panjang lintasan = keliling &times; banyak putaran = 220 cm &times; 100 = 22.000 cm = <strong>220 m</strong>."
+    },
+    {
+      no: 37,
+      text: "Suatu persegi panjang memiliki panjang 2p cm dan lebar q cm. Jika persegi memiliki panjang sisi q cm dan luasnya 3/2 luas persegi panjang tersebut maka ....",
+      options: {
+        A: "p = q",
+        B: "2p = q",
+        C: "3p = q",
+        D: "4p = 2q",
+        E: "3p = 2p"
+      },
+      answer: "C",
+      explanation: "Luas persegi panjang = 2p &times; q = 2pq; Luas persegi = q<sup>2</sup>.<br>Luas persegi = (3/2) Luas persegi panjang &rArr; q<sup>2</sup> = (3/2)(2pq) = 3pq.<br>Kedua ruas dibagi q: <strong>q = 3p</strong> (atau <strong>3p = q</strong>)."
+    },
+    {
+      no: 38,
+      text: "Sebuah kolam berbentuk balok dengan ukuran panjang 24 m, lebar 10 m, dan dalam 1 m akan diuruk menggunakan pasir. Pasir tersebut diangkut oleh truk dengan ukuran bak truk panjang 5 m, lebar 1,6 m, dan tinggi 1 m. Jika hanya ada 1 truk, berapa kali truk tersebut harus membawa muatan uruk pasir?",
+      options: {
+        A: "10 kali",
+        B: "20 kali",
+        C: "30 kali",
+        D: "40 kali",
+        E: "60 kali"
+      },
+      answer: "C",
+      explanation: "Banyak angkut truk = (Volume kolam) / (Volume bak truk)<br>= (24 &times; 10 &times; 1) / (5 &times; 1,6 &times; 1) = 240 / 8 = <strong>30 kali</strong>."
+    },
+    {
+      no: 39,
+      text: "Sebuah ruangan memiliki ukuran 3 m &times; 4,5 m akan dipasang ubin dengan ukuran 30 cm &times; 30 cm. Banyak ubin yang dibutuhkan adalah ....",
+      options: {
+        A: "100 ubin",
+        B: "125 ubin",
+        C: "150 ubin",
+        D: "200 ubin",
+        E: "300 ubin"
+      },
+      answer: "C",
+      explanation: "Banyak ubin = (Luas ruangan) / (Luas ubin)<br>= (3 m &times; 4,5 m) / (30 cm &times; 30 cm) = (300 cm &times; 450 cm) / (30 cm &times; 30 cm) = 10 &times; 15 = <strong>150 ubin</strong>."
+    },
+    {
+      no: 40,
+      text: "Sebuah segitiga sama sisi memiliki panjang sisi 10 cm. Luas segitiga tersebut adalah ....",
+      options: {
+        A: "25&radic;2 cm<sup>2</sup>",
+        B: "25 cm<sup>2</sup>",
+        C: "50 cm<sup>2</sup>",
+        D: "100 cm<sup>2</sup>",
+        E: "50&radic;2 cm<sup>2</sup>"
+      },
+      answer: "A",
+      explanation: "Tinggi segitiga sama sisi secara tepat adalah t = &radic;(10<sup>2</sup> &minus; 5<sup>2</sup>) = 5&radic;3 cm (luas 25&radic;3 cm<sup>2</sup>), namun pada pembahasan PDF digunakan tanda + sehingga t = &radic;(10<sup>2</sup> + 5<sup>2</sup>) = 5&radic;2 cm dan Luas = (1/2) &times; 10 &times; 5&radic;2 = <strong>25&radic;2 cm<sup>2</sup></strong> (opsi <strong>A</strong>)."
+    }
+  ];
+
+  // =========================================================================
+  // RENDER VISUAL PENDUKUNG SOAL & PEMBAHASAN
+  // =========================================================================
+  function renderVisualHelper(visualHtml) {
+    if (!visualHtml) return "";
+    return `<div class="diagram-scroll">${visualHtml}</div>`;
+  }
+
+  // =========================================================================
+  // STATE & LOGIKA APLIKASI CAT
+  // =========================================================================
+  const EXAM_DURATION_SECONDS = 40 * 60; // 40 Menit untuk 40 Soal
+  let currentUser = { user: "", nama: "" };
+  let currentIndex = 0;
+  let userAnswers = new Array(questions.length).fill(null);
+  let doubtStatus = new Array(questions.length).fill(false);
+  let timeLeft = EXAM_DURATION_SECONDS;
+  let timerInterval = null;
+
+  // Fungsi Modal Custom (Pengganti alert & confirm agar aman di semua iframe/browser)
+  function showModal(title, message, buttons) {
+    const overlay = document.getElementById("custom-modal");
+    document.getElementById("modal-title").textContent = title;
+    document.getElementById("modal-message").textContent = message;
+    const btnContainer = document.getElementById("modal-buttons");
+    btnContainer.innerHTML = "";
+
+    buttons.forEach(b => {
+      const btn = document.createElement("button");
+      btn.className = "btn " + (b.className || "btn-primary");
+      btn.style.width = "auto";
+      btn.textContent = b.text;
+      btn.onclick = () => {
+        overlay.style.display = "none";
+        if (b.onClick) b.onClick();
+      };
+      btnContainer.appendChild(btn);
+    });
+
+    overlay.style.display = "flex";
+  }
+
+  // Handle Login ke Google Sheet
+  document.getElementById("login-form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const userVal = document.getElementById("username").value.trim();
+    const passVal = document.getElementById("password").value.trim();
+    const btn = document.getElementById("btn-login");
+    const errBox = document.getElementById("login-error");
+
+    btn.disabled = true;
+    btn.textContent = "Memverifikasi...";
+    errBox.style.display = "none";
+
+    try {
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({ username: userVal, password: passVal })
+      });
+      
+      const textRes = await response.text();
+      let result;
+      try {
+        result = JSON.parse(textRes);
+      } catch (parseErr) {
+        throw new Error("Format respons server tidak valid.");
+      }
+
+      if (result.status === "success") {
+        currentUser = { user: result.user, nama: result.nama };
+        startExam();
+      } else {
+        errBox.style.display = "block";
+        errBox.textContent = result.message || "Username atau Password salah!";
+      }
+    } catch (error) {
+      errBox.style.display = "block";
+      errBox.textContent = "Gagal memproses login. Pastikan Web App sudah di-deploy ulang dengan 'Who has access' diset ke 'Anyone'.";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Masuk Ujian";
+    }
+  });
+
+  function resetExamState() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    currentIndex = 0;
+    userAnswers = new Array(questions.length).fill(null);
+    doubtStatus = new Array(questions.length).fill(false);
+    timeLeft = EXAM_DURATION_SECONDS;
+
+    const timerEl = document.getElementById("timer");
+    timerEl.textContent = "40:00";
+    timerEl.style.color = "white";
+  }
+
+  function startExam() {
+    resetExamState();
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("exam-screen").style.display = "block";
+    document.getElementById("peserta-info").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+
+    initNumberGrid();
+    renderQuestion(0);
+    startTimer();
+  }
+
+  function retryExam() {
+    startExam();
+  }
+
+  function confirmLogout() {
+    showModal(
+      "Konfirmasi Logout",
+      "Apakah Anda yakin ingin keluar dari ujian? Progres jawaban Anda saat ini akan direset.",
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Logout", className: "btn-logout", onClick: logoutUser }
+      ]
+    );
+  }
+
+  function logoutUser() {
+    resetExamState();
+    currentUser = { user: "", nama: "" };
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("login-error").style.display = "none";
+
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("login-screen").style.display = "flex";
+  }
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+      const s = (timeLeft % 60).toString().padStart(2, '0');
+      document.getElementById("timer").textContent = `${m}:${s}`;
+
+      if (timeLeft <= 300) {
+        document.getElementById("timer").style.color = "#fca5a5";
+      }
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        showModal(
+          "Waktu Habis",
+          "Waktu ujian telah habis! Jawaban Anda akan dikumpulkan otomatis.",
+          [{ text: "Lihat Hasil", className: "btn-primary", onClick: finishExam }]
+        );
+      }
+    }, 1000);
+  }
+
+  function initNumberGrid() {
+    const grid = document.getElementById("number-grid");
+    grid.innerHTML = "";
+    questions.forEach((q, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "num-btn";
+      btn.id = `num-btn-${idx}`;
+      btn.textContent = q.no;
+      btn.onclick = () => renderQuestion(idx);
+      grid.appendChild(btn);
+    });
+  }
+
+  function updateNumberGrid() {
+    questions.forEach((_, idx) => {
+      const btn = document.getElementById(`num-btn-${idx}`);
+      if (!btn) return;
+      btn.className = "num-btn";
+      if (idx === currentIndex) btn.classList.add("active");
+      if (doubtStatus[idx]) {
+        btn.classList.add("doubt");
+      } else if (userAnswers[idx] !== null) {
+        btn.classList.add("answered");
+      }
+    });
+  }
+
+  function renderQuestion(index) {
+    currentIndex = index;
+    const q = questions[index];
+
+    document.getElementById("q-number").textContent = `Soal No. ${q.no} dari ${questions.length}`;
+    document.getElementById("q-text").innerHTML = q.text;
+    document.getElementById("q-visual").innerHTML = renderVisualHelper(q.visual);
+
+    const statusEl = document.getElementById("q-status");
+    if (doubtStatus[index]) {
+      statusEl.textContent = "Ditandai Ragu-Ragu";
+      statusEl.style.color = "#b45309";
+    } else if (userAnswers[index]) {
+      statusEl.textContent = `Terjawab (${userAnswers[index]})`;
+      statusEl.style.color = "var(--success)";
+    } else {
+      statusEl.textContent = "Belum dijawab";
+      statusEl.style.color = "var(--muted)";
+    }
+
+    const optContainer = document.getElementById("q-options");
+    optContainer.innerHTML = "";
+
+    ["A", "B", "C", "D", "E"].forEach(letter => {
+      const div = document.createElement("div");
+      div.className = "option-item" + (userAnswers[index] === letter ? " selected" : "");
+      div.onclick = () => selectOption(letter);
+      div.innerHTML = `
+        <div class="option-letter">${letter}</div>
+        <div>${q.options[letter]}</div>
+      `;
+      optContainer.appendChild(div);
+    });
+
+    document.getElementById("btn-prev").disabled = (index === 0);
+    document.getElementById("btn-next").disabled = (index === questions.length - 1);
+    updateNumberGrid();
+  }
+
+  function selectOption(letter) {
+    userAnswers[currentIndex] = letter;
+    renderQuestion(currentIndex);
+  }
+
+  function toggleDoubt() {
+    doubtStatus[currentIndex] = !doubtStatus[currentIndex];
+    renderQuestion(currentIndex);
+  }
+
+  function prevQuestion() {
+    if (currentIndex > 0) renderQuestion(currentIndex - 1);
+  }
+
+  function nextQuestion() {
+    if (currentIndex < questions.length - 1) renderQuestion(currentIndex + 1);
+  }
+
+  function confirmFinish() {
+    const unanswered = userAnswers.filter(a => a === null).length;
+    const msg = unanswered > 0 
+      ? `Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin mengakhiri ujian?`
+      : "Apakah Anda yakin ingin mengumpulkan semua jawaban sekarang?";
+    
+    showModal(
+      "Kumpulkan Jawaban",
+      msg,
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Kumpulkan", className: "btn-finish", onClick: finishExam }
+      ]
+    );
+  }
+
+  function finishExam() {
+    clearInterval(timerInterval);
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "block";
+
+    let benar = 0, salah = 0, kosong = 0;
+    const reviewContainer = document.getElementById("review-container");
+    reviewContainer.innerHTML = "";
+
+    questions.forEach((q, idx) => {
+      const uAns = userAnswers[idx];
+      const isCorrect = uAns === q.answer;
+
+      if (uAns === null) kosong++;
+      else if (isCorrect) benar++;
+      else salah++;
+
+      const card = document.createElement("div");
+      card.className = `card review-card ${isCorrect ? 'correct' : 'wrong'}`;
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+          <strong>Soal No. ${q.no}</strong>
+          <span style="font-weight:bold; color:${isCorrect ? 'var(--success)' : 'var(--danger)'}">
+            ${uAns === null ? 'Tidak Dijawab' : (isCorrect ? 'BENAR' : 'SALAH')}
+          </span>
+        </div>
+        <p style="margin-bottom:10px;">${q.text}</p>
+        ${renderVisualHelper(q.visual)}
+        <p><strong>Jawaban Anda:</strong> ${uAns ? `${uAns}. ${q.options[uAns]}` : '-'} | 
+           <strong style="color:var(--success)">Kunci Jawaban:</strong> ${q.answer}. ${q.options[q.answer]}</p>
+        <div class="pembahasan-box">
+          <strong>Pembahasan:</strong>
+          <div style="margin-top:6px;">${q.explanation}</div>
+          <div style="margin-top:8px; font-weight:700; color:#0f172a;">&#9632; Jawaban: ${q.answer}</div>
+        </div>
+      `;
+      reviewContainer.appendChild(card);
+    });
+
+    const skor = Math.round((benar / questions.length) * 100);
+    document.getElementById("res-peserta").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+    document.getElementById("res-score").textContent = `${skor} / 100`;
+    document.getElementById("res-detail").textContent = `Benar: ${benar} | Salah: ${salah} | Kosong: ${kosong}`;
+  }
+</script>
+</body>
+</html>

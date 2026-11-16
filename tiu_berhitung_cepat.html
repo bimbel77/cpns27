@@ -1,0 +1,887 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAT - BERHITUNG CEPAT</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+      --warning: #eab308;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); line-height: 1.6; }
+
+    /* Login Screen */
+    #login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .login-box {
+      background: var(--card); padding: 35px; border-radius: 12px; width: 100%; max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+    .login-box h2 { text-align: center; color: var(--primary); margin-bottom: 5px; }
+    .login-box p { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 25px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+    .form-group input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;
+    }
+    .btn {
+      display: inline-block; padding: 10px 18px; border: none; border-radius: 6px; font-size: 0.95rem;
+      font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; text-decoration: none;
+    }
+    .btn-primary { background: var(--primary); color: white; width: 100%; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+    .btn-logout {
+      background: var(--danger); color: white; padding: 7px 14px; font-size: 0.85rem;
+    }
+    .btn-logout:hover { background: var(--danger-hover); }
+    .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 10px; text-align: center; display: none; }
+
+    .register-link-box {
+      margin-top: 18px; padding-top: 15px; border-top: 1px solid #e2e8f0;
+      text-align: center; font-size: 0.9rem; color: var(--muted);
+    }
+    .register-link-box a {
+      color: var(--primary); font-weight: 700; text-decoration: none;
+    }
+    .register-link-box a:hover {
+      text-decoration: underline; color: var(--primary-hover);
+    }
+
+    /* Header CAT */
+    header {
+      background: var(--primary); color: white; padding: 15px 25px; display: flex;
+      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header-title h1 { font-size: 1.2rem; }
+    .header-info { display: flex; align-items: center; gap: 15px; }
+    .timer-box {
+      background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 6px;
+      font-weight: bold; font-size: 1.1rem; letter-spacing: 1px;
+    }
+
+    /* Main Container */
+    #exam-screen, #result-screen { display: none; max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+    .exam-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+    @media (max-width: 850px) { .exam-layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card); border-radius: 10px; padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
+    }
+
+    /* Soal Area */
+    .question-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 2px solid var(--bg); padding-bottom: 12px; margin-bottom: 18px;
+    }
+    .badge-no { background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; }
+    .question-text { font-size: 1.05rem; margin-bottom: 15px; }
+
+    /* Opsi Jawaban */
+    .options-list { display: flex; flex-direction: column; gap: 10px; }
+    .option-item {
+      display: flex; align-items: center; gap: 12px; padding: 12px 15px;
+      border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: 0.15s;
+    }
+    .option-item:hover { background: #f8fafc; border-color: var(--primary); }
+    .option-item.selected { background: #eff6ff; border-color: var(--primary); font-weight: 600; }
+    .option-letter {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+    }
+    .option-item.selected .option-letter { background: var(--primary); color: white; }
+
+    /* Navigasi Bawah Soal */
+    .nav-actions {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 25px;
+      padding-top: 15px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;
+    }
+    .btn-nav { background: #e2e8f0; color: var(--text); }
+    .btn-nav:hover { background: #cbd5e1; }
+    .btn-ragu { background: var(--warning); color: #000; }
+    .btn-finish { background: var(--success); color: white; width: 100%; margin-top: 15px; }
+    .btn-finish:hover { background: #15803d; }
+
+    /* Grid Nomor Soal */
+    .grid-numbers {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px;
+      max-height: 360px; overflow-y: auto; padding-right: 4px;
+    }
+    .num-btn {
+      padding: 8px 0; border: 1px solid var(--border); border-radius: 6px;
+      background: white; font-weight: 600; cursor: pointer; text-align: center;
+    }
+    .num-btn.active { border: 2px solid var(--primary); }
+    .num-btn.answered { background: var(--success); color: white; border-color: var(--success); }
+    .num-btn.doubt { background: var(--warning); color: black; border-color: var(--warning); }
+
+    .legend { display: flex; gap: 12px; font-size: 0.8rem; margin-top: 15px; flex-wrap: wrap; }
+    .legend span { display: flex; align-items: center; gap: 5px; }
+    .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+    /* Result & Pembahasan */
+    .score-banner {
+      text-align: center; padding: 30px; background: linear-gradient(135deg, #1e40af, #3b82f6);
+      color: white; border-radius: 12px; margin-bottom: 25px;
+    }
+    .score-big { font-size: 3.5rem; font-weight: bold; margin: 10px 0; }
+    .result-actions {
+      display: flex; justify-content: center; gap: 12px; margin-top: 15px; flex-wrap: wrap;
+    }
+    .review-card { margin-bottom: 20px; border-left: 5px solid var(--border); }
+    .review-card.correct { border-left-color: var(--success); }
+    .review-card.wrong { border-left-color: var(--danger); }
+    .pembahasan-box {
+      background: #f8fafc; padding: 15px; border-radius: 8px; margin-top: 12px;
+      border: 1px dashed #94a3b8; font-size: 0.95rem;
+    }
+    .diagram-scroll {
+      overflow-x: auto;
+      margin: 10px 0 8px 0;
+      padding: 8px;
+      background: #ffffff;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+    .math-table {
+      width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 4px 0;
+    }
+    .math-table th, .math-table td {
+      border: 1px solid #cbd5e1; padding: 6px 10px; text-align: center;
+    }
+    .math-table th {
+      background: #eff6ff; color: var(--primary); font-weight: 700;
+    }
+    .frac {
+      display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: 0.88em; margin: 0 2px;
+    }
+    .frac span:first-child { border-bottom: 1px solid currentColor; padding: 0 3px; }
+    .frac span:last-child { padding: 0 3px; }
+
+    /* Custom Modal Dialog (Pengganti alert/confirm) */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6); display: none; align-items: center;
+      justify-content: center; z-index: 999; padding: 20px;
+    }
+    .modal-card {
+      background: white; padding: 25px; border-radius: 12px; max-width: 400px;
+      width: 100%; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .modal-card h3 { color: var(--primary); margin-bottom: 10px; }
+    .modal-card p { color: var(--text); font-size: 0.95rem; margin-bottom: 20px; }
+    .modal-btns { display: flex; gap: 10px; justify-content: center; }
+  </style>
+</head>
+<body>
+
+  <!-- HALAMAN LOGIN -->
+  <div id="login-screen">
+    <div class="login-box">
+      <h2>Portal Ujian CAT</h2>
+      <p>Subtes TIU: Berhitung Cepat (21 Soal)</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Username/Email</label>
+          <input type="text" id="username" required placeholder="Masukkan username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="Masukkan password">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-login">Masuk Ujian</button>
+        <div class="error-msg" id="login-error"></div>
+        <div class="register-link-box">
+          Belum punya akun? <a href="http://lynk.id/seputar_guru/4g73189dndge/checkout" target="_blank" rel="noopener noreferrer">Daftar di sini</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- HALAMAN UJIAN CAT -->
+  <div id="exam-screen">
+    <header>
+      <div class="header-title">
+        <h1>CAT - BERHITUNG CEPAT</h1>
+        <small id="peserta-info">Peserta: -</small>
+      </div>
+      <div class="header-info">
+        <div class="timer-box" id="timer">30:00</div>
+        <button type="button" class="btn btn-logout" onclick="confirmLogout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="exam-layout" style="margin-top: 20px;">
+      <!-- Kolom Kiri: Soal -->
+      <div class="card">
+        <div class="question-header">
+          <span class="badge-no" id="q-number">Soal No. 1</span>
+          <span id="q-status" style="font-size: 0.85rem; color: var(--muted);">Belum dijawab</span>
+        </div>
+        <div class="question-text" id="q-text"></div>
+        <div class="options-list" id="q-options"></div>
+
+        <div class="nav-actions">
+          <button class="btn btn-nav" id="btn-prev" onclick="prevQuestion()">&laquo; Sebelumnya</button>
+          <button class="btn btn-ragu" id="btn-doubt" onclick="toggleDoubt()">Ragu-Ragu</button>
+          <button class="btn btn-nav" id="btn-next" onclick="nextQuestion()">Selanjutnya &raquo;</button>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Navigasi Nomor -->
+      <div class="card">
+        <h3>Navigasi Soal</h3>
+        <div class="grid-numbers" id="number-grid"></div>
+        <div class="legend">
+          <span><i class="dot" style="background: var(--success);"></i> Dijawab</span>
+          <span><i class="dot" style="background: var(--warning);"></i> Ragu</span>
+          <span><i class="dot" style="background: #fff; border: 1px solid #cbd5e1;"></i> Kosong</span>
+        </div>
+        <button class="btn btn-finish" onclick="confirmFinish()">Selesai & Kumpulkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN HASIL & PEMBAHASAN -->
+  <div id="result-screen">
+    <div class="score-banner">
+      <h2>Hasil Ujian CAT Anda</h2>
+      <p id="res-peserta"></p>
+      <div class="score-big" id="res-score">0</div>
+      <p id="res-detail">Benar: 0 | Salah: 0 | Kosong: 0</p>
+      <div class="result-actions">
+        <button class="btn" style="background: white; color: var(--primary);" onclick="retryExam()">Ulangi Ujian</button>
+        <button class="btn btn-logout" onclick="logoutUser()">Logout</button>
+      </div>
+    </div>
+    <h3 style="margin-bottom: 15px;">Kunci Jawaban & Pembahasan Lengkap</h3>
+    <div id="review-container"></div>
+  </div>
+
+  <!-- CUSTOM MODAL -->
+  <div class="modal-overlay" id="custom-modal">
+    <div class="modal-card">
+      <h3 id="modal-title">Konfirmasi</h3>
+      <p id="modal-message">Pesan konfirmasi</p>
+      <div class="modal-btns" id="modal-buttons"></div>
+    </div>
+  </div>
+
+<script>
+  // =========================================================================
+  // URL GOOGLE APPS SCRIPT ANDA YANG AKTIF
+  // =========================================================================
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxB6Th7GHlD9o8ABbYcK2mdV7mv4ufy2i-SYXUg3jVqS0Q1bkXa_pkseMhqmIzgCTx7/exec";
+
+  // =========================================================================
+  // BANK SOAL, KUNCI JAWABAN & PEMBAHASAN (21 SOAL BERHITUNG CEPAT DARI PDF)
+  // =========================================================================
+  const questions = [
+    {
+      no: 1,
+      text: "444,88 : 88,4 = ....",
+      options: {
+        A: "5,033",
+        B: "50,33",
+        C: "51,23",
+        D: "7,881",
+        E: "70,81"
+      },
+      answer: "A",
+      explanation: "<strong>TRIK!</strong> Gunakan perkiraan.<br>444,88 : 88,4 mendekati 450 : 90 = 5.<br>Pilihlah jawaban yang mendekati 5.<br>444,88 : 88,4 = <strong>5,033</strong>."
+    },
+    {
+      no: 2,
+      text: "256,374 + 6,246 &minus; 176,27 = ....",
+      options: {
+        A: "44,55",
+        B: "50,4",
+        C: "86,35",
+        D: "124,45",
+        E: "144,5"
+      },
+      answer: "C",
+      explanation: "<strong>TRIK!</strong> Gunakan perkiraan.<br>256,374 + 6,246 &minus; 176,27 mendekati 256 + 6 &minus; 176 = 86.<br>Pilih jawaban yang hasilnya mendekati 86.<br>Jadi, 256,374 + 6,246 &minus; 176,27 = <strong>86,35</strong>."
+    },
+    {
+      no: 3,
+      text: "Nilai dari (2014 &minus; 2055 + 2088 &minus; 2199) + (2087 &minus; 2015 + 2200 + 2057) adalah ....",
+      options: {
+        A: "&minus;1",
+        B: "0",
+        C: "1",
+        D: "2",
+        E: "2013"
+      },
+      answer: "C",
+      explanation: "<strong>TRIK!</strong> Kelompokkan penjumlahan dan pengurangan tersebut:<br>(2.014 &minus; 2.055 + 2.088 &minus; 2.199) + (2.087 &minus; 2.015 + 2.200 + 2.057)<br>= (2.014 &minus; 2.015) + (2.057 &minus; 2.055) + (&minus;2.088 + 2.087) + (2.200 &minus; 2.199)<br>= &minus;1 + 2 &minus; 1 + 1 = <strong>1</strong>."
+    },
+    {
+      no: 4,
+      text: "0,575 : 0,025 = ....",
+      options: {
+        A: "25",
+        B: "23",
+        C: "22",
+        D: "21",
+        E: "27"
+      },
+      answer: "B",
+      explanation: "0,575 : 0,025 &rArr; kedua bilangan dikalikan 1.000:<br>= 575 : 25 = <strong>23</strong>."
+    },
+    {
+      no: 5,
+      text: "999% dari 0,637637637... adalah ....",
+      options: {
+        A: "63",
+        B: "64",
+        C: "63,7",
+        D: "0,637",
+        E: "6,37"
+      },
+      answer: "E",
+      visual: `<table class="math-table">
+        <tr><th>Pola Desimal Berulang</th><th>Bentuk Pecahan</th></tr>
+        <tr><td>0,aaaa...</td><td><span class="frac"><span>a</span><span>9</span></span></td></tr>
+        <tr><td>0,ababab...</td><td><span class="frac"><span>ab</span><span>99</span></span></td></tr>
+        <tr><td>0,abcabcabc...</td><td><span class="frac"><span>abc</span><span>999</span></span></td></tr>
+      </table>`,
+      explanation: "<strong>TRIK!</strong> 0,637637637... = <span class=\"frac\"><span>637</span><span>999</span></span>.<br>Jadi, 999% dari 0,637637637... adalah:<br>999% &times; 0,637637637... = <span class=\"frac\"><span>999</span><span>100</span></span> &times; <span class=\"frac\"><span>637</span><span>999</span></span> = <span class=\"frac\"><span>637</span><span>100</span></span> = <strong>6,37</strong>."
+    },
+    {
+      no: 6,
+      text: "Jika 6<sup>4</sup> + 6<sup>4</sup> + 6<sup>4</sup> + 6<sup>4</sup> + 6<sup>4</sup> + 6<sup>4</sup> = (2 &times; a)<sup>n</sup>, dengan a dan n bilangan bulat maka nilai a + n = ....",
+      options: {
+        A: "3",
+        B: "4",
+        C: "5",
+        D: "8",
+        E: "9"
+      },
+      answer: "D",
+      explanation: "<strong>TRIK!</strong> Gunakan sifat perpangkatan.<br>6<sup>4</sup> + 6<sup>4</sup> + 6<sup>4</sup> + 6<sup>4</sup> + 6<sup>4</sup> + 6<sup>4</sup> = (2 &times; a)<sup>n</sup><br>6 &times; 6<sup>4</sup> = (2 &times; a)<sup>n</sup><br>6<sup>5</sup> = (2 &times; a)<sup>n</sup><br>(2 &times; 3)<sup>5</sup> = (2 &times; a)<sup>n</sup><br>Nilai a = 3, n = 5. Jadi, a + n = 3 + 5 = <strong>8</strong>."
+    },
+    {
+      no: 7,
+      text: "(17 &times; 125 + 83 &times; 125) : 25 = ....",
+      options: {
+        A: "20",
+        B: "200",
+        C: "320",
+        D: "500",
+        E: "720"
+      },
+      answer: "D",
+      explanation: "<strong>TRIK!</strong> Gunakan sifat distribusi.<br>(17 &times; 125 + 83 &times; 125) : 25<br>= {(17 + 83) &times; 125} : 25<br>= (100 &times; 125) : 25 = 100 &times; 5 = <strong>500</strong>."
+    },
+    {
+      no: 8,
+      text: "634 + 8 &times; 125 &minus; 2.048 : 64 = ....",
+      options: {
+        A: "1.456",
+        B: "1.602",
+        C: "1.666",
+        D: "1.774",
+        E: "1.888"
+      },
+      answer: "B",
+      explanation: "<strong>INGAT!</strong> Lakukan operasi perkalian dan pembagian dahulu.<br>634 + 8 &times; 125 &minus; 2.048 : 64<br>= 634 + (8 &times; 125) &minus; (2.048 : 64)<br>= 634 + 1.000 &minus; 32<br>= 602 + 1.000 = <strong>1.602</strong>."
+    },
+    {
+      no: 9,
+      text: "(180 : 9)<sup>2</sup> &minus; (120 &minus; 101)<sup>2</sup> = ....",
+      options: {
+        A: "29",
+        B: "31",
+        C: "33",
+        D: "37",
+        E: "39"
+      },
+      answer: "E",
+      explanation: "<strong>Ingat:</strong> (a<sup>2</sup> &minus; b<sup>2</sup>) = (a + b)(a &minus; b)<br>(180 : 9)<sup>2</sup> &minus; (120 &minus; 101)<sup>2</sup><br>= 20<sup>2</sup> &minus; 19<sup>2</sup><br>= (20 &minus; 19)(20 + 19)<br>= 1 &times; 39 = <strong>39</strong>."
+    },
+    {
+      no: 10,
+      text: "6,655<sup>2</sup> &minus; 3,345<sup>2</sup> + 756,2 = ....",
+      options: {
+        A: "789,3",
+        B: "679,3",
+        C: "885,4",
+        D: "837,4",
+        E: "998,7"
+      },
+      answer: "A",
+      explanation: "<strong>Ingat:</strong> (a<sup>2</sup> &minus; b<sup>2</sup>) = (a + b)(a &minus; b)<br>6,655<sup>2</sup> &minus; 3,345<sup>2</sup> + 756,2<br>= (6,655 &minus; 3,345)(6,655 + 3,345) + 756,2<br>= 3,31 &times; 10 + 756,2<br>= 33,1 + 756,2 = <strong>789,3</strong>."
+    },
+    {
+      no: 11,
+      text: "51% dari 576% dari <span class=\"frac\"><span>22</span><span>576</span></span> = ....",
+      options: {
+        A: "0,0221",
+        B: "0,1122",
+        C: "1,2452",
+        D: "4,2248",
+        E: "45,162"
+      },
+      answer: "B",
+      explanation: "51% &times; 576% &times; <span class=\"frac\"><span>22</span><span>576</span></span> = <span class=\"frac\"><span>51</span><span>100</span></span> &times; <span class=\"frac\"><span>576</span><span>100</span></span> &times; <span class=\"frac\"><span>22</span><span>576</span></span><br>= <span class=\"frac\"><span>51 &times; 22</span><span>10.000</span></span> = <span class=\"frac\"><span>1.122</span><span>10.000</span></span> = <strong>0,1122</strong>."
+    },
+    {
+      no: 12,
+      text: "(6 &times; 31)<sup>2</sup> &minus; (201 &minus; 14)<sup>2</sup> = ....",
+      options: {
+        A: "373",
+        B: "186",
+        C: "36",
+        D: "&minus;186",
+        E: "&minus;373"
+      },
+      answer: "E",
+      explanation: "<strong>Ingat:</strong> (a<sup>2</sup> &minus; b<sup>2</sup>) = (a + b)(a &minus; b)<br>(6 &times; 31)<sup>2</sup> &minus; (201 &minus; 14)<sup>2</sup><br>= 186<sup>2</sup> &minus; 187<sup>2</sup><br>= (186 + 187)(186 &minus; 187)<br>= 373 &times; (&minus;1) = <strong>&minus;373</strong>."
+    },
+    {
+      no: 13,
+      text: "Nilai 37,5% dari 0,333 adalah ....",
+      options: {
+        A: "0,008",
+        B: "0,015",
+        C: "0,1",
+        D: "0,125",
+        E: "0,321"
+      },
+      answer: "D",
+      explanation: "<strong>Ingat pecahan istimewa:</strong> 37,5% = <span class=\"frac\"><span>3</span><span>8</span></span> dan 0,333... = <span class=\"frac\"><span>1</span><span>3</span></span>.<br>37,5% &times; 0,333 = <span class=\"frac\"><span>3</span><span>8</span></span> &times; <span class=\"frac\"><span>1</span><span>3</span></span> = <span class=\"frac\"><span>1</span><span>8</span></span> = <strong>0,125</strong>."
+    },
+    {
+      no: 14,
+      text: "225,225 : 22,5 = ....",
+      options: {
+        A: "100",
+        B: "100,01",
+        C: "10",
+        D: "10,1",
+        E: "10,01"
+      },
+      answer: "E",
+      explanation: "Kedua bilangan dikalikan 1.000:<br>225,225 : 22,5 = <span class=\"frac\"><span>225.225</span><span>22.500</span></span><br>= <span class=\"frac\"><span>225.000 + 225</span><span>22.500</span></span> = <span class=\"frac\"><span>225.000</span><span>22.500</span></span> + <span class=\"frac\"><span>225</span><span>22.500</span></span><br>= 10 + <span class=\"frac\"><span>1</span><span>100</span></span> = 10 + 0,01 = <strong>10,01</strong>."
+    },
+    {
+      no: 15,
+      text: "<span class=\"frac\"><span>3</span><span>2</span></span> dari (<span class=\"frac\"><span>2</span><span>3</span></span> + <span class=\"frac\"><span>2</span><span>7</span></span>) adalah ....",
+      options: {
+        A: "<span class=\"frac\"><span>1</span><span>7</span></span>",
+        B: "<span class=\"frac\"><span>8</span><span>21</span></span>",
+        C: "<span class=\"frac\"><span>10</span><span>21</span></span>",
+        D: "1<span class=\"frac\"><span>3</span><span>7</span></span>",
+        E: "1<span class=\"frac\"><span>5</span><span>7</span></span>"
+      },
+      answer: "D",
+      explanation: "<span class=\"frac\"><span>3</span><span>2</span></span> &times; (<span class=\"frac\"><span>2</span><span>3</span></span> + <span class=\"frac\"><span>2</span><span>7</span></span>) = <span class=\"frac\"><span>3</span><span>2</span></span> &times; (<span class=\"frac\"><span>2 &times; 7 + 2 &times; 3</span><span>3 &times; 7</span></span>)<br>= <span class=\"frac\"><span>3</span><span>2</span></span> &times; (<span class=\"frac\"><span>14 + 6</span><span>21</span></span>) = <span class=\"frac\"><span>3</span><span>2</span></span> &times; <span class=\"frac\"><span>20</span><span>21</span></span> = <span class=\"frac\"><span>10</span><span>7</span></span> = <strong>1<span class=\"frac\"><span>3</span><span>7</span></span></strong>."
+    },
+    {
+      no: 16,
+      text: "(<span class=\"frac\"><span>1</span><span>8</span></span> + <span class=\"frac\"><span>1</span><span>3</span></span>) dibagi 2<span class=\"frac\"><span>7</span><span>24</span></span> adalah ....",
+      options: {
+        A: "0,333",
+        B: "0,125",
+        C: "0,375",
+        D: "0,2",
+        E: "0,4"
+      },
+      answer: "D",
+      explanation: "<strong>INGAT:</strong> <span class=\"frac\"><span>a</span><span>b</span></span> : <span class=\"frac\"><span>c</span><span>d</span></span> = <span class=\"frac\"><span>a</span><span>b</span></span> &times; <span class=\"frac\"><span>d</span><span>c</span></span>.<br>(<span class=\"frac\"><span>1</span><span>8</span></span> + <span class=\"frac\"><span>1</span><span>3</span></span>) : 2<span class=\"frac\"><span>7</span><span>24</span></span> = (<span class=\"frac\"><span>3 + 8</span><span>24</span></span>) : <span class=\"frac\"><span>55</span><span>24</span></span><br>= <span class=\"frac\"><span>11</span><span>24</span></span> &times; <span class=\"frac\"><span>24</span><span>55</span></span> = <span class=\"frac\"><span>11</span><span>55</span></span> = <span class=\"frac\"><span>1</span><span>5</span></span> = <strong>0,2</strong>."
+    },
+    {
+      no: 17,
+      text: "2<span class=\"frac\"><span>1</span><span>3</span></span> &minus; 3<span class=\"frac\"><span>1</span><span>2</span></span> + 4<span class=\"frac\"><span>1</span><span>4</span></span> = ....",
+      options: {
+        A: "3<span class=\"frac\"><span>1</span><span>12</span></span>",
+        B: "2<span class=\"frac\"><span>5</span><span>12</span></span>",
+        C: "2<span class=\"frac\"><span>7</span><span>12</span></span>",
+        D: "4<span class=\"frac\"><span>1</span><span>12</span></span>",
+        E: "5<span class=\"frac\"><span>5</span><span>12</span></span>"
+      },
+      answer: "A",
+      explanation: "<strong>INGAT!</strong> Samakan penyebutnya terlebih dahulu. KPK dari 3, 2, dan 4 adalah 12.<br>2<span class=\"frac\"><span>1</span><span>3</span></span> &minus; 3<span class=\"frac\"><span>1</span><span>2</span></span> + 4<span class=\"frac\"><span>1</span><span>4</span></span> = (2 &minus; 3 + 4) + (<span class=\"frac\"><span>1</span><span>3</span></span> &minus; <span class=\"frac\"><span>1</span><span>2</span></span> + <span class=\"frac\"><span>1</span><span>4</span></span>)<br>= 3 + <span class=\"frac\"><span>4 &minus; 6 + 3</span><span>12</span></span> = 3 + <span class=\"frac\"><span>1</span><span>12</span></span> = <strong>3<span class=\"frac\"><span>1</span><span>12</span></span></strong>."
+    },
+    {
+      no: 18,
+      text: "<span class=\"frac\"><span>5</span><span>4</span></span> + 3<span class=\"frac\"><span>1</span><span>3</span></span> &divide; <span class=\"frac\"><span>10</span><span>11</span></span> &divide; <span class=\"frac\"><span>1</span><span>3</span></span> = ....",
+      options: {
+        A: "12<span class=\"frac\"><span>1</span><span>4</span></span>",
+        B: "11<span class=\"frac\"><span>3</span><span>4</span></span>",
+        C: "12<span class=\"frac\"><span>3</span><span>4</span></span>",
+        D: "11<span class=\"frac\"><span>1</span><span>4</span></span>",
+        E: "13<span class=\"frac\"><span>1</span><span>2</span></span>"
+      },
+      answer: "A",
+      explanation: "<span class=\"frac\"><span>5</span><span>4</span></span> + 3<span class=\"frac\"><span>1</span><span>3</span></span> &divide; <span class=\"frac\"><span>10</span><span>11</span></span> &divide; <span class=\"frac\"><span>1</span><span>3</span></span><br>= 1<span class=\"frac\"><span>1</span><span>4</span></span> + (<span class=\"frac\"><span>10</span><span>3</span></span> &times; <span class=\"frac\"><span>11</span><span>10</span></span> &times; 3)<br>= 1<span class=\"frac\"><span>1</span><span>4</span></span> + 11 = <strong>12<span class=\"frac\"><span>1</span><span>4</span></span></strong>."
+    },
+    {
+      no: 19,
+      text: "Manakah nilai berikut yang terbesar?",
+      options: {
+        A: "<span class=\"frac\"><span>1</span><span>3</span></span> dari 24",
+        B: "<span class=\"frac\"><span>2</span><span>7</span></span> dari 28",
+        C: "<span class=\"frac\"><span>1</span><span>9</span></span> dari 72",
+        D: "<span class=\"frac\"><span>1</span><span>4</span></span> dari 32",
+        E: "<span class=\"frac\"><span>2</span><span>3</span></span> dari 15"
+      },
+      answer: "E",
+      explanation: "Hitung masing-masing opsi:<br>A. <span class=\"frac\"><span>1</span><span>3</span></span> dari 24 = 8<br>B. <span class=\"frac\"><span>2</span><span>7</span></span> dari 28 = 8<br>C. <span class=\"frac\"><span>1</span><span>9</span></span> dari 72 = 8<br>D. <span class=\"frac\"><span>1</span><span>4</span></span> dari 32 = 8<br>E. <span class=\"frac\"><span>2</span><span>3</span></span> dari 15 = <strong>10</strong> (Terbesar)."
+    },
+    {
+      no: 20,
+      text: "Nilai dari <span class=\"frac\"><span>1</span><span>6</span></span> + (<span class=\"frac\"><span>1</span><span>6</span></span> &divide; <span class=\"frac\"><span>1</span><span>6</span></span>) + <span class=\"frac\"><span>1</span><span>6</span></span> adalah ....",
+      options: {
+        A: "1<span class=\"frac\"><span>1</span><span>6</span></span>",
+        B: "1<span class=\"frac\"><span>1</span><span>3</span></span>",
+        C: "1<span class=\"frac\"><span>1</span><span>2</span></span>",
+        D: "1<span class=\"frac\"><span>5</span><span>6</span></span>",
+        E: "2"
+      },
+      answer: "B",
+      explanation: "<strong>Ingat!</strong> <span class=\"frac\"><span>a</span><span>b</span></span> : <span class=\"frac\"><span>c</span><span>d</span></span> = <span class=\"frac\"><span>a</span><span>b</span></span> &times; <span class=\"frac\"><span>d</span><span>c</span></span>.<br><span class=\"frac\"><span>1</span><span>6</span></span> + (<span class=\"frac\"><span>1</span><span>6</span></span> &divide; <span class=\"frac\"><span>1</span><span>6</span></span>) + <span class=\"frac\"><span>1</span><span>6</span></span> = <span class=\"frac\"><span>1</span><span>6</span></span> + (<span class=\"frac\"><span>1</span><span>6</span></span> &times; 6) + <span class=\"frac\"><span>1</span><span>6</span></span><br>= <span class=\"frac\"><span>1</span><span>6</span></span> + 1 + <span class=\"frac\"><span>1</span><span>6</span></span> = 1<span class=\"frac\"><span>2</span><span>6</span></span> = <strong>1<span class=\"frac\"><span>1</span><span>3</span></span></strong>."
+    },
+    {
+      no: 21,
+      text: "Diketahui: <span class=\"frac\"><span>1</span><span>2</span></span>; 0,65; 1<span class=\"frac\"><span>1</span><span>7</span></span>; <span class=\"frac\"><span>1</span><span>8</span></span>; 37,5%. Urutan pecahan dari yang terkecil ke terbesar adalah ....",
+      options: {
+        A: "<span class=\"frac\"><span>1</span><span>8</span></span>; 37,5%; <span class=\"frac\"><span>1</span><span>2</span></span>; 0,65; 1<span class=\"frac\"><span>1</span><span>7</span></span>",
+        B: "<span class=\"frac\"><span>1</span><span>2</span></span>; 0,65; <span class=\"frac\"><span>1</span><span>8</span></span>; 37,5%; 1<span class=\"frac\"><span>1</span><span>7</span></span>",
+        C: "37,5%; <span class=\"frac\"><span>1</span><span>2</span></span>; 0,65; <span class=\"frac\"><span>1</span><span>8</span></span>; 1<span class=\"frac\"><span>1</span><span>7</span></span>",
+        D: "<span class=\"frac\"><span>1</span><span>8</span></span>; <span class=\"frac\"><span>1</span><span>2</span></span>; 37,5%; 0,65; 1<span class=\"frac\"><span>1</span><span>7</span></span>",
+        E: "0,65; 37,5%; <span class=\"frac\"><span>1</span><span>8</span></span>; <span class=\"frac\"><span>1</span><span>2</span></span>; 1<span class=\"frac\"><span>1</span><span>7</span></span>"
+      },
+      answer: "A",
+      visual: `<table class="math-table">
+        <tr><th>Bilangan</th><th>Bentuk Desimal</th><th>Urutan</th></tr>
+        <tr><td><span class="frac"><span>1</span><span>8</span></span></td><td>0,125</td><td>1 (Terkecil)</td></tr>
+        <tr><td>37,5%</td><td>0,375</td><td>2</td></tr>
+        <tr><td><span class="frac"><span>1</span><span>2</span></span></td><td>0,500</td><td>3</td></tr>
+        <tr><td>0,65</td><td>0,650</td><td>4</td></tr>
+        <tr><td>1<span class="frac"><span>1</span><span>7</span></span></td><td>1,143</td><td>5 (Terbesar)</td></tr>
+      </table>`,
+      explanation: "Diubah ke bentuk desimal:<br>&bull; <span class=\"frac\"><span>1</span><span>2</span></span> = 0,5<br>&bull; 0,65<br>&bull; 1<span class=\"frac\"><span>1</span><span>7</span></span> = 1,14<br>&bull; <span class=\"frac\"><span>1</span><span>8</span></span> = 0,125<br>&bull; 37,5% = 0,375<br>Diperoleh 0,125 &lt; 0,375 &lt; 0,5 &lt; 0,65 &lt; 1,14.<br>Jadi, urutan dari yang terkecil: <strong><span class=\"frac\"><span>1</span><span>8</span></span>; 37,5%; <span class=\"frac\"><span>1</span><span>2</span></span>; 0,65; 1<span class=\"frac\"><span>1</span><span>7</span></span></strong>."
+    }
+  ];
+
+  // =========================================================================
+  // RENDER VISUAL PENDUKUNG PEMBAHASAN
+  // =========================================================================
+  function renderVisualHelper(visualHtml) {
+    if (!visualHtml) return "";
+    return `<div class="diagram-scroll">${visualHtml}</div>`;
+  }
+
+  // =========================================================================
+  // STATE & LOGIKA APLIKASI CAT
+  // =========================================================================
+  const EXAM_DURATION_SECONDS = 30 * 60; // 30 Menit
+  let currentUser = { user: "", nama: "" };
+  let currentIndex = 0;
+  let userAnswers = new Array(questions.length).fill(null);
+  let doubtStatus = new Array(questions.length).fill(false);
+  let timeLeft = EXAM_DURATION_SECONDS;
+  let timerInterval = null;
+
+  // Fungsi Modal Custom (Pengganti alert & confirm agar aman di semua iframe/browser)
+  function showModal(title, message, buttons) {
+    const overlay = document.getElementById("custom-modal");
+    document.getElementById("modal-title").textContent = title;
+    document.getElementById("modal-message").textContent = message;
+    const btnContainer = document.getElementById("modal-buttons");
+    btnContainer.innerHTML = "";
+
+    buttons.forEach(b => {
+      const btn = document.createElement("button");
+      btn.className = "btn " + (b.className || "btn-primary");
+      btn.style.width = "auto";
+      btn.textContent = b.text;
+      btn.onclick = () => {
+        overlay.style.display = "none";
+        if (b.onClick) b.onClick();
+      };
+      btnContainer.appendChild(btn);
+    });
+
+    overlay.style.display = "flex";
+  }
+
+  // Handle Login ke Google Sheet
+  document.getElementById("login-form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const userVal = document.getElementById("username").value.trim();
+    const passVal = document.getElementById("password").value.trim();
+    const btn = document.getElementById("btn-login");
+    const errBox = document.getElementById("login-error");
+
+    btn.disabled = true;
+    btn.textContent = "Memverifikasi...";
+    errBox.style.display = "none";
+
+    try {
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({ username: userVal, password: passVal })
+      });
+      
+      const textRes = await response.text();
+      let result;
+      try {
+        result = JSON.parse(textRes);
+      } catch (parseErr) {
+        throw new Error("Format respons server tidak valid.");
+      }
+
+      if (result.status === "success") {
+        currentUser = { user: result.user, nama: result.nama };
+        startExam();
+      } else {
+        errBox.style.display = "block";
+        errBox.textContent = result.message || "Username atau Password salah!";
+      }
+    } catch (error) {
+      errBox.style.display = "block";
+      errBox.textContent = "Gagal memproses login. Pastikan Web App sudah di-deploy ulang dengan 'Who has access' diset ke 'Anyone'.";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Masuk Ujian";
+    }
+  });
+
+  function resetExamState() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    currentIndex = 0;
+    userAnswers = new Array(questions.length).fill(null);
+    doubtStatus = new Array(questions.length).fill(false);
+    timeLeft = EXAM_DURATION_SECONDS;
+
+    const timerEl = document.getElementById("timer");
+    timerEl.textContent = "30:00";
+    timerEl.style.color = "white";
+  }
+
+  function startExam() {
+    resetExamState();
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("exam-screen").style.display = "block";
+    document.getElementById("peserta-info").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+
+    initNumberGrid();
+    renderQuestion(0);
+    startTimer();
+  }
+
+  function retryExam() {
+    startExam();
+  }
+
+  function confirmLogout() {
+    showModal(
+      "Konfirmasi Logout",
+      "Apakah Anda yakin ingin keluar dari ujian? Progres jawaban Anda saat ini akan direset.",
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Logout", className: "btn-logout", onClick: logoutUser }
+      ]
+    );
+  }
+
+  function logoutUser() {
+    resetExamState();
+    currentUser = { user: "", nama: "" };
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("login-error").style.display = "none";
+
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("login-screen").style.display = "flex";
+  }
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+      const s = (timeLeft % 60).toString().padStart(2, '0');
+      document.getElementById("timer").textContent = `${m}:${s}`;
+
+      if (timeLeft <= 300) {
+        document.getElementById("timer").style.color = "#fca5a5";
+      }
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        showModal(
+          "Waktu Habis",
+          "Waktu ujian telah habis! Jawaban Anda akan dikumpulkan otomatis.",
+          [{ text: "Lihat Hasil", className: "btn-primary", onClick: finishExam }]
+        );
+      }
+    }, 1000);
+  }
+
+  function initNumberGrid() {
+    const grid = document.getElementById("number-grid");
+    grid.innerHTML = "";
+    questions.forEach((q, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "num-btn";
+      btn.id = `num-btn-${idx}`;
+      btn.textContent = q.no;
+      btn.onclick = () => renderQuestion(idx);
+      grid.appendChild(btn);
+    });
+  }
+
+  function updateNumberGrid() {
+    questions.forEach((_, idx) => {
+      const btn = document.getElementById(`num-btn-${idx}`);
+      if (!btn) return;
+      btn.className = "num-btn";
+      if (idx === currentIndex) btn.classList.add("active");
+      if (doubtStatus[idx]) {
+        btn.classList.add("doubt");
+      } else if (userAnswers[idx] !== null) {
+        btn.classList.add("answered");
+      }
+    });
+  }
+
+  function renderQuestion(index) {
+    currentIndex = index;
+    const q = questions[index];
+
+    document.getElementById("q-number").textContent = `Soal No. ${q.no} dari ${questions.length}`;
+    document.getElementById("q-text").innerHTML = q.text;
+
+    const statusEl = document.getElementById("q-status");
+    if (doubtStatus[index]) {
+      statusEl.textContent = "Ditandai Ragu-Ragu";
+      statusEl.style.color = "#b45309";
+    } else if (userAnswers[index]) {
+      statusEl.textContent = `Terjawab (${userAnswers[index]})`;
+      statusEl.style.color = "var(--success)";
+    } else {
+      statusEl.textContent = "Belum dijawab";
+      statusEl.style.color = "var(--muted)";
+    }
+
+    const optContainer = document.getElementById("q-options");
+    optContainer.innerHTML = "";
+
+    ["A", "B", "C", "D", "E"].forEach(letter => {
+      const div = document.createElement("div");
+      div.className = "option-item" + (userAnswers[index] === letter ? " selected" : "");
+      div.onclick = () => selectOption(letter);
+      div.innerHTML = `
+        <div class="option-letter">${letter}</div>
+        <div>${q.options[letter]}</div>
+      `;
+      optContainer.appendChild(div);
+    });
+
+    document.getElementById("btn-prev").disabled = (index === 0);
+    document.getElementById("btn-next").disabled = (index === questions.length - 1);
+    updateNumberGrid();
+  }
+
+  function selectOption(letter) {
+    userAnswers[currentIndex] = letter;
+    renderQuestion(currentIndex);
+  }
+
+  function toggleDoubt() {
+    doubtStatus[currentIndex] = !doubtStatus[currentIndex];
+    renderQuestion(currentIndex);
+  }
+
+  function prevQuestion() {
+    if (currentIndex > 0) renderQuestion(currentIndex - 1);
+  }
+
+  function nextQuestion() {
+    if (currentIndex < questions.length - 1) renderQuestion(currentIndex + 1);
+  }
+
+  function confirmFinish() {
+    const unanswered = userAnswers.filter(a => a === null).length;
+    const msg = unanswered > 0 
+      ? `Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin mengakhiri ujian?`
+      : "Apakah Anda yakin ingin mengumpulkan semua jawaban sekarang?";
+    
+    showModal(
+      "Kumpulkan Jawaban",
+      msg,
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Kumpulkan", className: "btn-finish", onClick: finishExam }
+      ]
+    );
+  }
+
+  function finishExam() {
+    clearInterval(timerInterval);
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "block";
+
+    let benar = 0, salah = 0, kosong = 0;
+    const reviewContainer = document.getElementById("review-container");
+    reviewContainer.innerHTML = "";
+
+    questions.forEach((q, idx) => {
+      const uAns = userAnswers[idx];
+      const isCorrect = uAns === q.answer;
+
+      if (uAns === null) kosong++;
+      else if (isCorrect) benar++;
+      else salah++;
+
+      const card = document.createElement("div");
+      card.className = `card review-card ${isCorrect ? 'correct' : 'wrong'}`;
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+          <strong>Soal No. ${q.no}</strong>
+          <span style="font-weight:bold; color:${isCorrect ? 'var(--success)' : 'var(--danger)'}">
+            ${uAns === null ? 'Tidak Dijawab' : (isCorrect ? 'BENAR' : 'SALAH')}
+          </span>
+        </div>
+        <p style="margin-bottom:10px;">${q.text}</p>
+        <p><strong>Jawaban Anda:</strong> ${uAns ? `${uAns}. ${q.options[uAns]}` : '-'} | 
+           <strong style="color:var(--success)">Kunci Jawaban:</strong> ${q.answer}. ${q.options[q.answer]}</p>
+        <div class="pembahasan-box">
+          <strong>Pembahasan:</strong>
+          ${renderVisualHelper(q.visual)}
+          <div style="margin-top:6px;">${q.explanation}</div>
+          <div style="margin-top:8px; font-weight:700; color:#0f172a;">&#9632; Jawaban: ${q.answer}</div>
+        </div>
+      `;
+      reviewContainer.appendChild(card);
+    });
+
+    const skor = Math.round((benar / questions.length) * 100);
+    document.getElementById("res-peserta").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+    document.getElementById("res-score").textContent = `${skor} / 100`;
+    document.getElementById("res-detail").textContent = `Benar: ${benar} | Salah: ${salah} | Kosong: ${kosong}`;
+  }
+</script>
+</body>
+</html>

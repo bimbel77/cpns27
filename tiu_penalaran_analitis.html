@@ -1,0 +1,1468 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAT - PENALARAN ANALITIS</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+      --warning: #eab308;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); line-height: 1.6; }
+
+    /* Login Screen */
+    #login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .login-box {
+      background: var(--card); padding: 35px; border-radius: 12px; width: 100%; max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+    .login-box h2 { text-align: center; color: var(--primary); margin-bottom: 5px; }
+    .login-box p { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 25px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+    .form-group input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;
+    }
+    .btn {
+      display: inline-block; padding: 10px 18px; border: none; border-radius: 6px; font-size: 0.95rem;
+      font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; text-decoration: none;
+    }
+    .btn-primary { background: var(--primary); color: white; width: 100%; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+    .btn-logout {
+      background: var(--danger); color: white; padding: 7px 14px; font-size: 0.85rem;
+    }
+    .btn-logout:hover { background: var(--danger-hover); }
+    .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 10px; text-align: center; display: none; }
+
+    .register-link-box {
+      margin-top: 18px; padding-top: 15px; border-top: 1px solid #e2e8f0;
+      text-align: center; font-size: 0.9rem; color: var(--muted);
+    }
+    .register-link-box a {
+      color: var(--primary); font-weight: 700; text-decoration: none;
+    }
+    .register-link-box a:hover {
+      text-decoration: underline; color: var(--primary-hover);
+    }
+
+    /* Header CAT */
+    header {
+      background: var(--primary); color: white; padding: 15px 25px; display: flex;
+      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header-title h1 { font-size: 1.2rem; }
+    .header-info { display: flex; align-items: center; gap: 15px; }
+    .timer-box {
+      background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 6px;
+      font-weight: bold; font-size: 1.1rem; letter-spacing: 1px;
+    }
+
+    /* Main Container */
+    #exam-screen, #result-screen { display: none; max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+    .exam-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+    @media (max-width: 850px) { .exam-layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card); border-radius: 10px; padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
+    }
+
+    /* Soal Area */
+    .question-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 2px solid var(--bg); padding-bottom: 12px; margin-bottom: 18px;
+    }
+    .badge-no { background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; }
+    .question-text { font-size: 1.05rem; margin-bottom: 15px; }
+    .passage-box {
+      background: #f8fafc; border-left: 4px solid var(--primary); padding: 12px 15px;
+      margin-bottom: 15px; border-radius: 0 8px 8px 0; font-size: 0.96rem; color: #1e293b;
+    }
+
+    /* Opsi Jawaban */
+    .options-list { display: flex; flex-direction: column; gap: 10px; }
+    .option-item {
+      display: flex; align-items: center; gap: 12px; padding: 12px 15px;
+      border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: 0.15s;
+    }
+    .option-item:hover { background: #f8fafc; border-color: var(--primary); }
+    .option-item.selected { background: #eff6ff; border-color: var(--primary); font-weight: 600; }
+    .option-letter {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+    }
+    .option-item.selected .option-letter { background: var(--primary); color: white; }
+
+    /* Navigasi Bawah Soal */
+    .nav-actions {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 25px;
+      padding-top: 15px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;
+    }
+    .btn-nav { background: #e2e8f0; color: var(--text); }
+    .btn-nav:hover { background: #cbd5e1; }
+    .btn-ragu { background: var(--warning); color: #000; }
+    .btn-finish { background: var(--success); color: white; width: 100%; margin-top: 15px; }
+    .btn-finish:hover { background: #15803d; }
+
+    /* Grid Nomor Soal */
+    .grid-numbers {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px;
+      max-height: 360px; overflow-y: auto; padding-right: 4px;
+    }
+    .num-btn {
+      padding: 8px 0; border: 1px solid var(--border); border-radius: 6px;
+      background: white; font-weight: 600; cursor: pointer; text-align: center;
+    }
+    .num-btn.active { border: 2px solid var(--primary); }
+    .num-btn.answered { background: var(--success); color: white; border-color: var(--success); }
+    .num-btn.doubt { background: var(--warning); color: black; border-color: var(--warning); }
+
+    .legend { display: flex; gap: 12px; font-size: 0.8rem; margin-top: 15px; flex-wrap: wrap; }
+    .legend span { display: flex; align-items: center; gap: 5px; }
+    .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+    /* Result & Pembahasan */
+    .score-banner {
+      text-align: center; padding: 30px; background: linear-gradient(135deg, #1e40af, #3b82f6);
+      color: white; border-radius: 12px; margin-bottom: 25px;
+    }
+    .score-big { font-size: 3.5rem; font-weight: bold; margin: 10px 0; }
+    .result-actions {
+      display: flex; justify-content: center; gap: 12px; margin-top: 15px; flex-wrap: wrap;
+    }
+    .review-card { margin-bottom: 20px; border-left: 5px solid var(--border); }
+    .review-card.correct { border-left-color: var(--success); }
+    .review-card.wrong { border-left-color: var(--danger); }
+    .pembahasan-box {
+      background: #f8fafc; padding: 15px; border-radius: 8px; margin-top: 12px;
+      border: 1px dashed #94a3b8; font-size: 0.95rem;
+    }
+    .diagram-scroll {
+      overflow-x: auto;
+      margin: 10px 0 8px 0;
+      padding: 8px;
+      background: #ffffff;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+    .math-table {
+      width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 4px 0;
+    }
+    .math-table th, .math-table td {
+      border: 1px solid #cbd5e1; padding: 6px 10px; text-align: center;
+    }
+    .math-table th {
+      background: #eff6ff; color: var(--primary); font-weight: 700;
+    }
+    .frac {
+      display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: 0.88em; margin: 0 2px;
+    }
+    .frac span:first-child { border-bottom: 1px solid currentColor; padding: 0 3px; }
+    .frac span:last-child { padding: 0 3px; }
+
+    /* Custom Modal Dialog (Pengganti alert/confirm) */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6); display: none; align-items: center;
+      justify-content: center; z-index: 999; padding: 20px;
+    }
+    .modal-card {
+      background: white; padding: 25px; border-radius: 12px; max-width: 400px;
+      width: 100%; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .modal-card h3 { color: var(--primary); margin-bottom: 10px; }
+    .modal-card p { color: var(--text); font-size: 0.95rem; margin-bottom: 20px; }
+    .modal-btns { display: flex; gap: 10px; justify-content: center; }
+  </style>
+</head>
+<body>
+
+  <!-- HALAMAN LOGIN -->
+  <div id="login-screen">
+    <div class="login-box">
+      <h2>Portal Ujian CAT</h2>
+      <p>Subtes TIU: Penalaran Analitis (60 Soal)</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Username/Email</label>
+          <input type="text" id="username" required placeholder="Masukkan username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="Masukkan password">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-login">Masuk Ujian</button>
+        <div class="error-msg" id="login-error"></div>
+        <div class="register-link-box">
+          Belum punya akun? <a href="http://lynk.id/seputar_guru/4g73189dndge/checkout" target="_blank" rel="noopener noreferrer">Daftar di sini</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- HALAMAN UJIAN CAT -->
+  <div id="exam-screen">
+    <header>
+      <div class="header-title">
+        <h1>CAT - PENALARAN ANALITIS</h1>
+        <small id="peserta-info">Peserta: -</small>
+      </div>
+      <div class="header-info">
+        <div class="timer-box" id="timer">60:00</div>
+        <button type="button" class="btn btn-logout" onclick="confirmLogout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="exam-layout" style="margin-top: 20px;">
+      <!-- Kolom Kiri: Soal -->
+      <div class="card">
+        <div class="question-header">
+          <span class="badge-no" id="q-number">Soal No. 1</span>
+          <span id="q-status" style="font-size: 0.85rem; color: var(--muted);">Belum dijawab</span>
+        </div>
+        <div class="question-text" id="q-text"></div>
+        <div class="options-list" id="q-options"></div>
+
+        <div class="nav-actions">
+          <button class="btn btn-nav" id="btn-prev" onclick="prevQuestion()">&laquo; Sebelumnya</button>
+          <button class="btn btn-ragu" id="btn-doubt" onclick="toggleDoubt()">Ragu-Ragu</button>
+          <button class="btn btn-nav" id="btn-next" onclick="nextQuestion()">Selanjutnya &raquo;</button>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Navigasi Nomor -->
+      <div class="card">
+        <h3>Navigasi Soal</h3>
+        <div class="grid-numbers" id="number-grid"></div>
+        <div class="legend">
+          <span><i class="dot" style="background: var(--success);"></i> Dijawab</span>
+          <span><i class="dot" style="background: var(--warning);"></i> Ragu</span>
+          <span><i class="dot" style="background: #fff; border: 1px solid #cbd5e1;"></i> Kosong</span>
+        </div>
+        <button class="btn btn-finish" onclick="confirmFinish()">Selesai & Kumpulkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN HASIL & PEMBAHASAN -->
+  <div id="result-screen">
+    <div class="score-banner">
+      <h2>Hasil Ujian CAT Anda</h2>
+      <p id="res-peserta"></p>
+      <div class="score-big" id="res-score">0</div>
+      <p id="res-detail">Benar: 0 | Salah: 0 | Kosong: 0</p>
+      <div class="result-actions">
+        <button class="btn" style="background: white; color: var(--primary);" onclick="retryExam()">Ulangi Ujian</button>
+        <button class="btn btn-logout" onclick="logoutUser()">Logout</button>
+      </div>
+    </div>
+    <h3 style="margin-bottom: 15px;">Kunci Jawaban & Pembahasan Lengkap</h3>
+    <div id="review-container"></div>
+  </div>
+
+  <!-- CUSTOM MODAL -->
+  <div class="modal-overlay" id="custom-modal">
+    <div class="modal-card">
+      <h3 id="modal-title">Konfirmasi</h3>
+      <p id="modal-message">Pesan konfirmasi</p>
+      <div class="modal-btns" id="modal-buttons"></div>
+    </div>
+  </div>
+
+<script>
+  // =========================================================================
+  // URL GOOGLE APPS SCRIPT ANDA YANG AKTIF
+  // =========================================================================
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxB6Th7GHlD9o8ABbYcK2mdV7mv4ufy2i-SYXUg3jVqS0Q1bkXa_pkseMhqmIzgCTx7/exec";
+
+  // =========================================================================
+  // BANK SOAL, KUNCI JAWABAN & PEMBAHASAN (60 SOAL PENALARAN ANALITIS DARI PDF)
+  // =========================================================================
+  const questions = [
+    {
+      no: 1,
+      text: "Pak Ali menghemat biaya perjalanan dari kota A ke kota C. Rute perjalanan tersebut harus dilakukan dengan dua kali penerbangan, dari kota A ke kota B dilanjutkan dari kota B ke kota C. Tarif maskapai burung dari kota A ke kota B lebih mahal daripada maskapai rusa, tetapi tidak melebihi tarif maskapai ular. Tarif maskapai ular dari kota B ke kota C kurang dari tarif maskapai burung, tetapi sama dengan tarif maskapai rusa. Maskapai yang dipilih oleh Pak Ali dalam dua penerbangan tersebut ....",
+      options: {
+        A: "Ular dan rusa",
+        B: "Burung dan ular",
+        C: "Rusa dan ular",
+        D: "Rusa dan burung",
+        E: "Burung dan rusa"
+      },
+      answer: "C",
+      explanation: "Simbol &gt; berarti lebih mahal.<br>Dari kota A ke B: Tarif maskapai Ular = Burung &gt; Rusa (termurah: <strong>Rusa</strong>).<br>Dari kota B ke C: Tarif maskapai Burung &gt; Ular = Rusa (termurah: <strong>Ular</strong> atau Rusa).<br>Untuk menghemat, Pak Ali memilih maskapai <strong>Rusa dan ular</strong>."
+    },
+    {
+      no: 2,
+      text: "Untuk bisa terpilih menjadi pegawai teladan di sebuah pabrik mobil, seorang karyawan harus rajin bekerja, berprestasi, dan sudah bekerja minimal 5 tahun. Pak Harun adalah satpam yang sangat disiplin, ia baru bekerja 3 tahun. Tahun lalu ia berhasil menangkap seorang pencuri sepeda motor milik karyawan. Dewi adalah staf tata usaha yang sering pergi berbelanja pada jam kerja, ia sudah bekerja selama 7 tahun. Pak Yanto bekerja di bagian produksi selama 6 tahun, sering izin karena merasa kurang sehat. Sementara Yeni bekerja di bagian pemasaran, penjualannya melebihi target, dan telah bekerja selama 5 tahun. Endang sangat rajin masuk kerja, ia adalah karyawan tata usaha dan telah bekerja selama 4 tahun. Gelar pegawai teladan sebaiknya diberikan kepada siapa?",
+      options: {
+        A: "Pak Harun",
+        B: "Pak Yanto",
+        C: "Dewi",
+        D: "Yeni",
+        E: "Endang"
+      },
+      answer: "D",
+      explanation: "Syarat sebagai pegawai teladan: rajin bekerja, berprestasi, dan sudah bekerja minimal 5 tahun.<br>&bull; Pak Harun: masa kerja 3 tahun (di bawah 5 tahun, tidak terpilih).<br>&bull; Dewi: masa kerja 7 tahun, tetapi kurang disiplin.<br>&bull; Pak Yanto: masa kerja 6 tahun, tetapi sering izin (kurang disiplin).<br>&bull; <strong>Yeni</strong>: penjualan melebihi target (berprestasi) dan masa kerja 5 tahun (memenuhi semua syarat).<br>&bull; Endang: masa kerja 4 tahun (di bawah 5 tahun, tidak terpilih).<br>Gelar pegawai teladan sebaiknya diberikan kepada <strong>Yeni</strong>."
+    },
+    {
+      no: 3,
+      text: "Ali lebih cermat daripada Budi, tapi lebih ceroboh daripada Deni. Mardi lebih cermat daripada Deni. Urutan dari yang paling cermat adalah ....",
+      options: {
+        A: "Mardi, Deni, Ali, Budi",
+        B: "Deni, Mardi, Ali, Budi",
+        C: "Mardi, Ali, Budi, Deni",
+        D: "Mardi, Deni, Budi, Ali",
+        E: "Deni, Budi, Mardi, Ali"
+      },
+      answer: "A",
+      explanation: "Simbol &gt; berarti lebih cermat, dan simbol &lt; berarti lebih ceroboh.<br>Keterangan berdasarkan bacaan diperoleh bahwa tingkat kecermatan:<br>&bull; Ali &gt; Budi<br>&bull; Ali &lt; Deni atau Deni &gt; Ali<br>&bull; Mardi &gt; Deni<br>Urutan dari yang paling cermat: Mardi &gt; Deni &gt; Ali &gt; Budi (<strong>Mardi, Deni, Ali, Budi</strong>)."
+    },
+    {
+      no: 4,
+      text: "Amri membeli baju dan sarung baru untuk lebaran. Dodo hanya membeli sarung baru. Harun membeli sama dengan Indra ditambah sepatu. Agung membeli celana, sarung, dan peci. Sedangkan, Indra membeli sama persis dengan Amri. Siapakah yang tidak membeli sarung baru?",
+      options: {
+        A: "Amri",
+        B: "Harun",
+        C: "Agung",
+        D: "Indra",
+        E: "Tidak ada"
+      },
+      answer: "E",
+      explanation: "Simbol &ldquo;=&rdquo; berarti membeli. Keterangan dari soal:<br>&bull; Amri = Baju, Sarung<br>&bull; Dodo = Sarung<br>&bull; Agung = Celana, Sarung, Peci<br>&bull; Indra = Amri = Baju, Sarung<br>&bull; Harun = Indra + Sepatu = Baju, Sarung, Sepatu<br>Jadi, semua membeli sarung (<strong>Tidak ada</strong> yang tidak membeli sarung baru)."
+    },
+    {
+      no: 5,
+      text: "Anto berlari lebih cepat daripada Indra. Kaka berlari lebih lambat daripada Ivan. Ivan berlari lebih lambat daripada Rino. Indra berlari lebih cepat daripada Rino. Urutan yang benar mulai dari yang terlambat adalah ....",
+      options: {
+        A: "Anto, Indra, Rino, Ivan, Kaka",
+        B: "Anto, Kaka, Rino, Indra, Ivan",
+        C: "Kaka, Rino, Indra, Ivan, Anto",
+        D: "Ivan, Indra, Kaka, Anto, Rino",
+        E: "Kaka, Ivan, Rino, Indra, Anto"
+      },
+      answer: "E",
+      explanation: "Simbol &gt; berarti lebih cepat dan simbol &lt; berarti lebih lambat.<br>&bull; Anto &gt; Indra<br>&bull; Kaka &lt; Ivan atau Ivan &gt; Kaka<br>&bull; Ivan &lt; Rino atau Rino &gt; Ivan<br>&bull; Indra &gt; Rino<br>Urutan mulai dari yang tercepat: Anto &gt; Indra &gt; Rino &gt; Ivan &gt; Kaka.<br>Urutan yang benar mulai dari yang terlambat adalah: Kaka &lt; Ivan &lt; Rino &lt; Indra &lt; Anto (<strong>Kaka, Ivan, Rino, Indra, Anto</strong>)."
+    },
+    {
+      no: 6,
+      text: "Tiga tim pendaki gunung harus dibentuk dengan masing-masing tim terdiri atas tiga orang. A harus berada dalam satu tim dengan D, B tidak boleh setim dengan G atau C, C tidak boleh dipisahkan dengan I, E dan H harus berada dalam tim yang sama dengan B, sedangkan F harus dipisahkan dengan A. Untuk tiap tim yang dapat dibentuk adalah ....",
+      options: {
+        A: "A, D, G &ndash; B, I, H &ndash; C, E, F",
+        B: "A, B, G &ndash; D, E, H &ndash; C, I, F",
+        C: "A, I, F &ndash; B, E, N &ndash; C, D, F",
+        D: "A, D, I &ndash; B, E, H &ndash; C, G, F",
+        E: "E, H, B &ndash; A, D, G &ndash; C, I, F"
+      },
+      answer: "E",
+      explanation: "Simbol &gt;&lt; berarti tidak boleh satu tim. Simbol &lsquo;,&rsquo; boleh satu tim.<br>Keterangan:<br>&bull; A, D<br>&bull; B &gt;&lt; G dan B &gt;&lt; C<br>&bull; C, I<br>&bull; E, H, B<br>&bull; F &gt;&lt; A<br>Tim pendaki yang memenuhi semua aturan: (<strong>E, H, B</strong>), (<strong>A, D, G</strong>), dan (<strong>C, I, F</strong>)."
+    },
+    {
+      no: 7,
+      text: "Di sini ada perempatan jalan yang saling tegak lurus. Salah satu jalan itu menuju ke kota Semarang. Jika saya menghadap utara maka jalan yang ke kiri dan belakang saya adalah jalan yang menuju ke tempat lain. Jalan yang tepat di hadapan saya menuju ke Laut Jawa. Jalan manakah yang menuju Semarang?",
+      options: {
+        A: "Ke Utara",
+        B: "Ke Timur",
+        C: "Ke Barat",
+        D: "Ke Selatan",
+        E: "Jawaban A, B, C, D salah"
+      },
+      answer: "B",
+      explanation: "Jika menghadap utara:<br>&bull; Tepat di hadapan (Utara) menuju Laut Jawa.<br>&bull; Di kiri (Barat) dan di belakang (Selatan) menuju ke tempat lain.<br>Maka satu-satunya jalan tersisa di sebelah kanan adalah arah <strong>Ke Timur</strong> menuju kota Semarang (catatan: pada kunci PDF tertulis ke Utara/Laut Jawa pada teksnya, namun sesuai analisis arah mata angin yang tepat adalah <strong>Ke Timur</strong>)."
+    },
+    {
+      no: 8,
+      text: "P, Q, R, S, T adalah lima orang diplomat. P hanya dapat berbicara bahasa Inggris dan Jerman. Q hanya berbicara dalam bahasa Prancis, Jepang, dan Cina. R hanya dapat berbicara bahasa Jerman. S hanya berbicara dalam bahasa Inggris, Jepang, dan Cina. T hanya dapat berbicara dalam bahasa Prancis dan Jerman. Satu-satunya pasangan diplomat yang harus menggunakan penerjemah dalam berkomunikasi adalah ....",
+      options: {
+        A: "P dan R",
+        B: "Q dan R",
+        C: "R dan T",
+        D: "Q dan S",
+        E: "P dan T"
+      },
+      answer: "B",
+      explanation: "Bahasa yang dikuasai:<br>&bull; P = Inggris, Jerman<br>&bull; Q = Prancis, Jepang, Cina<br>&bull; R = Jerman<br>&bull; S = Inggris, Jepang, Cina<br>&bull; T = Prancis, Jerman<br><strong>Q dan R</strong> jika bertemu memerlukan penerjemah karena mereka tidak menguasai bahasa yang sama."
+    },
+    {
+      no: 9,
+      text: "Film Bundaku Tersayang memecahkan rekor paling banyak ditonton orang. Sementara film Pencuri yang Baik Hati memperoleh 4 buah piala Citra, antara lain sutradara dan peran utama pria terbaik. Film Rinduku Terpaut di Awan tidak ditonton sebanyak orang dibandingkan dengan film terdahulu, tetapi mendapat piala Citra dua lebih banyak dari film Pencuri Yang Baik Hati merupakan film dokumenter terbaik. Film Tersanjung merupakan film yang laris di bioskop. Film Kisah Klasik mendapatkan 5 piala citra. Manakah film terbaik berdasarkan piala Citra yang diperolehnya?",
+      options: {
+        A: "Rinduku Terpaut di Awan",
+        B: "Pencuri Yang Baik Hati",
+        C: "Bundaku Tersayang",
+        D: "Tersanjung",
+        E: "Kisah Klasik"
+      },
+      answer: "A",
+      explanation: "Dari keterangan soal diperoleh perolehan piala Citra:<br>&bull; Bundaku Tersayang = 0 piala Citra<br>&bull; Pencuri yang Baik Hati = 4 piala Citra<br>&bull; Rinduku Terpaut di Awan = 4 + 2 = 6 piala Citra<br>&bull; Tersanjung = 0 piala Citra<br>&bull; Kisah Klasik = 5 piala Citra<br>Film terbaik berdasarkan piala Citra yang diperolehnya adalah <strong>Rinduku Terpaut di Awan</strong> yang memperoleh 6 piala Citra."
+    },
+    {
+      no: 10,
+      text: "Ketika Ayah pulang dari kios penjahit, sepatunya berlumpur dan topinya banyak kena tepung. Tempat-tempat yang mungkin dilaluinya adalah Kampung Iping, Lapangan Badak, Taman Muda, dan Jalan Sumbing. Dia tidak mempunyai cukup waktu untuk mengunjungi lebih dari satu daerah dari daerah-daerah itu. Di jalan-jalan sama sekali tidak ada lumpur, kecuali di jalan-jalan yang aspalnya dibongkar untuk diperbaiki. Kampung Iping didiami oleh penjahit, demikian pula Jalan Sumbing, dan Taman Muda. Yang ada perusahaan roti adalah Jalan Sumbing, lapangan Badak, dan Kampung Iping. Saya tahu bahwa jalanan di Kampung Iping tidak sedang diperbaiki, tetapi mungkin sekali ada perbaikan jalan di tempat-tempat lain. Jalan manakah Ayah pulang ke rumah?",
+      options: {
+        A: "Kampung Iping",
+        B: "Jalan Sumbing",
+        C: "Lapangan Badak",
+        D: "Taman Muda",
+        E: "Tidak ada jawaban yang benar"
+      },
+      answer: "B",
+      explanation: "&bull; Yang didiami penjahit: Kampung Iping, Jalan Sumbing, dan Taman Muda.<br>&bull; Topi kena tepung karena lewat daerah yang ada perusahaan roti, yaitu: Jalan Sumbing, Lapangan Badak, dan Kampung Iping.<br>&bull; Karena jalanan Kampung Iping tidak rusak (tidak berlumpur) dan Ayah hanya mengunjungi satu tempat, maka yang dikunjungi adalah <strong>Jalan Sumbing</strong> (ada penjahit, ada perusahaan roti, dan jalanan sedang diperbaiki sehingga berlumpur)."
+    },
+    {
+      no: 11,
+      text: "Ibu Dina ingin membeli polis asuransi jiwa dengan premi termurah. Setelah meneliti puluhan perusahaan asuransi, terpilihlah lima asuransi yang kredibilitasnya cukup meyakinkan. Harga polis Asuransi Bahagia cukup murah, tetapi premi yang harus dibayar per bulannya lebih mahal dari Asuransi Asal Selamet, meski tetap lebih murah dibandingkan dengan Asuransi Seger Waras. Premi yang harus dibayar untuk Asuransi Ayem Tentrem tiap bulannya lebih murah dibandingkan dengan Asuransi Asal Selamet, tetapi masih kalah murah dengan Asuransi Timbang Apes. Polis Asuransi mana yang memenuhi kriteria Ibu Dina?",
+      options: {
+        A: "Asuransi Timbang Apes",
+        B: "Asuransi Asal Selamet",
+        C: "Asuransi Ayem Tentrem",
+        D: "Asuransi Seger Waras",
+        E: "Asuransi Bahagia"
+      },
+      answer: "A",
+      explanation: "Simbol &gt; berarti lebih mahal dan simbol &lt; berarti lebih murah.<br>&bull; Asuransi Bahagia &gt; Asal Selamet<br>&bull; Asuransi Bahagia &lt; Seger Waras<br>&bull; Ayem Tentrem &lt; Asal Selamet<br>&bull; Timbang Apes &lt; Ayem Tentrem<br>Urutan dari paling murah: Asuransi Timbang Apes &lt; Ayem Tentrem &lt; Asal Selamet &lt; Asuransi Bahagia &lt; Seger Waras.<br>Asuransi yang dipilih adalah yang termurah, yaitu: <strong>Asuransi Timbang Apes</strong>."
+    },
+    {
+      no: 12,
+      text: "Jarak antara kota A dan B adalah dua kali jarak antara kota C dan D. Kota E terletak di tengah-tengah antara kota C dan D. Selanjutnya, diketahui bahwa jarak kota C ke kota A sama dengan jarak kota D ke kota B, yaitu setengah jarak kota A ke kota E. Dua kota di bawah ini yang jaraknya paling jauh adalah ....",
+      options: {
+        A: "Kota A dan B",
+        B: "Kota B dan E",
+        C: "Kota A dan E",
+        D: "Kota B dan D",
+        E: "Kota C dan B"
+      },
+      answer: "A",
+      visual: `<svg width="360" height="65" viewBox="0 0 360 65" xmlns="http://www.w3.org/2000/svg">
+        <line x1="30" y1="30" x2="330" y2="30" stroke="#1e40af" stroke-width="2.5"/>
+        <circle cx="30" cy="30" r="5" fill="#1e40af"/>
+        <circle cx="105" cy="30" r="5" fill="#1e40af"/>
+        <circle cx="180" cy="30" r="5" fill="#1e40af"/>
+        <circle cx="255" cy="30" r="5" fill="#1e40af"/>
+        <circle cx="330" cy="30" r="5" fill="#1e40af"/>
+        <text x="30" y="52" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">A</text>
+        <text x="105" y="52" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">C</text>
+        <text x="180" y="52" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">E</text>
+        <text x="255" y="52" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">D</text>
+        <text x="330" y="52" text-anchor="middle" font-size="13" font-weight="700" fill="#0f172a">B</text>
+      </svg>`,
+      explanation: "Dari keterangan soal: AB = 2CD, E di tengah C dan D dengan CE = ED, serta CA = DB = &frac12;AE.<br>Susunan urutan letak kota pada satu garis lurus adalah A &ndash; C &ndash; E &ndash; D &ndash; B.<br>Dua kota yang jaraknya paling jauh adalah <strong>Kota A dan B</strong>."
+    },
+    {
+      no: 13,
+      text: "X lebih tua dari N, E lebih muda dari A, T lebih muda dari N, X lebih muda dari E, N lebih tua dari T maka yang termuda adalah ....",
+      options: {
+        A: "N",
+        B: "E",
+        C: "X",
+        D: "T",
+        E: "A"
+      },
+      answer: "D",
+      explanation: "Simbol &gt; lebih tua dan &lt; lebih muda.<br>&bull; X &gt; N atau N &lt; X<br>&bull; E &lt; A<br>&bull; T &lt; N<br>&bull; X &lt; E<br>&bull; N &gt; T atau T &lt; N<br>Urutan dari yang paling muda: T &lt; N &lt; X &lt; E &lt; A.<br>Paling muda adalah <strong>T</strong>."
+    },
+    {
+      no: 14,
+      text: "Yang terbaik tumbuh pada iklim dingin adalah wortel, kentang, dan kubis. Pada iklim sedang banyak sekali padang rumput dan di sana tumbuh ketela serta jagung. Pada iklim subtropis terdapat gandum, buah zaitun, dan kebun anggur. Pada iklim tropis tumbuh kelapa sawit dan padi. Bangsa X terutama hidup dari roti dan minyak sebagai pengganti mentega. Mereka minum anggur dan makan buah anggur. Pada iklim manakah mereka hidup?",
+      options: {
+        A: "Pada iklim dingin",
+        B: "Pada iklim subtropis",
+        C: "Pada iklim tropis",
+        D: "Pada iklim sedang",
+        E: "Jawaban A, B, C, D salah semua"
+      },
+      answer: "B",
+      explanation: "Keterangan dari soal:<br>&bull; Iklim dingin = wortel, kentang, kubis<br>&bull; Iklim sedang = padang rumput, ketela, jagung<br>&bull; Iklim subtropis = gandum, buah zaitun, kebun anggur<br>&bull; Iklim tropis = kelapa sawit, padi<br>Bangsa X terutama hidup dari roti (gandum) dan minyak (dari buah zaitun) sebagai pengganti mentega, serta minum anggur dan makan buah anggur &rarr; merupakan <strong>Pada iklim subtropis</strong>."
+    },
+    {
+      no: 15,
+      text: "Suatu keluarga mempunyai empat anak yang bergelar sarjana, A memperoleh gelar sarjana sesudah C, B memperoleh kesarjanaan sebelum D dan bersamaan dengan A. Urutan yang benar dalam memperoleh kesarjanaan adalah ....",
+      options: {
+        A: "D memperoleh gelar sarjana sebelum C",
+        B: "A memperoleh gelar sarjana sesudah D",
+        C: "C memperoleh gelar sarjana sebelum D",
+        D: "A memperoleh gelar sarjana bersamaan dengan D",
+        E: "B mendapatkan sarjana sebelum C"
+      },
+      answer: "C",
+      explanation: "Simbol &gt; mendapatkan gelar sarjana sebelum, simbol &lt; mendapatkan gelar sarjana setelah/sesudah.<br>Dari soal diperoleh: A &lt; C (atau C &gt; A), B &gt; D, dan B = A.<br>Urutan memperoleh gelar kesarjanaan dari yang paling awal adalah: C &gt; A = B &gt; D.<br>Jadi pernyataan yang benar adalah <strong>C memperoleh gelar sarjana sebelum D</strong>."
+    },
+    {
+      no: 16,
+      passage: "<strong>Teks untuk menjawab soal nomor 16 dan 17.</strong><br>Dalam suatu ujian, nilai Rara lebih tinggi daripada Sita. Reni mendapat nilai tertinggi. Nilai Joko lebih tinggi daripada Rara. Sinta mendapat nilai lebih rendah dibandingkan dengan Rara, tetapi lebih tinggi daripada Sita.",
+      text: "Urutan kelima anak berdasarkan nilai dimulai dari yang tertinggi adalah ....",
+      options: {
+        A: "Sinta, Sita, Rara, Joko, Reni",
+        B: "Reni, Joko, Sinta, Rara, Sita",
+        C: "Reni, Joko, Rara, Sinta, Sita",
+        D: "Sita, Sinta, Rara, Joko, Reni",
+        E: "Rara, Sita, Sinta, Joko, Reni"
+      },
+      answer: "C",
+      explanation: "Simbol &gt; berarti nilai lebih tinggi dan simbol &lt; berarti nilai lebih rendah.<br>&bull; Rara &gt; Sita<br>&bull; Reni mendapat nilai tertinggi<br>&bull; Joko &gt; Rara<br>&bull; Sinta &lt; Rara (atau Rara &gt; Sinta) dan Sinta &gt; Sita<br>Urutan berdasarkan dari nilai yang tertinggi: Reni &gt; Joko &gt; Rara &gt; Sinta &gt; Sita (<strong>Reni, Joko, Rara, Sinta, Sita</strong>)."
+    },
+    {
+      no: 17,
+      passage: "<strong>Teks untuk menjawab soal nomor 16 dan 17.</strong><br>Dalam suatu ujian, nilai Rara lebih tinggi daripada Sita. Reni mendapat nilai tertinggi. Nilai Joko lebih tinggi daripada Rara. Sinta mendapat nilai lebih rendah dibandingkan dengan Rara, tetapi lebih tinggi daripada Sita.",
+      text: "Jika ada siswa tambahan, Tono dan nilainya di antara Rara dan Sinta maka yang berada di urutan keempat adalah ....",
+      options: {
+        A: "Tono",
+        B: "Rara",
+        C: "Sinta",
+        D: "Sita",
+        E: "Joko"
+      },
+      answer: "A",
+      explanation: "Urutan berdasarkan dari nilai yang tertinggi setelah ada Tono di antara Rara dan Sinta:<br>1. Reni &gt; 2. Joko &gt; 3. Rara &gt; 4. <strong>Tono</strong> &gt; 5. Sinta &gt; 6. Sita.<br>Urutan keempat adalah <strong>Tono</strong>."
+    },
+    {
+      no: 18,
+      passage: "<strong>Teks untuk menjawab soal nomor 18 dan 19.</strong><br>Enam mahasiswa duduk berurutan dalam ujian wawancara. Tini tidak bersebelahan dengan Salim atau Tia. Nila duduk di dekat Tia. Tini duduk di dekat Jufri dan Jufri duduk di sebelah Nila. Salim tidak ingin didahului Harto dan Harto bersebelahan dengan Tini. Tia duduk di urutan terakhir.",
+      text: "Siapakah yang duduk di urutan keempat?",
+      options: {
+        A: "Salim",
+        B: "Tini",
+        C: "Jufri",
+        D: "Nila",
+        E: "Tia"
+      },
+      answer: "C",
+      explanation: "Tia di urutan ke-6 (terakhir), Nila di dekat Tia (ke-5), Jufri di sebelah Nila (ke-4), Tini di dekat Jufri (ke-3), Harto bersebelahan dengan Tini (ke-2), dan Salim mendahului Harto (ke-1).<br>Urutan duduk dari pertama sampai terakhir: Salim &gt; Harto &gt; Tini &gt; Jufri &gt; Nila &gt; Tia.<br>Jadi, yang duduk di urutan keempat adalah <strong>Jufri</strong>."
+    },
+    {
+      no: 19,
+      passage: "<strong>Teks untuk menjawab soal nomor 18 dan 19.</strong><br>Enam mahasiswa duduk berurutan dalam ujian wawancara. Tini tidak bersebelahan dengan Salim atau Tia. Nila duduk di dekat Tia. Tini duduk di dekat Jufri dan Jufri duduk di sebelah Nila. Salim tidak ingin didahului Harto dan Harto bersebelahan dengan Tini. Tia duduk di urutan terakhir.",
+      text: "Urutan tempat duduk dari pertama adalah ....",
+      options: {
+        A: "Salim, Harto, Tini, Jufri, Nila, Tia",
+        B: "Salim, Harto, Jufri, Tini, Nila, Tia",
+        C: "Jufri, Harto, Salim, Tini, Nila, Tia",
+        D: "Harto, Nila, Tini, Jufri, Salim, Tia",
+        E: "Salim, Harto, Tini, Nila, Jufri, Tia"
+      },
+      answer: "A",
+      explanation: "Urutan duduk dari yang pertama sampai terakhir:<br>1. Salim, 2. Harto, 3. Tini, 4. Jufri, 5. Nila, 6. Tia (<strong>Salim, Harto, Tini, Jufri, Nila, Tia</strong>)."
+    },
+    {
+      no: 20,
+      passage: "<strong>Teks untuk menjawab soal nomor 20 dan 21.</strong><br>Setiap upacara bendera di sekolah dasar, pengaturan baris dilakukan sebagai berikut:<br>&bull; Kelas yang bertindak sebagai petugas upacara berbaris menghadap barat.<br>&bull; Kelas yang tertua akan berbaris menghadap matahari terbit, sedang sisa kelas yang lain menghadap tiang bendera ke arah Utara.<br>&bull; Barisan kelas yang menghadap Utara diatur sedemikian rupa sehingga Barat ke Timur berturut-turut adalah kelas termuda sampai kelas tertua.",
+      text: "Jika petugas upacara hari ini adalah kelas III maka urutan yang menghadap Utara dari Barat ke Timur adalah ....",
+      options: {
+        A: "III &ndash; V &ndash; IV &ndash; II",
+        B: "VI &ndash; V &ndash; IV &ndash; II",
+        C: "V &ndash; IV &ndash; II &ndash; I",
+        D: "I &ndash; II &ndash; IV &ndash; V",
+        E: "VI &ndash; V &ndash; IV &ndash; III"
+      },
+      answer: "D",
+      explanation: "Karena petugas upacara hari ini adalah kelas III, maka:<br>&bull; Kelas III berbaris menghadap barat.<br>&bull; Kelas VI (tertua) berbaris menghadap timur (matahari terbit).<br>&bull; Sisa kelas yaitu I, II, IV, dan V menghadap utara dengan urutan dari Barat ke Timur (termuda ke tertua): <strong>I &ndash; II &ndash; IV &ndash; V</strong>."
+    },
+    {
+      no: 21,
+      passage: "<strong>Teks untuk menjawab soal nomor 20 dan 21.</strong><br>Setiap upacara bendera di sekolah dasar, pengaturan baris dilakukan sebagai berikut:<br>&bull; Kelas yang bertindak sebagai petugas upacara berbaris menghadap barat.<br>&bull; Kelas yang tertua akan berbaris menghadap matahari terbit, sedang sisa kelas yang lain menghadap tiang bendera ke arah Utara.<br>&bull; Barisan kelas yang menghadap Utara diatur sedemikian rupa sehingga Barat ke Timur berturut-turut adalah kelas termuda sampai kelas tertua.",
+      text: "Jika petugas upacara hari ini adalah kelas VI maka urutan yang menghadap Utara dari Timur ke Barat adalah ....",
+      options: {
+        A: "III &ndash; I &ndash; IV &ndash; II",
+        B: "VI &ndash; V &ndash; III &ndash; II",
+        C: "I &ndash; III &ndash; IV &ndash; V",
+        D: "III &ndash; IV &ndash; I &ndash; VI",
+        E: "IV &ndash; III &ndash; II &ndash; I"
+      },
+      answer: "E",
+      explanation: "Petugas upacara hari ini adalah kelas VI maka:<br>&bull; Kelas VI berbaris menghadap barat.<br>&bull; Kelas V (tertua dari sisa) berbaris menghadap timur.<br>&bull; Kelas I, II, III, dan IV menghadap utara dengan urutan dari Barat ke Timur adalah I, II, III, IV.<br>Maka urutan yang menghadap Utara dari Timur ke Barat adalah <strong>IV &ndash; III &ndash; II &ndash; I</strong>."
+    },
+    {
+      no: 22,
+      passage: "<strong>Teks untuk menjawab soal nomor 22&ndash;24.</strong><br>Tujuh mahasiswa menunggu giliran presentasi. Seno presentasi sebelum Kukuh. Ludin sebelum Bayu dan Dhany. Sedangkan, Ganda sebelum Kukuh dan Bayu. Irvan maju pertama, Kukuh tepat sesudah Ludin dan Bayu tepat sesudah Kukuh. Di antara Bayu dan Dhany tidak ada yang maju. Giliran Ganda tepat di antara Seno dan Ludin. Giliran Bayu sebelum Dhany.",
+      text: "Ludin mendapat giliran ke ....",
+      options: {
+        A: "2",
+        B: "3",
+        C: "4",
+        D: "5",
+        E: "6"
+      },
+      answer: "C",
+      explanation: "Irvan maju pertama (1). Giliran Ganda tepat di antara Seno dan Ludin (Seno - Ganda - Ludin). Kukuh tepat sesudah Ludin, Bayu tepat sesudah Kukuh, dan Dhany tepat sesudah Bayu.<br>Urutan presentasi dari yang paling awal: 1. Irvan &ndash; 2. Seno &ndash; 3. Ganda &ndash; 4. <strong>Ludin</strong> &ndash; 5. Kukuh &ndash; 6. Bayu &ndash; 7. Dhany.<br>Ludin berada di urutan ke-<strong>4</strong>."
+    },
+    {
+      no: 23,
+      passage: "<strong>Teks untuk menjawab soal nomor 22&ndash;24.</strong><br>Tujuh mahasiswa menunggu giliran presentasi. Seno presentasi sebelum Kukuh. Ludin sebelum Bayu dan Dhany. Sedangkan, Ganda sebelum Kukuh dan Bayu. Irvan maju pertama, Kukuh tepat sesudah Ludin dan Bayu tepat sesudah Kukuh. Di antara Bayu dan Dhany tidak ada yang maju. Giliran Ganda tepat di antara Seno dan Ludin. Giliran Bayu sebelum Dhany.",
+      text: "Yang berada di urutan terakhir adalah ....",
+      options: {
+        A: "Ganda",
+        B: "Kukuh",
+        C: "Dhany",
+        D: "Bayu",
+        E: "Seno"
+      },
+      answer: "C",
+      explanation: "Berdasarkan urutan presentasi: Irvan &ndash; Seno &ndash; Ganda &ndash; Ludin &ndash; Kukuh &ndash; Bayu &ndash; Dhany.<br>Urutan terakhir (ke-7) adalah <strong>Dhany</strong>."
+    },
+    {
+      no: 24,
+      passage: "<strong>Teks untuk menjawab soal nomor 22&ndash;24.</strong><br>Tujuh mahasiswa menunggu giliran presentasi. Seno presentasi sebelum Kukuh. Ludin sebelum Bayu dan Dhany. Sedangkan, Ganda sebelum Kukuh dan Bayu. Irvan maju pertama, Kukuh tepat sesudah Ludin dan Bayu tepat sesudah Kukuh. Di antara Bayu dan Dhany tidak ada yang maju. Giliran Ganda tepat di antara Seno dan Ludin. Giliran Bayu sebelum Dhany.",
+      text: "Urutan dari paling awal ....",
+      options: {
+        A: "Irvan &ndash; Ludin &ndash; Ganda &ndash; Seno &ndash; Kukuh &ndash; Bayu &ndash; Dhany",
+        B: "Irvan &ndash; Seno &ndash; Dhany &ndash; Kukuh &ndash; Ludin &ndash; Bayu &ndash; Ganda",
+        C: "Irvan &ndash; Ludin &ndash; Ganda &ndash; Seno &ndash; Dhany &ndash; Bayu &ndash; Kukuh",
+        D: "Irvan &ndash; Ganda &ndash; Seno &ndash; Ludin &ndash; Kukuh &ndash; Dhany &ndash; Bayu",
+        E: "Irvan &ndash; Seno &ndash; Ganda &ndash; Ludin &ndash; Kukuh &ndash; Bayu &ndash; Dhany"
+      },
+      answer: "E",
+      explanation: "Urutan presentasi dari paling awal adalah: <strong>Irvan &ndash; Seno &ndash; Ganda &ndash; Ludin &ndash; Kukuh &ndash; Bayu &ndash; Dhany</strong>."
+    },
+    {
+      no: 25,
+      passage: "<strong>Teks untuk menjawab soal nomor 25 dan 26.</strong><br>Hasil survei menunjukkan bahwa lagu keroncong lebih disukai daripada lagu klasik. Lagu rock dan dangdut sama-sama disukai, namun lagu keroncong lebih disukai daripada lagu rock dan dangdut. Lagu pop lebih disukai daripada keroncong. Lagu rock lebih disenangi daripada lagu klasik.",
+      text: "Urutan jenis lagu-lagu yang paling digemari sampai yang paling tidak digemari adalah ....",
+      options: {
+        A: "Pop, keroncong, rock/dangdut, klasik",
+        B: "Klasik, pop, rock/dangdut, keroncong",
+        C: "Pop, rock/dangdut, keroncong, klasik",
+        D: "Keroncong, pop, rock/dangdut, klasik",
+        E: "Pop, rock/dangdut, klasik, keroncong"
+      },
+      answer: "A",
+      explanation: "Simbol &gt; artinya lebih disukai:<br>&bull; Keroncong &gt; klasik<br>&bull; Keroncong &gt; dangdut, rock<br>&bull; Dangdut = rock<br>&bull; Pop &gt; keroncong<br>&bull; Rock &gt; klasik<br>Urutan dari yang paling digemari: Pop &gt; Keroncong &gt; Dangdut/rock &gt; klasik (<strong>Pop, keroncong, rock/dangdut, klasik</strong>)."
+    },
+    {
+      no: 26,
+      passage: "<strong>Teks untuk menjawab soal nomor 25 dan 26.</strong><br>Hasil survei menunjukkan bahwa lagu keroncong lebih disukai daripada lagu klasik. Lagu rock dan dangdut sama-sama disukai, namun lagu keroncong lebih disukai daripada lagu rock dan dangdut. Lagu pop lebih disukai daripada keroncong. Lagu rock lebih disenangi daripada lagu klasik.",
+      text: "Jenis lagu yang paling sedikit penggemarnya adalah ....",
+      options: {
+        A: "Keroncong",
+        B: "Rock",
+        C: "Pop",
+        D: "Klasik",
+        E: "Dangdut"
+      },
+      answer: "D",
+      explanation: "Lagu yang paling sedikit penggemarnya adalah lagu <strong>Klasik</strong>, karena berada di urutan paling akhir (paling tidak digemari)."
+    },
+    {
+      no: 27,
+      passage: "<strong>Teks untuk menjawab soal nomor 27 dan 28.</strong><br>Seorang wiraniaga harus memasarkan barang dagangan di lima kota H, I, J, K, dan L masing-masing sekali. Jadwal kunjungan kelima kota tadi sedemikian rupa sehingga:<br>&bull; Kota H harus dikunjungi sebelum kota-kota J dan K.<br>&bull; Kota L harus dikunjungi sesudah kunjungan ke kota J dan sebelumnya ke kota K.",
+      text: "Urutan kota yang harus dikunjungi wiraniaga tersebut adalah ....",
+      options: {
+        A: "K, J, L, I, dan H",
+        B: "I, H, K, J, dan L",
+        C: "J, L, K, H, dan I",
+        D: "L, J, K, H, dan I",
+        E: "H, I, J, K, dan L"
+      },
+      answer: "B",
+      explanation: "Simbol &gt; berarti dikunjungi sebelum:<br>&bull; H &gt; J dan H &gt; K<br>&bull; J &gt; L dan K &gt; L (atau sesuai pembahasan PDF: H &gt; K &gt; J &gt; L dengan I bebas ditempatkan).<br>Dari pilihan yang tersedia, urutan yang memenuhi H sebelum J &amp; K serta L setelah J &amp; K adalah <strong>I, H, K, J, dan L</strong>."
+    },
+    {
+      no: 28,
+      passage: "<strong>Teks untuk menjawab soal nomor 27 dan 28.</strong><br>Seorang wiraniaga harus memasarkan barang dagangan di lima kota H, I, J, K, dan L masing-masing sekali. Jadwal kunjungan kelima kota tadi sedemikian rupa sehingga:<br>&bull; Kota H harus dikunjungi sebelum kota-kota J dan K.<br>&bull; Kota L harus dikunjungi sesudah kunjungan ke kota J dan sebelumnya ke kota K.",
+      text: "Jika I dikunjungi setelah K dan sebelum J, kota yang dikunjungi pada urutan ketiga adalah ....",
+      options: {
+        A: "H",
+        B: "I",
+        C: "J",
+        D: "K",
+        E: "L"
+      },
+      answer: "B",
+      explanation: "Dengan I dikunjungi setelah K dan sebelum J, urutan kunjungan menjadi: 1. H &rarr; 2. K &rarr; 3. <strong>I</strong> &rarr; 4. J &rarr; 5. L.<br>Kota yang dikunjungi pada urutan ketiga adalah <strong>I</strong>."
+    },
+    {
+      no: 29,
+      passage: "<strong>Teks untuk menjawab soal nomor 29&ndash;33.</strong><br>A, B, C, D, dan E adalah lima pekerja yang mencalonkan diri menjadi ketua serikat pekerja. Ada tiga program yang diajukan para calon, yaitu:<br>(i) program peningkatan keterampilan pekerja oleh A, B, dan C;<br>(ii) program olahraga oleh B, C, dan D;<br>(iii) program peningkatan kesejahteraan oleh D, E, dan A.<br>Setiap warga hanya diperkenankan memilih satu calon berdasarkan programnya. Hasil pemungutan suara adalah sebagai berikut:<br>(a) 60 pekerja memilih program peningkatan keterampilan kerja.<br>(b) 45 pekerja memilih program olahraga.<br>(c) 90 pekerja memilih program peningkatan kesejahteraan.<br>(d) Jumlah suara terbagi sama besar pada calon-calon yang memiliki program sama.",
+      text: "Calon yang memperoleh suara terbanyak adalah ....",
+      options: {
+        A: "A",
+        B: "B",
+        C: "C",
+        D: "D",
+        E: "E"
+      },
+      answer: "A",
+      visual: `<table class="math-table">
+        <tr><th>Program / Keterangan</th><th>A</th><th>B</th><th>C</th><th>D</th><th>E</th></tr>
+        <tr><td>Program (i) [60 : 3]</td><td>20</td><td>20</td><td>20</td><td>-</td><td>-</td></tr>
+        <tr><td>Program (ii) [45 : 3]</td><td>-</td><td>15</td><td>15</td><td>15</td><td>-</td></tr>
+        <tr><td>Program (iii) [90 : 3]</td><td>30</td><td>-</td><td>-</td><td>30</td><td>30</td></tr>
+        <tr><th>Total Hasil Suara</th><th>50</th><th>35</th><th>35</th><th>45</th><th>30</th></tr>
+      </table>`,
+      explanation: "Pembagian suara:<br>&bull; Program (i): 60 / 3 = 20 suara untuk masing-masing A, B, C.<br>&bull; Program (ii): 45 / 3 = 15 suara untuk masing-masing B, C, D.<br>&bull; Program (iii): 90 / 3 = 30 suara untuk masing-masing D, E, A.<br>Total perolehan: A = 50, B = 35, C = 35, D = 45, E = 30.<br>Calon yang memperoleh suara terbanyak adalah <strong>A</strong> dengan 50 suara."
+    },
+    {
+      no: 30,
+      passage: "<strong>Teks untuk menjawab soal nomor 29&ndash;33.</strong><br>A, B, C, D, dan E adalah lima pekerja yang mencalonkan diri menjadi ketua serikat pekerja. Ada tiga program yang diajukan para calon, yaitu:<br>(i) program peningkatan keterampilan pekerja oleh A, B, dan C;<br>(ii) program olahraga oleh B, C, dan D;<br>(iii) program peningkatan kesejahteraan oleh D, E, dan A.<br>Setiap warga hanya diperkenankan memilih satu calon berdasarkan programnya. Hasil pemungutan suara adalah sebagai berikut:<br>(a) 60 pekerja memilih program peningkatan keterampilan kerja.<br>(b) 45 pekerja memilih program olahraga.<br>(c) 90 pekerja memilih program peningkatan kesejahteraan.<br>(d) Jumlah suara terbagi sama besar pada calon-calon yang memiliki program sama.",
+      text: "Calon yang memperoleh suara tersedikit adalah ....",
+      options: {
+        A: "A",
+        B: "B",
+        C: "C",
+        D: "D",
+        E: "E"
+      },
+      answer: "E",
+      explanation: "Berdasarkan rincian perolehan suara (A = 50, B = 35, C = 35, D = 45, E = 30), calon yang memperoleh suara tersedikit adalah <strong>E</strong> dengan 30 suara."
+    },
+    {
+      no: 31,
+      passage: "<strong>Teks untuk menjawab soal nomor 29&ndash;33.</strong><br>A, B, C, D, dan E adalah lima pekerja yang mencalonkan diri menjadi ketua serikat pekerja. Ada tiga program yang diajukan para calon, yaitu:<br>(i) program peningkatan keterampilan pekerja oleh A, B, dan C;<br>(ii) program olahraga oleh B, C, dan D;<br>(iii) program peningkatan kesejahteraan oleh D, E, dan A.<br>Setiap warga hanya diperkenankan memilih satu calon berdasarkan programnya. Hasil pemungutan suara adalah sebagai berikut:<br>(a) 60 pekerja memilih program peningkatan keterampilan kerja.<br>(b) 45 pekerja memilih program olahraga.<br>(c) 90 pekerja memilih program peningkatan kesejahteraan.<br>(d) Jumlah suara terbagi sama besar pada calon-calon yang memiliki program sama.",
+      text: "A dan B memiliki perbedaan perolehan suara sebanyak ... suara.",
+      options: {
+        A: "5",
+        B: "10",
+        C: "15",
+        D: "20",
+        E: "25"
+      },
+      answer: "C",
+      explanation: "Perolehan suara A = 50 dan B = 35.<br>Perbedaan perolehan suara A dan B = 50 &minus; 35 = <strong>15</strong> suara."
+    },
+    {
+      no: 32,
+      passage: "<strong>Teks untuk menjawab soal nomor 29&ndash;33.</strong><br>A, B, C, D, dan E adalah lima pekerja yang mencalonkan diri menjadi ketua serikat pekerja. Ada tiga program yang diajukan para calon, yaitu:<br>(i) program peningkatan keterampilan pekerja oleh A, B, dan C;<br>(ii) program olahraga oleh B, C, dan D;<br>(iii) program peningkatan kesejahteraan oleh D, E, dan A.<br>Setiap warga hanya diperkenankan memilih satu calon berdasarkan programnya. Hasil pemungutan suara adalah sebagai berikut:<br>(a) 60 pekerja memilih program peningkatan keterampilan kerja.<br>(b) 45 pekerja memilih program olahraga.<br>(c) 90 pekerja memilih program peningkatan kesejahteraan.<br>(d) Jumlah suara terbagi sama besar pada calon-calon yang memiliki program sama.",
+      text: "Urutan dengan perolehan tiga suara terbanyak, dimulai dari yang terbanyak, adalah ....",
+      options: {
+        A: "DBE",
+        B: "ECA",
+        C: "ABC",
+        D: "CAB",
+        E: "ADC"
+      },
+      answer: "E",
+      explanation: "Urutan dari yang mendapatkan suara terbanyak adalah A (50), D (45), B/C (35), E (30).<br>Tiga suara terbanyak adalah ADB atau <strong>ADC</strong>."
+    },
+    {
+      no: 33,
+      passage: "<strong>Teks untuk menjawab soal nomor 29&ndash;33.</strong><br>A, B, C, D, dan E adalah lima pekerja yang mencalonkan diri menjadi ketua serikat pekerja. Ada tiga program yang diajukan para calon, yaitu:<br>(i) program peningkatan keterampilan pekerja oleh A, B, dan C;<br>(ii) program olahraga oleh B, C, dan D;<br>(iii) program peningkatan kesejahteraan oleh D, E, dan A.<br>Setiap warga hanya diperkenankan memilih satu calon berdasarkan programnya. Hasil pemungutan suara adalah sebagai berikut:<br>(a) 60 pekerja memilih program peningkatan keterampilan kerja.<br>(b) 45 pekerja memilih program olahraga.<br>(c) 90 pekerja memilih program peningkatan kesejahteraan.<br>(d) Jumlah suara terbagi sama besar pada calon-calon yang memiliki program sama.",
+      text: "Jika ketua terpilih mengangkat ketua seksi olahraga dari calon yang memperoleh suara terbanyak dan mengajukan program olahraga maka yang menjadi ketua seksi olahraga adalah ....",
+      options: {
+        A: "A",
+        B: "B",
+        C: "C",
+        D: "D",
+        E: "E"
+      },
+      answer: "D",
+      explanation: "Ketua terpilih adalah A (50 suara). Calon yang mengajukan program olahraga adalah B (35), C (35), dan D (45).<br>Yang memperoleh suara terbanyak di antara pengaju program olahraga adalah calon <strong>D</strong>."
+    },
+    {
+      no: 34,
+      passage: "<strong>Teks untuk menjawab soal nomor 34&ndash;36.</strong><br>Adi, Beti, dan Yunus sebaya. Ayah mereka mulai bekerja pada usia 25 tahun di perusahaan yang sama. Perusahaan tersebut mengharuskan pegawai yang usianya 60 tahun untuk pensiun.<br>(a) Tahun ini usia ayah Adi tiga kali usia Adi.<br>(b) Tahun ini usia ibu Beti tiga kali usia Beti, tiga tahun lebih muda daripada usia ayah Beti.<br>(c) Tiga tahun yang lalu perbandingan antara usia Yunus dan usia ayah Yunus sama dengan perbandingan antara usia Adi dan ayah Adi tahun ini.<br>(d) Tahun ini ayah Adi memasuki masa pensiun.",
+      text: "Berapa tahun usia ketiga anak tersebut tahun lalu?",
+      options: {
+        A: "18",
+        B: "19",
+        C: "20",
+        D: "21",
+        E: "22"
+      },
+      answer: "B",
+      explanation: "Tahun ini ayah Adi pensiun &rArr; Ayah Adi = 60 tahun.<br>Ayah Adi = 3A &rArr; A = 60 / 3 = 20 tahun.<br>Karena sebaya, tahun ini usia Adi = Beti = Yunus = 20 tahun.<br>Usia ketiga anak tersebut tahun lalu = 20 &minus; 1 = <strong>19</strong> tahun."
+    },
+    {
+      no: 35,
+      passage: "<strong>Teks untuk menjawab soal nomor 34&ndash;36.</strong><br>Adi, Beti, dan Yunus sebaya. Ayah mereka mulai bekerja pada usia 25 tahun di perusahaan yang sama. Perusahaan tersebut mengharuskan pegawai yang usianya 60 tahun untuk pensiun.<br>(a) Tahun ini usia ayah Adi tiga kali usia Adi.<br>(b) Tahun ini usia ibu Beti tiga kali usia Beti, tiga tahun lebih muda daripada usia ayah Beti.<br>(c) Tiga tahun yang lalu perbandingan antara usia Yunus dan usia ayah Yunus sama dengan perbandingan antara usia Adi dan ayah Adi tahun ini.<br>(d) Tahun ini ayah Adi memasuki masa pensiun.",
+      text: "Urutan ketiga anak tersebut berdasarkan usia ayahnya dari usia termuda adalah ....",
+      options: {
+        A: "Adi, Beti, Yunus",
+        B: "Beti, Yunus, Adi",
+        C: "Yunus, Adi, Beti",
+        D: "Beti, Adi, Yunus",
+        E: "Yunus, Beti, Adi"
+      },
+      answer: "C",
+      explanation: "&bull; Ayah Adi = 60 tahun.<br>&bull; Ibu Beti = 3 &times; 20 = 60 tahun &rArr; Ayah Beti = 60 + 3 = 63 tahun.<br>&bull; (Y &minus; 3) / (Ayah Yunus &minus; 3) = 20 / 60 &rArr; 17 / (Ayah Yunus &minus; 3) = 1 / 3 &rArr; Ayah Yunus &minus; 3 = 51 &rArr; Ayah Yunus = 54 tahun.<br>Urutan berdasarkan usia ayahnya dari termuda: <strong>Yunus, Adi, Beti</strong> (54, 60, 63 tahun)."
+    },
+    {
+      no: 36,
+      passage: "<strong>Teks untuk menjawab soal nomor 34&ndash;36.</strong><br>Adi, Beti, dan Yunus sebaya. Ayah mereka mulai bekerja pada usia 25 tahun di perusahaan yang sama. Perusahaan tersebut mengharuskan pegawai yang usianya 60 tahun untuk pensiun.<br>(a) Tahun ini usia ayah Adi tiga kali usia Adi.<br>(b) Tahun ini usia ibu Beti tiga kali usia Beti, tiga tahun lebih muda daripada usia ayah Beti.<br>(c) Tiga tahun yang lalu perbandingan antara usia Yunus dan usia ayah Yunus sama dengan perbandingan antara usia Adi dan ayah Adi tahun ini.<br>(d) Tahun ini ayah Adi memasuki masa pensiun.",
+      text: "Berapa tahun masa kerja ayah Yunus pada tahun ini?",
+      options: {
+        A: "19",
+        B: "26",
+        C: "29",
+        D: "30",
+        E: "32"
+      },
+      answer: "C",
+      explanation: "Masa kerja ayah Yunus pada tahun ini = usia sekarang &minus; usia masuk kerja = 54 &minus; 25 = <strong>29</strong> tahun."
+    },
+    {
+      no: 37,
+      passage: "<strong>Teks untuk menjawab soal nomor 37&ndash;40.</strong><br>Sepasang pengantin akan jalan-jalan ke Yogyakarta dan berencana mengunjungi enam tempat wisata, yaitu: Malioboro, Alun-alun, Candi Borobudur, Candi Prambanan, Parangtritis, dan Keraton. Adapun aturan kunjungannya, yaitu:<br>&bull; Malioboro harus dikunjungi sebelum Candi Borobudur dan Keraton.<br>&bull; Candi Prambanan hanya boleh dikunjungi jika Candi Borobudur sudah dikunjungi.<br>&bull; Parangtritis harus dikunjungi setelah Malioboro namun sebelum Alun-alun.",
+      text: "Tempat yang pertama kali harus dikunjungi adalah ....",
+      options: {
+        A: "Malioboro",
+        B: "Alun-alun",
+        C: "Candi Borobudur",
+        D: "Candi Prambanan",
+        E: "Keraton"
+      },
+      answer: "A",
+      explanation: "Simbol &lt; berarti dikunjungi sebelum:<br>&bull; Malioboro &lt; Candi Borobudur &lt; Candi Prambanan<br>&bull; Malioboro &lt; Parangtritis &lt; Alun-alun<br>&bull; Malioboro &lt; Keraton<br>Terlihat Malioboro selalu paling awal, jadi yang pertama kali harus dikunjungi adalah <strong>Malioboro</strong>."
+    },
+    {
+      no: 38,
+      passage: "<strong>Teks untuk menjawab soal nomor 37&ndash;40.</strong><br>Sepasang pengantin akan jalan-jalan ke Yogyakarta dan berencana mengunjungi enam tempat wisata, yaitu: Malioboro, Alun-alun, Candi Borobudur, Candi Prambanan, Parangtritis, dan Keraton. Adapun aturan kunjungannya, yaitu:<br>&bull; Malioboro harus dikunjungi sebelum Candi Borobudur dan Keraton.<br>&bull; Candi Prambanan hanya boleh dikunjungi jika Candi Borobudur sudah dikunjungi.<br>&bull; Parangtritis harus dikunjungi setelah Malioboro namun sebelum Alun-alun.",
+      text: "Jika Alun-alun dikunjungi sebelum Candi Borobudur, dan Parangtritis dikunjungi setelah Keraton maka yang dikunjungi terakhir adalah ....",
+      options: {
+        A: "Alun-alun",
+        B: "Candi Borobudur",
+        C: "Candi Prambanan",
+        D: "Parangtritis",
+        E: "Keraton"
+      },
+      answer: "C",
+      explanation: "Dengan tambahan syarat Alun-alun &lt; Candi Borobudur dan Keraton &lt; Parangtritis, urutan lengkap dari yang paling awal menjadi:<br>Malioboro &lt; Keraton &lt; Parangtritis &lt; Alun-alun &lt; Candi Borobudur &lt; Candi Prambanan.<br>Yang dikunjungi terakhir adalah <strong>Candi Prambanan</strong>."
+    },
+    {
+      no: 39,
+      passage: "<strong>Teks untuk menjawab soal nomor 37&ndash;40.</strong><br>Sepasang pengantin akan jalan-jalan ke Yogyakarta dan berencana mengunjungi enam tempat wisata, yaitu: Malioboro, Alun-alun, Candi Borobudur, Candi Prambanan, Parangtritis, dan Keraton. Adapun aturan kunjungannya, yaitu:<br>&bull; Malioboro harus dikunjungi sebelum Candi Borobudur dan Keraton.<br>&bull; Candi Prambanan hanya boleh dikunjungi jika Candi Borobudur sudah dikunjungi.<br>&bull; Parangtritis harus dikunjungi setelah Malioboro namun sebelum Alun-alun.",
+      text: "Yang tidak mungkin dikunjungi setelah Alun-alun adalah ....",
+      options: {
+        A: "Keraton",
+        B: "Candi Prambanan",
+        C: "Candi Borobudur",
+        D: "Malioboro",
+        E: "Keraton"
+      },
+      answer: "D",
+      explanation: "Malioboro adalah tempat pertama yang harus dikunjungi sebelum semua tempat lainnya (termasuk sebelum Parangtritis dan Alun-alun), sehingga <strong>Malioboro</strong> tidak mungkin dikunjungi setelah Alun-alun (catatan: pada kunci PDF tertulis Candi Borobudur sebagai contoh tempat setelah Alun-alun, sedangkan sesuai pertanyaan &ldquo;tidak mungkin setelah Alun-alun&rdquo; adalah <strong>Malioboro</strong>)."
+    },
+    {
+      no: 40,
+      passage: "<strong>Teks untuk menjawab soal nomor 37&ndash;40.</strong><br>Sepasang pengantin akan jalan-jalan ke Yogyakarta dan berencana mengunjungi enam tempat wisata, yaitu: Malioboro, Alun-alun, Candi Borobudur, Candi Prambanan, Parangtritis, dan Keraton. Adapun aturan kunjungannya, yaitu:<br>&bull; Malioboro harus dikunjungi sebelum Candi Borobudur dan Keraton.<br>&bull; Candi Prambanan hanya boleh dikunjungi jika Candi Borobudur sudah dikunjungi.<br>&bull; Parangtritis harus dikunjungi setelah Malioboro namun sebelum Alun-alun.",
+      text: "Jika Keraton dikunjungi setelah Alun-alun, dan Candi Prambanan dikunjungi sebelum Parangtritis maka ....",
+      options: {
+        A: "yang dikunjungi kedua adalah Alun-alun",
+        B: "yang terakhir dikunjungi adalah Parangtritis",
+        C: "yang dikunjungi ketiga adalah Candi Prambanan",
+        D: "yang dikunjungi kelima adalah Parangtritis",
+        E: "yang dikunjungi keempat adalah Candi Borobudur"
+      },
+      answer: "C",
+      explanation: "Dengan syarat tambahan Alun-alun &lt; Keraton dan Candi Prambanan &lt; Parangtritis, urutan kunjungannya adalah:<br>1. Malioboro &lt; 2. Candi Borobudur &lt; 3. Candi Prambanan &lt; 4. Parangtritis &lt; 5. Alun-alun &lt; 6. Keraton.<br>Pernyataan yang benar adalah <strong>yang dikunjungi ketiga adalah Candi Prambanan</strong>."
+    },
+    {
+      no: 41,
+      passage: "<strong>Teks untuk menjawab soal nomor 41&ndash;43.</strong><br>Dalam pertandingan bulu tangkis Arman selalu kalah melawan Bambang, tetapi dalam cabang olahraga yang lainnya ia selalu menang bila bertanding melawan Bambang. Candra selalu menang dalam pertandingan tenis meja melawan Arman, tetapi dalam cabang bulu tangkis ia akan kalah bila bertanding melawan Arman. Dudi adalah pemain bulu tangkis terbaik, tetapi dalam cabang tenis meja dia tidak sebaik Bambang. Dalam cabang tenis meja, Edi lebih baik daripada Arman, sedangkan dalam cabang bulu tangkis ia menempati urutan tepat di bawah Dudi.",
+      text: "Siapakah pemain tenis meja terbaik di antara kelima atlet tersebut?",
+      options: {
+        A: "Arman",
+        B: "Bambang",
+        C: "Candra",
+        D: "Dudi",
+        E: "Edi"
+      },
+      answer: "E",
+      explanation: "Simbol &gt; menang, dan &lt; kalah.<br>&bull; Bulu Tangkis: Dudi &gt; Edi &gt; Bambang &gt; Arman &gt; Candra.<br>&bull; Tenis Meja: Arman &gt; Bambang, Candra &gt; Arman, Bambang &gt; Dudi, Edi &gt; Arman &rArr; urutan pemenang: Edi &gt; Candra &gt; Arman &gt; Bambang &gt; Dudi.<br>Pemain tenis meja terbaik di antara kelima atlet tersebut adalah <strong>Edi</strong>."
+    },
+    {
+      no: 42,
+      passage: "<strong>Teks untuk menjawab soal nomor 41&ndash;43.</strong><br>Dalam pertandingan bulu tangkis Arman selalu kalah melawan Bambang, tetapi dalam cabang olahraga yang lainnya ia selalu menang bila bertanding melawan Bambang. Candra selalu menang dalam pertandingan tenis meja melawan Arman, tetapi dalam cabang bulu tangkis ia akan kalah bila bertanding melawan Arman. Dudi adalah pemain bulu tangkis terbaik, tetapi dalam cabang tenis meja dia tidak sebaik Bambang. Dalam cabang tenis meja, Edi lebih baik daripada Arman, sedangkan dalam cabang bulu tangkis ia menempati urutan tepat di bawah Dudi.",
+      text: "Untuk cabang olahraga tenis meja, ranking pemain terbaik yang manakah yang paling tepat dari urutan di bawah ini!",
+      options: {
+        A: "Bambang &ndash; Arman &ndash; Candra &ndash; Dudi &ndash; Edi",
+        B: "Arman &ndash; Bambang &ndash; Candra &ndash; Edi &ndash; Dudi",
+        C: "Dudi &ndash; Edi &ndash; Candra &ndash; Bambang &ndash; Arman",
+        D: "Edi &ndash; Dudi &ndash; Candra &ndash; Bambang &ndash; Arman",
+        E: "Edi &ndash; Candra &ndash; Arman &ndash; Bambang &ndash; Dudi"
+      },
+      answer: "E",
+      explanation: "Untuk cabang olahraga tenis meja, ranking pemain terbaik dari peringkat 1 sampai 5 adalah: <strong>Edi &ndash; Candra &ndash; Arman &ndash; Bambang &ndash; Dudi</strong>."
+    },
+    {
+      no: 43,
+      passage: "<strong>Teks untuk menjawab soal nomor 41&ndash;43.</strong><br>Dalam pertandingan bulu tangkis Arman selalu kalah melawan Bambang, tetapi dalam cabang olahraga yang lainnya ia selalu menang bila bertanding melawan Bambang. Candra selalu menang dalam pertandingan tenis meja melawan Arman, tetapi dalam cabang bulu tangkis ia akan kalah bila bertanding melawan Arman. Dudi adalah pemain bulu tangkis terbaik, tetapi dalam cabang tenis meja dia tidak sebaik Bambang. Dalam cabang tenis meja, Edi lebih baik daripada Arman, sedangkan dalam cabang bulu tangkis ia menempati urutan tepat di bawah Dudi.",
+      text: "Untuk cabang olahraga bulu tangkis, ranking pemain terbaik manakah yang paling tepat dari urutan di bawah ini?",
+      options: {
+        A: "Dudi &ndash; Edi &ndash; Arman &ndash; Bambang &ndash; Candra",
+        B: "Bambang &ndash; Arman &ndash; Dudi &ndash; Edi &ndash; Candra",
+        C: "Dudi &ndash; Edi &ndash; Bambang &ndash; Arman &ndash; Candra",
+        D: "Bambang &ndash; Dudi &ndash; Edi &ndash; Arman &ndash; Candra",
+        E: "Dudi &ndash; Edi &ndash; Candra &ndash; Bambang &ndash; Arman"
+      },
+      answer: "C",
+      explanation: "Untuk cabang olahraga bulu tangkis, ranking pemain terbaik adalah: <strong>Dudi &ndash; Edi &ndash; Bambang &ndash; Arman &ndash; Candra</strong>."
+    },
+    {
+      no: 44,
+      passage: "<strong>Teks untuk menjawab soal nomor 44&ndash;47.</strong><br>Setiap berangkat ke sekolah Nina membawa bekal makanan. Bekal yang dibawa Nina diatur ibunya tanpa memperhitungkan hari ketika Nina tidak masuk sekolah. Nasi goreng dan nasi putih dibawa Nina secara bergantian setiap hari sekolah. Lauk untuk dua hari sekolah berurutan berupa ayam goreng, baru kemudian telur goreng untuk satu hari sekolah berikutnya, dan seterusnya berulang.<br>(a) Hari pertama pada minggu pertama tahun ajaran adalah hari Senin.<br>(b) Bekal pertama kali yang dibawa Nina berupa nasi goreng dan ayam goreng.<br>(c) Nina tidak masuk sekolah pada hari Selasa dan Sabtu minggu kedua karena sakit.<br>(d) Hari Rabu minggu kelima adalah hari libur nasional.",
+      text: "Pada hari apakah, selama lima minggu pertama, Nina dibekali dengan nasi goreng dan ayam goreng?",
+      options: {
+        A: "Senin",
+        B: "Selasa",
+        C: "Rabu",
+        D: "Kamis",
+        E: "Jumat"
+      },
+      answer: "A",
+      visual: `<table class="math-table">
+        <tr><th>Minggu ke-</th><th>Senin</th><th>Selasa</th><th>Rabu</th><th>Kamis</th><th>Jumat</th><th>Sabtu</th></tr>
+        <tr><td>I</td><td>Ng+A</td><td>Np+A</td><td>Ng+T</td><td>Np+A</td><td>Ng+A</td><td>Np+T</td></tr>
+        <tr><td>II</td><td>Ng+A</td><td><em>Sakit</em></td><td>Np+A</td><td>Ng+T</td><td>Np+A</td><td><em>Sakit</em></td></tr>
+        <tr><td>III</td><td>Ng+A</td><td>Np+T</td><td>Ng+A</td><td>Np+A</td><td>Ng+T</td><td>Np+A</td></tr>
+        <tr><td>IV</td><td>Ng+A</td><td>Np+T</td><td>Ng+A</td><td>Np+A</td><td>Ng+T</td><td>Np+A</td></tr>
+        <tr><td>V</td><td>Ng+A</td><td>Np+T</td><td><em>Libur</em></td><td>Ng+A</td><td>Np+A</td><td>Ng+T</td></tr>
+      </table>`,
+      explanation: "Keterangan: Ng = Nasi goreng, Np = Nasi putih, A = Ayam goreng, T = Telur goreng.<br>Berdasarkan tabel jadwal bekal lima minggu pertama, setiap hari <strong>Senin</strong> Nina selalu dibekali dengan nasi goreng dan ayam goreng (Ng+A)."
+    },
+    {
+      no: 45,
+      passage: "<strong>Teks untuk menjawab soal nomor 44&ndash;47.</strong><br>Setiap berangkat ke sekolah Nina membawa bekal makanan. Bekal yang dibawa Nina diatur ibunya tanpa memperhitungkan hari ketika Nina tidak masuk sekolah. Nasi goreng dan nasi putih dibawa Nina secara bergantian setiap hari sekolah. Lauk untuk dua hari sekolah berurutan berupa ayam goreng, baru kemudian telur goreng untuk satu hari sekolah berikutnya, dan seterusnya berulang.<br>(a) Hari pertama pada minggu pertama tahun ajaran adalah hari Senin.<br>(b) Bekal pertama kali yang dibawa Nina berupa nasi goreng dan ayam goreng.<br>(c) Nina tidak masuk sekolah pada hari Selasa dan Sabtu minggu kedua karena sakit.<br>(d) Hari Rabu minggu kelima adalah hari libur nasional.",
+      text: "Pada hari apakah, selama lima minggu pertama, Nina lebih sering membawa bekal nasi putih dan telur goreng?",
+      options: {
+        A: "Senin",
+        B: "Selasa",
+        C: "Rabu",
+        D: "Kamis",
+        E: "Jumat"
+      },
+      answer: "B",
+      explanation: "Berdasarkan tabel jadwal bekal lima minggu pertama, bekal nasi putih dan telur goreng (Np+T) muncul sebanyak 3 kali pada hari <strong>Selasa</strong> (Minggu III, IV, dan V)."
+    },
+    {
+      no: 46,
+      passage: "<strong>Teks untuk menjawab soal nomor 44&ndash;47.</strong><br>Setiap berangkat ke sekolah Nina membawa bekal makanan. Bekal yang dibawa Nina diatur ibunya tanpa memperhitungkan hari ketika Nina tidak masuk sekolah. Nasi goreng dan nasi putih dibawa Nina secara bergantian setiap hari sekolah. Lauk untuk dua hari sekolah berurutan berupa ayam goreng, baru kemudian telur goreng untuk satu hari sekolah berikutnya, dan seterusnya berulang.<br>(a) Hari pertama pada minggu pertama tahun ajaran adalah hari Senin.<br>(b) Bekal pertama kali yang dibawa Nina berupa nasi goreng dan ayam goreng.<br>(c) Nina tidak masuk sekolah pada hari Selasa dan Sabtu minggu kedua karena sakit.<br>(d) Hari Rabu minggu kelima adalah hari libur nasional.",
+      text: "Pada hari apa sajakah, pada minggu ketiga, Nina dibekali dengan nasi putih dan ayam goreng?",
+      options: {
+        A: "Senin dan Rabu",
+        B: "Selasa dan Kamis",
+        C: "Rabu dan Jumat",
+        D: "Kamis dan Sabtu",
+        E: "Jumat dan Senin"
+      },
+      answer: "D",
+      explanation: "Pada minggu ketiga: Senin (Ng+A), Selasa (Np+T), Rabu (Ng+A), <strong>Kamis (Np+A)</strong>, Jumat (Ng+T), <strong>Sabtu (Np+A)</strong>.<br>Jadi Nina dibekali nasi putih dan ayam goreng pada hari <strong>Kamis dan Sabtu</strong>."
+    },
+    {
+      no: 47,
+      passage: "<strong>Teks untuk menjawab soal nomor 44&ndash;47.</strong><br>Setiap berangkat ke sekolah Nina membawa bekal makanan. Bekal yang dibawa Nina diatur ibunya tanpa memperhitungkan hari ketika Nina tidak masuk sekolah. Nasi goreng dan nasi putih dibawa Nina secara bergantian setiap hari sekolah. Lauk untuk dua hari sekolah berurutan berupa ayam goreng, baru kemudian telur goreng untuk satu hari sekolah berikutnya, dan seterusnya berulang.<br>(a) Hari pertama pada minggu pertama tahun ajaran adalah hari Senin.<br>(b) Bekal pertama kali yang dibawa Nina berupa nasi goreng dan ayam goreng.<br>(c) Nina tidak masuk sekolah pada hari Selasa dan Sabtu minggu kedua karena sakit.<br>(d) Hari Rabu minggu kelima adalah hari libur nasional.",
+      text: "Selama lima minggu pertama, berapa kalikah Nina membawa bekal nasi goreng dan telur goreng?",
+      options: {
+        A: "8",
+        B: "7",
+        C: "6",
+        D: "5",
+        E: "4"
+      },
+      answer: "D",
+      explanation: "Selama lima minggu pertama, bekal nasi goreng dan telur goreng (Ng+T) dibawa pada:<br>1. Rabu Minggu I<br>2. Kamis Minggu II<br>3. Jumat Minggu III<br>4. Jumat Minggu IV<br>5. Sabtu Minggu V<br>Total sebanyak <strong>5</strong> kali."
+    },
+    {
+      no: 48,
+      passage: "<strong>Teks untuk menjawab soal nomor 48&ndash;50.</strong><br>Dalam rangka seleksi calon anggota tim bola basket putri dilakukan pengukuran tinggi badan. Anis lebih tinggi daripada Bunga. Tinggi Centika sama dengan tinggi Esty. Fentya lebih tinggi daripada Dawiyah. Hanya ada dua peserta yang tinggi badannya sama.",
+      text: "Pernyataan yang pasti salah adalah ....",
+      options: {
+        A: "Bunga lebih tinggi daripada Dawiyah",
+        B: "Anis lebih tinggi daripada Fentya",
+        C: "Anis sama dengan Esty",
+        D: "Dawiyah lebih tinggi daripada Anis",
+        E: "Fentya lebih tinggi daripada Anis"
+      },
+      answer: "C",
+      explanation: "Simbol &gt; lebih tinggi: Anis &gt; Bunga, Centika = Esty, Fentya &gt; Dawiyah.<br>Karena hanya ada dua peserta yang tinggi badannya sama, maka hanya Centika dan Esty yang tingginya sama.<br>Jadi, pernyataan <strong>Anis sama dengan Esty</strong> pasti salah."
+    },
+    {
+      no: 49,
+      passage: "<strong>Teks untuk menjawab soal nomor 48&ndash;50.</strong><br>Dalam rangka seleksi calon anggota tim bola basket putri dilakukan pengukuran tinggi badan. Anis lebih tinggi daripada Bunga. Tinggi Centika sama dengan tinggi Esty. Fentya lebih tinggi daripada Dawiyah. Hanya ada dua peserta yang tinggi badannya sama.",
+      text: "Jika Bunga lebih tinggi daripada Fentya maka ....",
+      options: {
+        A: "Anis lebih tinggi daripada Dawiyah",
+        B: "Fentya lebih tinggi daripada Anis",
+        C: "Dawiyah lebih tinggi daripada Bunga",
+        D: "Centika lebih tinggi daripada Fentya",
+        E: "Esty lebih tinggi dari Anis"
+      },
+      answer: "A",
+      explanation: "Dengan tambahan Bunga &gt; Fentya, diperoleh urutan tinggi badan:<br>Anis &gt; Bunga &gt; Fentya &gt; Dawiyah (dan Centika = Esty).<br>Maka pernyataan yang pasti benar adalah <strong>Anis lebih tinggi daripada Dawiyah</strong>."
+    },
+    {
+      no: 50,
+      passage: "<strong>Teks untuk menjawab soal nomor 48&ndash;50.</strong><br>Dalam rangka seleksi calon anggota tim bola basket putri dilakukan pengukuran tinggi badan. Anis lebih tinggi daripada Bunga. Tinggi Centika sama dengan tinggi Esty. Fentya lebih tinggi daripada Dawiyah. Hanya ada dua peserta yang tinggi badannya sama.",
+      text: "Berdasarkan soal nomor 49 dan jika Centika lebih tinggi daripada Anis maka ....",
+      options: {
+        A: "Anis lebih tinggi daripada Esty",
+        B: "Esty lebih tinggi daripada Bunga",
+        C: "Dawiyah lebih tinggi daripada Centika",
+        D: "Fentya lebih tinggi daripada Bunga",
+        E: "Anis Paling tinggi"
+      },
+      answer: "B",
+      explanation: "Jika Centika &gt; Anis dan Centika = Esty, maka urutan tinggi badan seluruhnya adalah:<br>Esty = Centika &gt; Anis &gt; Bunga &gt; Fentya &gt; Dawiyah.<br>Pernyataan yang benar adalah <strong>Esty lebih tinggi daripada Bunga</strong>."
+    },
+    {
+      no: 51,
+      passage: "<strong>Teks untuk menjawab soal nomor 51&ndash;56.</strong><br>Toni memiliki sebuah rak buku kecil yang terbagi atas lima tingkat, tingkat 1, 2, 3, 4, dan 5. Tingkat 1 adalah yang teratas dan tingkat 5 adalah yang terbawah. Toni menyimpan buku-buku pelajarannya ke dalam rak dengan aturan sebagai berikut:<br>(a) Buku pelajaran Matematika disimpan tepat di atas buku pelajaran Biologi, sedangkan buku pelajaran Bahasa Indonesia diletakkan tepat di bawah buku Biologi.<br>(b) Buku pelajaran Ekonomi diletakkan di atas buku pelajaran Fisika, sedangkan buku pelajaran Fisika dan Kimia berada di atas buku pelajaran Matematika.<br>(c) Buku pelajaran Kimia dan Geografi diletakkan saling terpisah sejauh mungkin.",
+      text: "Adik Toni mengambil buku Matematika dan menyimpannya kembali di samping buku Bahasa Indonesia. Tingkatan yang kosong adalah tingkat ke ....",
+      options: {
+        A: "1",
+        B: "2",
+        C: "3",
+        D: "4",
+        E: "5"
+      },
+      answer: "C",
+      visual: `<table class="math-table">
+        <tr><th>Tingkat</th><th>Susunan Buku Pelajaran</th></tr>
+        <tr><td>Tingkat 1 (Teratas)</td><td>Ekonomi</td></tr>
+        <tr><td>Tingkat 2</td><td>Fisika, Kimia</td></tr>
+        <tr><td>Tingkat 3</td><td>Matematika</td></tr>
+        <tr><td>Tingkat 4</td><td>Biologi</td></tr>
+        <tr><td>Tingkat 5 (Terbawah)</td><td>Bahasa Indonesia, Geografi</td></tr>
+      </table>`,
+      explanation: "Susunan rak dari tingkat 1 sampai 5 adalah: (1) Ekonomi, (2) Fisika &amp; Kimia, (3) Matematika, (4) Biologi, (5) Bahasa Indonesia &amp; Geografi.<br>Ketika buku Matematika diambil dan dipindah ke tingkat 5, maka tingkatan yang kosong adalah tingkat ke-<strong>3</strong>."
+    },
+    {
+      no: 52,
+      passage: "<strong>Teks untuk menjawab soal nomor 51&ndash;56.</strong><br>Toni memiliki sebuah rak buku kecil yang terbagi atas lima tingkat, tingkat 1, 2, 3, 4, dan 5. Tingkat 1 adalah yang teratas dan tingkat 5 adalah yang terbawah. Toni menyimpan buku-buku pelajarannya ke dalam rak dengan aturan sebagai berikut:<br>(a) Buku pelajaran Matematika disimpan tepat di atas buku pelajaran Biologi, sedangkan buku pelajaran Bahasa Indonesia diletakkan tepat di bawah buku Biologi.<br>(b) Buku pelajaran Ekonomi diletakkan di atas buku pelajaran Fisika, sedangkan buku pelajaran Fisika dan Kimia berada di atas buku pelajaran Matematika.<br>(c) Buku pelajaran Kimia dan Geografi diletakkan saling terpisah sejauh mungkin.",
+      text: "Buku yang letaknya setingkat dengan buku Bahasa Indonesia adalah buku ....",
+      options: {
+        A: "Fisika",
+        B: "Biologi",
+        C: "Ekonomi",
+        D: "Geografi",
+        E: "Matematika"
+      },
+      answer: "D",
+      explanation: "Pada tingkat 5 terdapat buku Bahasa Indonesia dan buku <strong>Geografi</strong>."
+    },
+    {
+      no: 53,
+      passage: "<strong>Teks untuk menjawab soal nomor 51&ndash;56.</strong><br>Toni memiliki sebuah rak buku kecil yang terbagi atas lima tingkat, tingkat 1, 2, 3, 4, dan 5. Tingkat 1 adalah yang teratas dan tingkat 5 adalah yang terbawah. Toni menyimpan buku-buku pelajarannya ke dalam rak dengan aturan sebagai berikut:<br>(a) Buku pelajaran Matematika disimpan tepat di atas buku pelajaran Biologi, sedangkan buku pelajaran Bahasa Indonesia diletakkan tepat di bawah buku Biologi.<br>(b) Buku pelajaran Ekonomi diletakkan di atas buku pelajaran Fisika, sedangkan buku pelajaran Fisika dan Kimia berada di atas buku pelajaran Matematika.<br>(c) Buku pelajaran Kimia dan Geografi diletakkan saling terpisah sejauh mungkin.",
+      text: "Buku yang terletak di tingkat 1 adalah buku ....",
+      options: {
+        A: "Fisika",
+        B: "Biologi",
+        C: "Ekonomi",
+        D: "Geografi",
+        E: "Matematika"
+      },
+      answer: "C",
+      explanation: "Buku yang terletak di tingkat 1 (paling atas) adalah buku <strong>Ekonomi</strong>."
+    },
+    {
+      no: 54,
+      passage: "<strong>Teks untuk menjawab soal nomor 51&ndash;56.</strong><br>Toni memiliki sebuah rak buku kecil yang terbagi atas lima tingkat, tingkat 1, 2, 3, 4, dan 5. Tingkat 1 adalah yang teratas dan tingkat 5 adalah yang terbawah. Toni menyimpan buku-buku pelajarannya ke dalam rak dengan aturan sebagai berikut:<br>(a) Buku pelajaran Matematika disimpan tepat di atas buku pelajaran Biologi, sedangkan buku pelajaran Bahasa Indonesia diletakkan tepat di bawah buku Biologi.<br>(b) Buku pelajaran Ekonomi diletakkan di atas buku pelajaran Fisika, sedangkan buku pelajaran Fisika dan Kimia berada di atas buku pelajaran Matematika.<br>(c) Buku pelajaran Kimia dan Geografi diletakkan saling terpisah sejauh mungkin.",
+      text: "Urutan lima buku dari tingkat tertinggi ke tingkat terendah adalah ....",
+      options: {
+        A: "Kimia, Fisika, Matematika, Ekonomi, Geografi",
+        B: "Ekonomi, Fisika, Matematika, Biologi, Geografi",
+        C: "Ekonomi, Bahasa Indonesia, Biologi, Geografi, Kimia",
+        D: "Fisika, Matematika, Geografi, Bahasa Indonesia, Kimia",
+        E: "Matematika, Geografi, Bahasa Indonesia, Biologi, Fisika"
+      },
+      answer: "B",
+      explanation: "Urutan lima buku dari tingkat 1 (tertinggi) ke tingkat 5 (terendah) yang sesuai susunan rak adalah: <strong>Ekonomi, Fisika, Matematika, Biologi, Geografi</strong>."
+    },
+    {
+      no: 55,
+      passage: "<strong>Teks untuk menjawab soal nomor 51&ndash;56.</strong><br>Toni memiliki sebuah rak buku kecil yang terbagi atas lima tingkat, tingkat 1, 2, 3, 4, dan 5. Tingkat 1 adalah yang teratas dan tingkat 5 adalah yang terbawah. Toni menyimpan buku-buku pelajarannya ke dalam rak dengan aturan sebagai berikut:<br>(a) Buku pelajaran Matematika disimpan tepat di atas buku pelajaran Biologi, sedangkan buku pelajaran Bahasa Indonesia diletakkan tepat di bawah buku Biologi.<br>(b) Buku pelajaran Ekonomi diletakkan di atas buku pelajaran Fisika, sedangkan buku pelajaran Fisika dan Kimia berada di atas buku pelajaran Matematika.<br>(c) Buku pelajaran Kimia dan Geografi diletakkan saling terpisah sejauh mungkin.",
+      text: "Buku yang disimpan di tingkat keempat adalah buku ....",
+      options: {
+        A: "Fisika",
+        B: "Biologi",
+        C: "Ekonomi",
+        D: "Geografi",
+        E: "Matematika"
+      },
+      answer: "B",
+      explanation: "Buku yang disimpan di tingkat keempat adalah buku <strong>Biologi</strong>."
+    },
+    {
+      no: 56,
+      passage: "<strong>Teks untuk menjawab soal nomor 51&ndash;56.</strong><br>Toni memiliki sebuah rak buku kecil yang terbagi atas lima tingkat, tingkat 1, 2, 3, 4, dan 5. Tingkat 1 adalah yang teratas dan tingkat 5 adalah yang terbawah. Toni menyimpan buku-buku pelajarannya ke dalam rak dengan aturan sebagai berikut:<br>(a) Buku pelajaran Matematika disimpan tepat di atas buku pelajaran Biologi, sedangkan buku pelajaran Bahasa Indonesia diletakkan tepat di bawah buku Biologi.<br>(b) Buku pelajaran Ekonomi diletakkan di atas buku pelajaran Fisika, sedangkan buku pelajaran Fisika dan Kimia berada di atas buku pelajaran Matematika.<br>(c) Buku pelajaran Kimia dan Geografi diletakkan saling terpisah sejauh mungkin.",
+      text: "Buku yang disimpan tidak berdampingan dengan buku yang lain adalah buku ....",
+      options: {
+        A: "Ekonomi, Kimia, Fisika",
+        B: "Fisika, Matematika, Geografi",
+        C: "Matematika, Ekonomi, Biologi",
+        D: "Kimia, Bahasa Indonesia, Ekonomi",
+        E: "Bahasa Indonesia, Biologi, Geografi"
+      },
+      answer: "C",
+      explanation: "Tingkat 2 diisi Fisika &amp; Kimia (berdampingan), sedangkan tingkat 5 diisi Bahasa Indonesia &amp; Geografi (berdampingan).<br>Buku yang berada sendiri pada tingkatnya (tidak berdampingan) adalah <strong>Matematika, Ekonomi, Biologi</strong>."
+    },
+    {
+      no: 57,
+      passage: "<strong>Teks untuk menjawab soal nomor 57&ndash;60.</strong><br>Tujuh orang, yaitu: Mono, Nini, Odi, Pani, Qori, Reni, dan Suni (Susi) sedang naik roller-coaster yang terdiri atas beberapa kereta yang saling terkait. Mereka menaiki 3 kereta terdepan, dan muatan maksimal 1 kereta adalah 4 orang. Karena telah diisi orang lain, kereta pertama hanya dapat diisi 2 orang dari mereka, kereta kedua dapat diisi 3 orang dari mereka, dan kereta ketiga dapat diisi 2 orang dari mereka. Aturannya adalah:<br>&bull; Mono di kereta yang sama dengan Reni<br>&bull; Suni tidak satu kereta dengan Pani atau Qori<br>&bull; Nini tidak satu kereta dengan Qori atau Pani",
+      text: "Bila Mono berada di kereta kedua maka pernyataan yang benar adalah ....",
+      options: {
+        A: "Qori di kereta pertama dan Pani di kereta ketiga",
+        B: "Nini di kereta pertama dan Suni di kereta ketiga",
+        C: "Suni dan Nini di kereta ketiga",
+        D: "Nini dan Pani di kereta pertama",
+        E: "Nini dan Suni di kereta kedua"
+      },
+      answer: "C",
+      explanation: "Kapasitas: Kereta I = 2 orang, Kereta II = 3 orang, Kereta III = 2 orang.<br>Karena Mono di Kereta II, maka Reni juga di Kereta II (tersisa 1 kursi di Kereta II).<br>Suni dan Nini tidak boleh satu kereta dengan Pani atau Qori. Karena kursi kosong tersisa adalah 2 di Kereta I, 1 di Kereta II, dan 2 di Kereta III, agar Suni &amp; Nini terpisah dari Pani &amp; Qori, maka <strong>Suni dan Nini di kereta ketiga</strong> (memenuhi 2 kursi penuh), sedangkan Pani dan Qori menempati Kereta I dan II."
+    },
+    {
+      no: 58,
+      passage: "<strong>Teks untuk menjawab soal nomor 57&ndash;60.</strong><br>Tujuh orang, yaitu: Mono, Nini, Odi, Pani, Qori, Reni, dan Suni (Susi) sedang naik roller-coaster yang terdiri atas beberapa kereta yang saling terkait. Mereka menaiki 3 kereta terdepan, dan muatan maksimal 1 kereta adalah 4 orang. Karena telah diisi orang lain, kereta pertama hanya dapat diisi 2 orang dari mereka, kereta kedua dapat diisi 3 orang dari mereka, dan kereta ketiga dapat diisi 2 orang dari mereka. Aturannya adalah:<br>&bull; Mono di kereta yang sama dengan Reni<br>&bull; Suni tidak satu kereta dengan Pani atau Qori<br>&bull; Nini tidak satu kereta dengan Qori atau Pani",
+      text: "Bila Reni berada di kereta pertama maka pernyataan yang mungkin benar adalah ....",
+      options: {
+        A: "Odi berada di kereta pertama",
+        B: "Pani berada di kereta yang sama dengan Mono",
+        C: "Nini dan Qori berada di kereta yang sama dengan Reni",
+        D: "Qori berada di kereta kedua",
+        E: "Nini dan Pani di kereta ketiga"
+      },
+      answer: "D",
+      explanation: "Bila Reni di Kereta I, maka Mono juga di Kereta I sehingga Kereta I penuh (2 orang: Reni, Mono).<br>Opsi A, B, C salah karena Kereta I sudah penuh. Opsi E salah karena Nini &gt;&lt; Pani.<br>Pernyataan yang mungkin benar adalah <strong>Qori berada di kereta kedua</strong>."
+    },
+    {
+      no: 59,
+      passage: "<strong>Teks untuk menjawab soal nomor 57&ndash;60.</strong><br>Tujuh orang, yaitu: Mono, Nini, Odi, Pani, Qori, Reni, dan Suni (Susi) sedang naik roller-coaster yang terdiri atas beberapa kereta yang saling terkait. Mereka menaiki 3 kereta terdepan, dan muatan maksimal 1 kereta adalah 4 orang. Karena telah diisi orang lain, kereta pertama hanya dapat diisi 2 orang dari mereka, kereta kedua dapat diisi 3 orang dari mereka, dan kereta ketiga dapat diisi 2 orang dari mereka. Aturannya adalah:<br>&bull; Mono di kereta yang sama dengan Reni<br>&bull; Suni tidak satu kereta dengan Pani atau Qori<br>&bull; Nini tidak satu kereta dengan Qori atau Pani",
+      text: "Bila Mono dan Qori berada di kereta kedua maka pernyataan berikut salah, kecuali ....",
+      options: {
+        A: "Suni satu kereta dengan Pani",
+        B: "Odi dan Pani berada di kereta ketiga",
+        C: "Reni berada di satu kereta dengan Nini",
+        D: "Pani berada di satu kereta dengan Reni",
+        E: "Odi di kereta kedua"
+      },
+      answer: "B",
+      explanation: "Kereta II terisi penuh oleh 3 orang: Mono, Qori, dan Reni.<br>Sisa 4 orang (Suni, Nini, Odi, Pani) mengisi Kereta I (2 kursi) dan Kereta III (2 kursi). Karena Suni dan Nini tidak boleh bersama Pani, maka Suni dan Nini harus berada dalam satu kereta (misal Kereta I), sedangkan <strong>Odi dan Pani berada di kereta ketiga</strong>."
+    },
+    {
+      no: 60,
+      passage: "<strong>Teks untuk menjawab soal nomor 57&ndash;60.</strong><br>Tujuh orang, yaitu: Mono, Nini, Odi, Pani, Qori, Reni, dan Suni (Susi) sedang naik roller-coaster yang terdiri atas beberapa kereta yang saling terkait. Mereka menaiki 3 kereta terdepan, dan muatan maksimal 1 kereta adalah 4 orang. Karena telah diisi orang lain, kereta pertama hanya dapat diisi 2 orang dari mereka, kereta kedua dapat diisi 3 orang dari mereka, dan kereta ketiga dapat diisi 2 orang dari mereka. Aturannya adalah:<br>&bull; Mono di kereta yang sama dengan Reni<br>&bull; Suni tidak satu kereta dengan Pani atau Qori<br>&bull; Nini tidak satu kereta dengan Qori atau Pani",
+      text: "Bila Odi berada di kereta ketiga maka pernyataan yang tidak mungkin benar adalah ....",
+      options: {
+        A: "Mono berada di kereta pertama",
+        B: "Qori berada di kereta ketiga",
+        C: "Nini berada di kereta kedua",
+        D: "Suni berada di kereta ketiga",
+        E: "Reni berada di kereta pertama"
+      },
+      answer: "B",
+      explanation: "Bila Odi berada di Kereta III, maka tersisa 1 kursi di Kereta III.<br>Jika <strong>Qori berada di kereta ketiga</strong> (bersama Odi), maka Nini dan Suni hanya bisa ditempatkan di Kereta I dan II. Namun salah satu dari Kereta I atau II juga akan ditempati Pani, sehingga pasti melanggar aturan Nini &gt;&lt; Pani atau Suni &gt;&lt; Pani.<br>Jadi yang tidak mungkin benar adalah <strong>Qori berada di kereta ketiga</strong>."
+    }
+  ];
+
+  // =========================================================================
+  // RENDER VISUAL PENDUKUNG PEMBAHASAN
+  // =========================================================================
+  function renderVisualHelper(visualHtml) {
+    if (!visualHtml) return "";
+    return `<div class="diagram-scroll">${visualHtml}</div>`;
+  }
+
+  // =========================================================================
+  // STATE & LOGIKA APLIKASI CAT
+  // =========================================================================
+  const EXAM_DURATION_SECONDS = 60 * 60; // 60 Menit untuk 60 Soal
+  let currentUser = { user: "", nama: "" };
+  let currentIndex = 0;
+  let userAnswers = new Array(questions.length).fill(null);
+  let doubtStatus = new Array(questions.length).fill(false);
+  let timeLeft = EXAM_DURATION_SECONDS;
+  let timerInterval = null;
+
+  // Fungsi Modal Custom (Pengganti alert & confirm agar aman di semua iframe/browser)
+  function showModal(title, message, buttons) {
+    const overlay = document.getElementById("custom-modal");
+    document.getElementById("modal-title").textContent = title;
+    document.getElementById("modal-message").textContent = message;
+    const btnContainer = document.getElementById("modal-buttons");
+    btnContainer.innerHTML = "";
+
+    buttons.forEach(b => {
+      const btn = document.createElement("button");
+      btn.className = "btn " + (b.className || "btn-primary");
+      btn.style.width = "auto";
+      btn.textContent = b.text;
+      btn.onclick = () => {
+        overlay.style.display = "none";
+        if (b.onClick) b.onClick();
+      };
+      btnContainer.appendChild(btn);
+    });
+
+    overlay.style.display = "flex";
+  }
+
+  // Handle Login ke Google Sheet
+  document.getElementById("login-form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const userVal = document.getElementById("username").value.trim();
+    const passVal = document.getElementById("password").value.trim();
+    const btn = document.getElementById("btn-login");
+    const errBox = document.getElementById("login-error");
+
+    btn.disabled = true;
+    btn.textContent = "Memverifikasi...";
+    errBox.style.display = "none";
+
+    try {
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({ username: userVal, password: passVal })
+      });
+      
+      const textRes = await response.text();
+      let result;
+      try {
+        result = JSON.parse(textRes);
+      } catch (parseErr) {
+        throw new Error("Format respons server tidak valid.");
+      }
+
+      if (result.status === "success") {
+        currentUser = { user: result.user, nama: result.nama };
+        startExam();
+      } else {
+        errBox.style.display = "block";
+        errBox.textContent = result.message || "Username atau Password salah!";
+      }
+    } catch (error) {
+      errBox.style.display = "block";
+      errBox.textContent = "Gagal memproses login. Pastikan Web App sudah di-deploy ulang dengan 'Who has access' diset ke 'Anyone'.";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Masuk Ujian";
+    }
+  });
+
+  function resetExamState() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    currentIndex = 0;
+    userAnswers = new Array(questions.length).fill(null);
+    doubtStatus = new Array(questions.length).fill(false);
+    timeLeft = EXAM_DURATION_SECONDS;
+
+    const timerEl = document.getElementById("timer");
+    timerEl.textContent = "60:00";
+    timerEl.style.color = "white";
+  }
+
+  function startExam() {
+    resetExamState();
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("exam-screen").style.display = "block";
+    document.getElementById("peserta-info").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+
+    initNumberGrid();
+    renderQuestion(0);
+    startTimer();
+  }
+
+  function retryExam() {
+    startExam();
+  }
+
+  function confirmLogout() {
+    showModal(
+      "Konfirmasi Logout",
+      "Apakah Anda yakin ingin keluar dari ujian? Progres jawaban Anda saat ini akan direset.",
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Logout", className: "btn-logout", onClick: logoutUser }
+      ]
+    );
+  }
+
+  function logoutUser() {
+    resetExamState();
+    currentUser = { user: "", nama: "" };
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("login-error").style.display = "none";
+
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("login-screen").style.display = "flex";
+  }
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+      const s = (timeLeft % 60).toString().padStart(2, '0');
+      document.getElementById("timer").textContent = `${m}:${s}`;
+
+      if (timeLeft <= 300) {
+        document.getElementById("timer").style.color = "#fca5a5";
+      }
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        showModal(
+          "Waktu Habis",
+          "Waktu ujian telah habis! Jawaban Anda akan dikumpulkan otomatis.",
+          [{ text: "Lihat Hasil", className: "btn-primary", onClick: finishExam }]
+        );
+      }
+    }, 1000);
+  }
+
+  function initNumberGrid() {
+    const grid = document.getElementById("number-grid");
+    grid.innerHTML = "";
+    questions.forEach((q, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "num-btn";
+      btn.id = `num-btn-${idx}`;
+      btn.textContent = q.no;
+      btn.onclick = () => renderQuestion(idx);
+      grid.appendChild(btn);
+    });
+  }
+
+  function updateNumberGrid() {
+    questions.forEach((_, idx) => {
+      const btn = document.getElementById(`num-btn-${idx}`);
+      if (!btn) return;
+      btn.className = "num-btn";
+      if (idx === currentIndex) btn.classList.add("active");
+      if (doubtStatus[idx]) {
+        btn.classList.add("doubt");
+      } else if (userAnswers[idx] !== null) {
+        btn.classList.add("answered");
+      }
+    });
+  }
+
+  function renderQuestion(index) {
+    currentIndex = index;
+    const q = questions[index];
+
+    document.getElementById("q-number").textContent = `Soal No. ${q.no} dari ${questions.length}`;
+    const passageHtml = q.passage ? `<div class="passage-box">${q.passage}</div>` : "";
+    document.getElementById("q-text").innerHTML = passageHtml + q.text;
+
+    const statusEl = document.getElementById("q-status");
+    if (doubtStatus[index]) {
+      statusEl.textContent = "Ditandai Ragu-Ragu";
+      statusEl.style.color = "#b45309";
+    } else if (userAnswers[index]) {
+      statusEl.textContent = `Terjawab (${userAnswers[index]})`;
+      statusEl.style.color = "var(--success)";
+    } else {
+      statusEl.textContent = "Belum dijawab";
+      statusEl.style.color = "var(--muted)";
+    }
+
+    const optContainer = document.getElementById("q-options");
+    optContainer.innerHTML = "";
+
+    ["A", "B", "C", "D", "E"].forEach(letter => {
+      const div = document.createElement("div");
+      div.className = "option-item" + (userAnswers[index] === letter ? " selected" : "");
+      div.onclick = () => selectOption(letter);
+      div.innerHTML = `
+        <div class="option-letter">${letter}</div>
+        <div>${q.options[letter]}</div>
+      `;
+      optContainer.appendChild(div);
+    });
+
+    document.getElementById("btn-prev").disabled = (index === 0);
+    document.getElementById("btn-next").disabled = (index === questions.length - 1);
+    updateNumberGrid();
+  }
+
+  function selectOption(letter) {
+    userAnswers[currentIndex] = letter;
+    renderQuestion(currentIndex);
+  }
+
+  function toggleDoubt() {
+    doubtStatus[currentIndex] = !doubtStatus[currentIndex];
+    renderQuestion(currentIndex);
+  }
+
+  function prevQuestion() {
+    if (currentIndex > 0) renderQuestion(currentIndex - 1);
+  }
+
+  function nextQuestion() {
+    if (currentIndex < questions.length - 1) renderQuestion(currentIndex + 1);
+  }
+
+  function confirmFinish() {
+    const unanswered = userAnswers.filter(a => a === null).length;
+    const msg = unanswered > 0 
+      ? `Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin mengakhiri ujian?`
+      : "Apakah Anda yakin ingin mengumpulkan semua jawaban sekarang?";
+    
+    showModal(
+      "Kumpulkan Jawaban",
+      msg,
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Kumpulkan", className: "btn-finish", onClick: finishExam }
+      ]
+    );
+  }
+
+  function finishExam() {
+    clearInterval(timerInterval);
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "block";
+
+    let benar = 0, salah = 0, kosong = 0;
+    const reviewContainer = document.getElementById("review-container");
+    reviewContainer.innerHTML = "";
+
+    questions.forEach((q, idx) => {
+      const uAns = userAnswers[idx];
+      const isCorrect = uAns === q.answer;
+
+      if (uAns === null) kosong++;
+      else if (isCorrect) benar++;
+      else salah++;
+
+      const passageHtml = q.passage ? `<div class="passage-box">${q.passage}</div>` : "";
+      const card = document.createElement("div");
+      card.className = `card review-card ${isCorrect ? 'correct' : 'wrong'}`;
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px;">
+          <strong>Soal No. ${q.no}</strong>
+          <span style="font-weight:bold; color:${isCorrect ? 'var(--success)' : 'var(--danger)'}">
+            ${uAns === null ? 'Tidak Dijawab' : (isCorrect ? 'BENAR' : 'SALAH')}
+          </span>
+        </div>
+        ${passageHtml}
+        <p style="margin-bottom:10px;">${q.text}</p>
+        <p><strong>Jawaban Anda:</strong> ${uAns ? `${uAns}. ${q.options[uAns]}` : '-'} | 
+           <strong style="color:var(--success)">Kunci Jawaban:</strong> ${q.answer}. ${q.options[q.answer]}</p>
+        <div class="pembahasan-box">
+          <strong>Pembahasan:</strong>
+          ${renderVisualHelper(q.visual)}
+          <div style="margin-top:6px;">${q.explanation}</div>
+          <div style="margin-top:8px; font-weight:700; color:#0f172a;">&#9632; Jawaban: ${q.answer}</div>
+        </div>
+      `;
+      reviewContainer.appendChild(card);
+    });
+
+    const skor = Math.round((benar / questions.length) * 100);
+    document.getElementById("res-peserta").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+    document.getElementById("res-score").textContent = `${skor} / 100`;
+    document.getElementById("res-detail").textContent = `Benar: ${benar} | Salah: ${salah} | Kosong: ${kosong}`;
+  }
+</script>
+</body>
+</html>
