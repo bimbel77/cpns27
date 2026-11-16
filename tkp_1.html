@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAT - TES KARAKTERISTIK PRIBADI (TKP)</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+      --warning: #eab308;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); line-height: 1.6; }
+
+    /* Login Screen */
+    #login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .login-box {
+      background: var(--card); padding: 35px; border-radius: 12px; width: 100%; max-width: 400px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+    .login-box h2 { text-align: center; color: var(--primary); margin-bottom: 5px; }
+    .login-box p { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 25px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+    .form-group input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;
+    }
+    .btn {
+      display: inline-block; padding: 10px 18px; border: none; border-radius: 6px; font-size: 0.95rem;
+      font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; text-decoration: none;
+    }
+    .btn-primary { background: var(--primary); color: white; width: 100%; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+    .btn-logout {
+      background: var(--danger); color: white; padding: 7px 14px; font-size: 0.85rem;
+    }
+    .btn-logout:hover { background: var(--danger-hover); }
+    .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 10px; text-align: center; display: none; }
+
+    .register-link-box {
+      margin-top: 18px; padding-top: 15px; border-top: 1px solid #e2e8f0;
+      text-align: center; font-size: 0.9rem; color: var(--muted);
+    }
+    .register-link-box a {
+      color: var(--primary); font-weight: 700; text-decoration: none;
+    }
+    .register-link-box a:hover {
+      text-decoration: underline; color: var(--primary-hover);
+    }
+
+    /* Header CAT */
+    header {
+      background: var(--primary); color: white; padding: 15px 25px; display: flex;
+      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header-title h1 { font-size: 1.2rem; }
+    .header-info { display: flex; align-items: center; gap: 15px; }
+    .timer-box {
+      background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 6px;
+      font-weight: bold; font-size: 1.1rem; letter-spacing: 1px;
+    }
+
+    /* Main Container */
+    #exam-screen, #result-screen { display: none; max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+    .exam-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+    @media (max-width: 850px) { .exam-layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card); border-radius: 10px; padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
+    }
+
+    /* Soal Area */
+    .question-header {
+      display: flex; justify-content: space-between; align-items: center;
+      border-bottom: 2px solid var(--bg); padding-bottom: 12px; margin-bottom: 18px;
+    }
+    .badge-no { background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; }
+    .question-text { font-size: 1.05rem; margin-bottom: 15px; }
+
+    /* Opsi Jawaban */
+    .options-list { display: flex; flex-direction: column; gap: 10px; }
+    .option-item {
+      display: flex; align-items: center; gap: 12px; padding: 12px 15px;
+      border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: 0.15s;
+    }
+    .option-item:hover { background: #f8fafc; border-color: var(--primary); }
+    .option-item.selected { background: #eff6ff; border-color: var(--primary); font-weight: 600; }
+    .option-letter {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+    }
+    .option-item.selected .option-letter { background: var(--primary); color: white; }
+
+    /* Navigasi Bawah Soal */
+    .nav-actions {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 25px;
+      padding-top: 15px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;
+    }
+    .btn-nav { background: #e2e8f0; color: var(--text); }
+    .btn-nav:hover { background: #cbd5e1; }
+    .btn-ragu { background: var(--warning); color: #000; }
+    .btn-finish { background: var(--success); color: white; width: 100%; margin-top: 15px; }
+    .btn-finish:hover { background: #15803d; }
+
+    /* Grid Nomor Soal */
+    .grid-numbers {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px;
+      max-height: 360px; overflow-y: auto; padding-right: 4px;
+    }
+    .num-btn {
+      padding: 8px 0; border: 1px solid var(--border); border-radius: 6px;
+      background: white; font-weight: 600; cursor: pointer; text-align: center;
+    }
+    .num-btn.active { border: 2px solid var(--primary); }
+    .num-btn.answered { background: var(--success); color: white; border-color: var(--success); }
+    .num-btn.doubt { background: var(--warning); color: black; border-color: var(--warning); }
+
+    .legend { display: flex; gap: 12px; font-size: 0.8rem; margin-top: 15px; flex-wrap: wrap; }
+    .legend span { display: flex; align-items: center; gap: 5px; }
+    .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+    /* Result & Pembahasan */
+    .score-banner {
+      text-align: center; padding: 30px; background: linear-gradient(135deg, #1e40af, #3b82f6);
+      color: white; border-radius: 12px; margin-bottom: 25px;
+    }
+    .score-big { font-size: 3.5rem; font-weight: bold; margin: 10px 0; }
+    .result-actions {
+      display: flex; justify-content: center; gap: 12px; margin-top: 15px; flex-wrap: wrap;
+    }
+    .review-card { margin-bottom: 20px; border-left: 5px solid var(--border); }
+    .review-card.correct { border-left-color: var(--success); }
+    .review-card.mid { border-left-color: var(--warning); }
+    .review-card.wrong { border-left-color: var(--danger); }
+    .pembahasan-box {
+      background: #f8fafc; padding: 15px; border-radius: 8px; margin-top: 12px;
+      border: 1px dashed #94a3b8; font-size: 0.95rem;
+    }
+    .poin-badge-row {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; margin-bottom: 10px;
+    }
+    .poin-pill {
+      padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;
+      background: #e2e8f0; color: #0f172a;
+    }
+    .poin-pill.max-poin {
+      background: #dcfce7; color: #166534; border: 1px solid #86efac;
+    }
+    .poin-pill.user-poin {
+      outline: 2px solid var(--primary);
+    }
+
+    /* Custom Modal Dialog (Pengganti alert/confirm) */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6); display: none; align-items: center;
+      justify-content: center; z-index: 999; padding: 20px;
+    }
+    .modal-card {
+      background: white; padding: 25px; border-radius: 12px; max-width: 400px;
+      width: 100%; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .modal-card h3 { color: var(--primary); margin-bottom: 10px; }
+    .modal-card p { color: var(--text); font-size: 0.95rem; margin-bottom: 20px; }
+    .modal-btns { display: flex; gap: 10px; justify-content: center; }
+  </style>
+</head>
+<body>
+
+  <!-- HALAMAN LOGIN -->
+  <div id="login-screen">
+    <div class="login-box">
+      <h2>Portal Ujian CAT</h2>
+      <p>Subtes TKP: Tes Karakteristik Pribadi (50 Soal)</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Username/Email</label>
+          <input type="text" id="username" required placeholder="Masukkan username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="Masukkan password">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-login">Masuk Ujian</button>
+        <div class="error-msg" id="login-error"></div>
+        <div class="register-link-box">
+          Belum punya akun? <a href="http://lynk.id/seputar_guru/4g73189dndge/checkout" target="_blank" rel="noopener noreferrer">Daftar di sini</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- HALAMAN UJIAN CAT -->
+  <div id="exam-screen">
+    <header>
+      <div class="header-title">
+        <h1>CAT - TES KARAKTERISTIK PRIBADI</h1>
+        <small id="peserta-info">Peserta: -</small>
+      </div>
+      <div class="header-info">
+        <div class="timer-box" id="timer">50:00</div>
+        <button type="button" class="btn btn-logout" onclick="confirmLogout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="exam-layout" style="margin-top: 20px;">
+      <!-- Kolom Kiri: Soal -->
+      <div class="card">
+        <div class="question-header">
+          <span class="badge-no" id="q-number">Soal No. 1</span>
+          <span id="q-status" style="font-size: 0.85rem; color: var(--muted);">Belum dijawab</span>
+        </div>
+        <div class="question-text" id="q-text"></div>
+        <div class="options-list" id="q-options"></div>
+
+        <div class="nav-actions">
+          <button class="btn btn-nav" id="btn-prev" onclick="prevQuestion()">&laquo; Sebelumnya</button>
+          <button class="btn btn-ragu" id="btn-doubt" onclick="toggleDoubt()">Ragu-Ragu</button>
+          <button class="btn btn-nav" id="btn-next" onclick="nextQuestion()">Selanjutnya &raquo;</button>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Navigasi Nomor -->
+      <div class="card">
+        <h3>Navigasi Soal</h3>
+        <div class="grid-numbers" id="number-grid"></div>
+        <div class="legend">
+          <span><i class="dot" style="background: var(--success);"></i> Dijawab</span>
+          <span><i class="dot" style="background: var(--warning);"></i> Ragu</span>
+          <span><i class="dot" style="background: #fff; border: 1px solid #cbd5e1;"></i> Kosong</span>
+        </div>
+        <button class="btn btn-finish" onclick="confirmFinish()">Selesai & Kumpulkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN HASIL & PEMBAHASAN -->
+  <div id="result-screen">
+    <div class="score-banner">
+      <h2>Hasil Ujian CAT TKP Anda</h2>
+      <p id="res-peserta"></p>
+      <div class="score-big" id="res-score">0 / 250</div>
+      <p id="res-detail">Dijawab: 0 | Kosong: 0 | Poin Maksimal (5): 0 Soal</p>
+      <div class="result-actions">
+        <button class="btn" style="background: white; color: var(--primary);" onclick="retryExam()">Ulangi Ujian</button>
+        <button class="btn btn-logout" onclick="logoutUser()">Logout</button>
+      </div>
+    </div>
+    <h3 style="margin-bottom: 15px;">Rincian Poin Opsi & Pembahasan Lengkap</h3>
+    <div id="review-container"></div>
+  </div>
+
+  <!-- CUSTOM MODAL -->
+  <div class="modal-overlay" id="custom-modal">
+    <div class="modal-card">
+      <h3 id="modal-title">Konfirmasi</h3>
+      <p id="modal-message">Pesan konfirmasi</p>
+      <div class="modal-btns" id="modal-buttons"></div>
+    </div>
+  </div>
+
+<script>
+  // =========================================================================
+  // URL GOOGLE APPS SCRIPT ANDA YANG AKTIF
+  // =========================================================================
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxB6Th7GHlD9o8ABbYcK2mdV7mv4ufy2i-SYXUg3jVqS0Q1bkXa_pkseMhqmIzgCTx7/exec";
+
+  // =========================================================================
+  // BANK SOAL, SKOR OPSI (1-5) & PEMBAHASAN (50 SOAL TKP DARI PDF)
+  // =========================================================================
+  const questions = [
+    {
+      no: 1,
+      text: "Saya banyak mengikuti kegiatan di luar kegiatan kantor karena menurut saya kegiatan tersebut ....",
+      options: {
+        A: "Dapat meningkatkan kemampuan diri saya",
+        B: "Mengisi waktu luang saya",
+        C: "Memberikan suatu pengalaman baru",
+        D: "Diikuti oleh banyak rekan seusia",
+        E: "Tidak terlalu menghabiskan waktu dan pikiran saya"
+      },
+      points: { A: 5, C: 4, B: 3, E: 2, D: 1 },
+      explanation: "Aspek <strong>Kemauan dan Kemampuan Belajar Berkelanjutan</strong>. Mengikuti kegiatan di luar kantor sebaiknya diarahkan untuk mengembangkan potensi dan meningkatkan kapasitas serta kemampuan diri (Opsi A, skor 5), diikuti dengan menambah pengalaman baru (Opsi C, skor 4)."
+    },
+    {
+      no: 2,
+      text: "Pada saat terikat dalam suatu proses kegiatan kerja, biasanya saya ....",
+      options: {
+        A: "Banyak melakukan kegiatan lain yang baru yang tidak berhubungan dengan kegiatan kerja",
+        B: "Hanya melakukan kegiatan yang berhubungan dengan kegiatan kerja tersebut",
+        C: "Tidak melaksanakan kegiatan lain sebelum kegiatan tersebut terselesaikan",
+        D: "Sesekali melakukan kegiatan lain sebagai hiburan",
+        E: "Dapat melakukan banyak kegiatan lain secara bersamaan"
+      },
+      points: { C: 5, B: 4, D: 3, E: 2, A: 1 },
+      explanation: "Aspek <strong>Profesionalisme dan Orientasi pada Hasil</strong>. Ketika terikat dalam suatu pekerjaan, sikap yang paling bertanggung jawab dan fokus adalah menyelesaikan tugas utama tersebut hingga tuntas terlebih dahulu sebelum beralih ke kegiatan lain (Opsi C, skor 5)."
+    },
+    {
+      no: 3,
+      text: "Sebentar lagi kantor akan mengadakan penilaian untuk promosi jabatan. Agar saya mendapatkan kesempatan untuk promosi jabatan, saya akan melakukan ....",
+      options: {
+        A: "Tetap bekerja seperti biasa dan membiarkan proses penilaian berjalan",
+        B: "Mendekati atasan penilai promosi jabatan dan mencoba untuk mendapatkan simpati",
+        C: "Memperbaiki kinerja dengan menetapkan prioritas kerja",
+        D: "Meminta saran senior agar saya dapat mendapatkan promosi jabatan tersebut",
+        E: "Menunjukkan kinerja terbaik saya pada saat penilaian"
+      },
+      points: { C: 5, A: 4, E: 3, D: 2, B: 1 },
+      explanation: "Aspek <strong>Semangat Berprestasi dan Integritas</strong>. Upaya meraih promosi yang paling konstruktif dan berkelanjutan adalah memperbaiki kualitas kinerja secara nyata melalui pengaturan prioritas kerja yang efektif (Opsi C, skor 5), bukan sekadar mencari simpati penilai."
+    },
+    {
+      no: 4,
+      text: "Ketika ditugaskan untuk memimpin tim dalam sebuah proyek kerja, saya akan ....",
+      options: {
+        A: "Berusaha sekuat tenaga untuk meningkatkan performa kerja tim",
+        B: "Berusaha sekedarnya saja",
+        C: "Menjalankan tim sesuai kebiasaan kerja tim sebelumnya",
+        D: "Berusaha sesuai dengan kondisi dan komitmen anggota tim lain",
+        E: "Berusaha mengajak tim untuk bekerja sama dengan baik"
+      },
+      points: { E: 5, A: 4, C: 3, D: 2, B: 1 },
+      explanation: "Aspek <strong>Kemampuan Menggerakkan dan Mengoordinir Orang Lain</strong>. Seorang pemimpin tim yang efektif harus mampu membangun sinergi dan mengajak seluruh anggota tim untuk bekerja sama dengan baik guna mencapai tujuan bersama (Opsi E, skor 5)."
+    },
+    {
+      no: 5,
+      text: "Saya diterima kuliah di salah satu perguruan tinggi negeri sesuai dengan harapan saya. Namun, kondisi keuangan saya saat ini tidak mendukung untuk saya melanjutkan kuliah. Saya akan ....",
+      options: {
+        A: "Mencari pinjaman uang untuk biaya kuliah",
+        B: "Mengundurkan diri dan membatalkan untuk kuliah",
+        C: "Mencari beasiswa dari negara atau lembaga lainnya",
+        D: "Menunda kuliah sampai memiliki dana yang cukup",
+        E: "Tetap melanjutkan kuliah, sambil mencari pekerjaan untuk membiayai kuliah"
+      },
+      points: { E: 5, C: 4, D: 3, A: 2, B: 1 },
+      explanation: "Aspek <strong>Kemandirian dan Daya Juang (Semangat Berprestasi)</strong>. Menghadapi kendala biaya tanpa menyerah pada cita-cita dengan cara tetap berkuliah sambil berusaha mandiri mencari penghasilan untuk membiayainya menunjukkan daya juang tertinggi (Opsi E, skor 5)."
+    },
+    {
+      no: 6,
+      text: "Pada saat rapat penting, seorang rekan kantor tiba-tiba mengalami kesakitan yang ia tahan. Yang saya lakukan adalah ....",
+      options: {
+        A: "Mengajak rekan saya itu keluar dari ruangan untuk beristirahat",
+        B: "Menyampaikan ke peserta rapat tentang kondisi teman saya, dan meminta rapat dihentikan sementara",
+        C: "Membiarkan saja dan pura-pura tidak tahu",
+        D: "Tidak konsen dalam mengikuti rapat karena ingin menolongnya",
+        E: "Menunggu rapat selesai dan kemudian menolongnya"
+      },
+      points: { B: 5, A: 4, E: 3, D: 2, C: 1 },
+      explanation: "Aspek <strong>Kepedulian Sosial dan Etika Profesional</strong>. Menginformasikan kondisi darurat rekan kerja kepada forum rapat dan meminta jeda sementara menunjukkan empati tinggi sekaligus menjaga etika komunikasi dalam forum resmi (Opsi B, skor 5)."
+    },
+    {
+      no: 7,
+      text: "Rekan sekantor saya tidak mampu membayar tagihan rumah sakit, yang akan saya lakukan ....",
+      options: {
+        A: "Mengoordinir teman satu kantor untuk menyisihkan uang, agar biaya rumah sakitnya dapat terbayar",
+        B: "Bersimpati dan berusaha menghiburnya",
+        C: "Membiarkan saja dan menganggap itu adalah hal yang wajar",
+        D: "Membantu sebagian biaya rumah sakit sesuai dengan kemampuan saya",
+        E: "Membayar seluruh biaya rumah sakit meskipun harus menguras tabungan saya"
+      },
+      points: { D: 5, A: 4, E: 3, B: 2, C: 1 },
+      explanation: "Aspek <strong>Kepedulian dan Pengendalian Diri (Proporsionalitas)</strong>. Memberikan bantuan finansial secara langsung sesuai batas kemampuan diri sendiri adalah tindakan nyata yang bijak dan tidak membebani diri secara berlebihan (Opsi D, skor 5), disusul menggalang solidaritas rekan kantor (Opsi A, skor 4)."
+    },
+    {
+      no: 8,
+      text: "Kantor mengadakan acara rekreasi bersama ke luar kota pada hari minggu, saya akan ....",
+      options: {
+        A: "Tidak mengikutinya",
+        B: "Mengikutinya jika tidak ada acara lain",
+        C: "Bersemangat mengikutinya",
+        D: "Kurang bersemangat mengikutinya",
+        E: "Mengikutinya untuk menghilangkan penat karena pekerjaan"
+      },
+      points: { C: 5, E: 4, B: 3, D: 2, A: 1 },
+      explanation: "Aspek <strong>Kemampuan Bekerja Sama dalam Kelompok & Jejaring Kerja</strong>. Antusias dan bersemangat mengikuti kegiatan kebersamaan kantor mempererat kekompakan tim dan hubungan antarpegawai (Opsi C, skor 5)."
+    },
+    {
+      no: 9,
+      text: "Teman sekantor ingin meminjam uang saya untuk biaya berobat anaknya, padahal uang yang tersisa adalah uang cadangan saya pada akhir bulan. Saya akan ....",
+      options: {
+        A: "Mengatakan bahwa saat ini saya tidak memiliki uang sama sekali",
+        B: "Meminjamkan sebagian uang simpanan saya",
+        C: "Mencarikan ia pinjaman kepada teman lain",
+        D: "Mengatakan bahwa uang saya terbatas dan menyarankannya untuk meminjam uang kepada teman lain",
+        E: "Mengajaknya mencari tambahan penghasilan di luar jam kantor"
+      },
+      points: { B: 5, D: 4, E: 3, C: 2, A: 1 },
+      explanation: "Aspek <strong>Kepedulian Sosial dan Empati</strong>. Dalam situasi mendesak seperti biaya pengobatan anak, berbagi dengan meminjamkan sebagian dana cadangan yang dimiliki menunjukkan empati dan kepedulian yang tinggi tanpa mengorbankan seluruh kebutuhan pokok sendiri (Opsi B, skor 5)."
+    },
+    {
+      no: 10,
+      text: "Saat saya mengalami kegagalan dalam suatu usaha, biasanya saya akan ....",
+      options: {
+        A: "Mencoba terus sampai saya mengalami keberhasilan",
+        B: "Terpuruk dan tidak mau berusaha lagi",
+        C: "Sedih namun tetap berusaha mencoba",
+        D: "Meminta bantuan orang lain untuk menyelesaikan persoalan",
+        E: "Introspeksi diri dan kemudian mencoba lagi"
+      },
+      points: { E: 5, A: 4, D: 3, C: 2, B: 1 },
+      explanation: "Aspek <strong>Kemampuan Beradaptasi dan Pengendalian Diri</strong>. Kegagalan akan menjadi pelajaran berharga apabila diawali dengan evaluasi/introspeksi diri atas penyebab kesalahan sebelum kembali bangkit mencoba lagi (Opsi E, skor 5)."
+    },
+    {
+      no: 11,
+      text: "Saya memiliki janji bertemu dengan seorang klien, namun ia tidak datang sama sekali ke tempat pertemuan. Saya akan ....",
+      options: {
+        A: "Marah dan membatalkan segala kerja sama dengannya",
+        B: "Meminta penjelasan atas ketidakhadirannya",
+        C: "Menjadwalkan ulang janji pertemuan",
+        D: "Menolak penjadwalan ulang janji temu dengannya",
+        E: "Membalas dengan tidak hadir pada pertemuan berikutnya"
+      },
+      points: { B: 5, C: 4, D: 3, E: 2, A: 1 },
+      explanation: "Aspek <strong>Pengendalian Diri dan Orientasi pada Pelayanan</strong>. Ketika klien tidak hadir, langkah pertama yang paling profesional dan komunikatif adalah mengonfirmasi dan meminta penjelasan secara baik-baik untuk mengetahui kendala yang terjadi (Opsi B, skor 5)."
+    },
+    {
+      no: 12,
+      text: "Saat makan siang di kantin kantor, biasanya saya ....",
+      options: {
+        A: "Berbicara seperlunya saja dengan teman semeja saya",
+        B: "Duduk sendiri dan menikmati makanan saya",
+        C: "Mengobrol dengan orang-orang yang sudah saya kenal baik",
+        D: "Berusaha menjalin komunikasi dengan beberapa orang baru",
+        E: "Asyik dengan kelompok saya sendiri"
+      },
+      points: { D: 5, C: 4, E: 3, A: 2, B: 1 },
+      explanation: "Aspek <strong>Jejaring Kerja (Networking) dan Sosial Budaya</strong>. Memanfaatkan waktu istirahat untuk memperluas pergaulan dan menjalin komunikasi dengan rekan-rekan baru di lingkungan kantor membangun jejaring kerja yang positif (Opsi D, skor 5)."
+    },
+    {
+      no: 13,
+      text: "Kantor menugaskan saya untuk menghadiri rapat di luar kota. Padahal saat itu anak saya sedang sakit. Saya akan ....",
+      options: {
+        A: "Melaksanakan tugas dengan perasaan dongkol",
+        B: "Menolak tugas dan berkonsentrasi merawat anak saya",
+        C: "Menjelaskan kondisi yang sedang saya alami kepada atasan untuk meminta kebijaksanaannya",
+        D: "Tetap berangkat melaksanakan tugas dengan sepenuh hati",
+        E: "Melaksanakan tugas dengan menyertakan anak istri"
+      },
+      points: { C: 5, D: 4, E: 3, A: 2, B: 1 },
+      explanation: "Aspek <strong>Profesionalisme dan Komunikasi Efektif</strong>. Mengomunikasikan secara jujur kondisi darurat keluarga kepada atasan guna memohon kebijaksanaan (misalnya penjadwalan ulang atau delegasi) merupakan langkah yang etis, terbuka, dan bertanggung jawab (Opsi C, skor 5)."
+    },
+    {
+      no: 14,
+      text: "Dalam era sekarang komputerisasi sudah merambah ke seluruh lapisan dunia kerja, saya akan ....",
+      options: {
+        A: "Mempelajari tentang komputer hanya jika diminta oleh kantor",
+        B: "Meminta peralatan komputer ke kantor",
+        C: "Membaca banyak pengetahuan komputer dari buku",
+        D: "Mempelajari dan mengembangkan kemampuan saya dalam mengoperasikan komputer",
+        E: "Mengikuti segala perkembangan tentang komputer"
+      },
+      points: { D: 5, C: 4, E: 3, A: 2, B: 1 },
+      explanation: "Aspek <strong>Teknologi Informasi dan Komunikasi (TIK)</strong>. Menghadapi digitalisasi dunia kerja menuntut tindakan nyata untuk secara aktif mempelajari dan mengasah keterampilan praktik dalam mengoperasikan komputer (Opsi D, skor 5)."
+    },
+    {
+      no: 15,
+      text: "Pada hari ulang tahun atasan, saya ingin memberikan sebuah hadiah. Pertimbangan utama saya dalam memberikan hadiah adalah ....",
+      options: {
+        A: "Pengaruh hadiah saya terhadap kedekatan saya dengan atasan",
+        B: "Budget yang saya miliki",
+        C: "Keinginan atasan saya",
+        D: "Hadiah yang diberikan teman lain kepada atasan",
+        E: "Kegunaan hadiah saya terhadap atasan"
+      },
+      points: { E: 5, B: 4, C: 3, D: 2, A: 1 },
+      explanation: "Aspek <strong>Integritas dan Efektivitas</strong>. Pertimbangan yang paling tulus, objektif, dan bebas dari motif pamrih atau gratifikasi terselubung adalah nilai manfaat/kegunaan barang tersebut bagi penerima (Opsi E, skor 5)."
+    },
+    {
+      no: 16,
+      text: "Teman seruangan saya tiba-tiba jatuh sakit dan meminta saya untuk menggantikan tugasnya. Saya akan ....",
+      options: {
+        A: "Mempelajari tugas tersebut dengan baik sebelum mengambil keputusan untuk menerimanya",
+        B: "Mencari rekan kerja lain yang bersedia untuk menggantikan tugas tersebut",
+        C: "Tanpa berpikir panjang segera menyanggupinya",
+        D: "Menolak menerima tugas tersebut",
+        E: "Meminta dia untuk mencari rekan kerja lain yang bersedia untuk menggantikan tugasnya"
+      },
+      points: { A: 5, C: 4, B: 3, E: 2, D: 1 },
+      explanation: "Aspek <strong>Profesionalisme dan Bekerja Sama dalam Kelompok</strong>. Sebelum menyanggupi pelimpahan tugas rekan yang sakit, mempelajari rincian tugas tersebut terlebih dahulu memastikan kita dapat mengerjakannya dengan baik dan tepat sasaran (Opsi A, skor 5)."
+    },
+    {
+      no: 17,
+      text: "Saya ingin meminta izin kepada atasan karena ada kepentingan yang sangat mendesak. Namun, pada saat itu atasan saya sedang berbicara dengan rekan kerja saya. Saya akan ....",
+      options: {
+        A: "Menyela pembicaraan mereka setelah meminta maaf sebelumnya",
+        B: "Langsung pulang dan meninggalkan pesan kepada rekan kerja untuk menyampaikan izin saya kepada atasan",
+        C: "Menunggu pembicaraan mereka berakhir",
+        D: "Langsung masuk ke ruangan dan mengutarakan maksud saya",
+        E: "Mendengarkan dan menimbang pentingnya pembicaraan mereka sebelum menyela untuk meminta izin"
+      },
+      points: { C: 5, A: 4, E: 3, D: 2, B: 1 },
+      explanation: "Aspek <strong>Pengendalian Diri dan Tata Krama Profesional</strong>. Menghormati lawan bicara yang sedang berdiskusi dengan sabar menunggu hingga pembicaraan mereka selesai mencerminkan etika kerja yang santun dan pengendalian diri yang baik (Opsi C, skor 5)."
+    },
+    {
+      no: 18,
+      text: "Anak buah saya selalu bermasalah untuk memenuhi deadline kerja yang saya berikan kepadanya. Saya akan ....",
+      options: {
+        A: "Memindahnya ke bagian lain",
+        B: "Tidak memberinya pekerjaan lagi",
+        C: "Memberinya deadline sesuai tingkat kemampuannya selama ini",
+        D: "Mengomunikasikannya dan mencari kendala yang dialaminya dan mencari solusinya",
+        E: "Tetap memberikan pekerjaan dengan deadline sesuai standar yang saya inginkan"
+      },
+      points: { D: 5, C: 4, E: 3, B: 2, A: 1 },
+      explanation: "Aspek <strong>Kemampuan Menggerakkan dan Mengoordinir Orang Lain</strong>. Atasan yang solutif akan berdialog dengan bawahan untuk mengidentifikasi akar kendala yang menghambat penyelesaian tugas dan bersama-sama merumuskan solusinya (Opsi D, skor 5)."
+    },
+    {
+      no: 19,
+      text: "Saya sudah bekerja keras untuk kantor. Namun, hasil evalusi mengatakan kinerja saya lebih rendah daripada rekan lain. Saya akan ....",
+      options: {
+        A: "Menanyakan kepada tim evaluator di mana letak kekurangan kinerja saya",
+        B: "Meningkatkan kinerja untuk mencapai hasil evaluasi yang lebih baik",
+        C: "Tidak akan mempersoalkan hasil evaluasi dan tetap bekerja seperti biasa",
+        D: "Menjadi kurang bersemangat dalam bekerja",
+        E: "Meminta masukan dari rekan lain yang hasil evaluasinya bagus"
+      },
+      points: { B: 5, C: 4, E: 3, A: 2, D: 1 },
+      explanation: "Aspek <strong>Semangat Berprestasi dan Kemampuan Belajar Berkelanjutan</strong>. Respons terbaik terhadap hasil evaluasi yang belum optimal adalah menjadikannya pemicu semangat untuk terus meningkatkan kualitas kinerja agar mencapai hasil yang lebih baik (Opsi B, skor 5)."
+    },
+    {
+      no: 20,
+      text: "Karena terlambat bangun, saya terlambat datang ke kantor. Sesampai di kantor atasan memarahi saya atas keterlambatan tersebut. Saya akan ....",
+      options: {
+        A: "Tidak terima karena saya baru terlambat datang satu kali itu",
+        B: "Meminta maaf dan memberitahukan kondisi yang saya alami",
+        C: "Menerimanya karena itu memang kesalahan saya",
+        D: "Diam saja dan segera meminta izin untuk mulai bekerja",
+        E: "Menerimanya dan berusaha untuk tidak terlambat lagi"
+      },
+      points: { E: 5, C: 4, B: 3, D: 2, A: 1 },
+      explanation: "Aspek <strong>Integritas dan Pengendalian Diri</strong>. Mengakui kesalahan secara lapang dada ketika ditegur atas kelalaian diri sendiri, disertai komitmen nyata untuk memperbaiki disiplin agar tidak mengulanginya lagi adalah sikap yang dewasa (Opsi E, skor 5)."
+    },
+    {
+      no: 21,
+      text: "Saya merasa tidak cocok dengan salah satu rekan kantor saya. Suatu hari saya terpilih untuk berada dalam satu tim kerja dengan dia. Saya akan ....",
+      options: {
+        A: "Menolak untuk berada dalam tim kerja tersebut",
+        B: "Menyelesaikan proyek kerja tersebut bersamanya secara profesional",
+        C: "Tidak mau terlibat dalam proyek kerja tersebut dan membiarkannya menyelesaikannya sendirian",
+        D: "Menyelesaikan proyek kerja tersebut sendirian tanpa melibatkannya",
+        E: "Minta bertukar tempat dengan rekan kerja yang lain"
+      },
+      points: { B: 5, D: 4, C: 3, E: 2, A: 1 },
+      explanation: "Aspek <strong>Profesionalisme dan Bekerja Sama dalam Kelompok</strong>. Perbedaan pribadi tidak boleh mengganggu kepentingan organisasi; tetap bekerja sama secara profesional demi kesuksesan proyek adalah sikap ASN yang unggul (Opsi B, skor 5)."
+    },
+    {
+      no: 22,
+      text: "Dalam menyelesaikan suatu pekerjaan biasanya saya senang melakukannya dengan cara yang .....",
+      options: {
+        A: "Memberikan hasil maksimal",
+        B: "Sama dengan yang biasa digunakan kebanyakan orang",
+        C: "Tidak menimbulkan kesusahan pada saya",
+        D: "Baru dan tidak terpikirkan oleh orang lain",
+        E: "Sesuai dengan tingkat pekerjaan"
+      },
+      points: { D: 5, A: 4, E: 3, C: 2, B: 1 },
+      explanation: "Aspek <strong>Kreativitas dan Inovasi</strong>. Menemukan dan menerapkan pendekatan atau metode baru yang kreatif dan out-of-the-box dalam menyelesaikan pekerjaan menunjukkan daya inovasi tinggi (Opsi D, skor 5), diikuti dengan orientasi pada hasil maksimal (Opsi A, skor 4)."
+    },
+    {
+      no: 23,
+      text: "Dalam memberikan sebuah gagasan, saya dikenal sebagai orang yang ....",
+      options: {
+        A: "Memberikan solusi terbaik",
+        B: "Menempuh banyak resiko",
+        C: "Penuh ide baru",
+        D: "Penyempurna sistem yang ada",
+        E: "Memiliki gagasan rasional"
+      },
+      points: { C: 5, A: 4, E: 3, D: 2, B: 1 },
+      explanation: "Aspek <strong>Kreativitas dan Inovasi</strong>. Dikenal sebagai pribadi yang penuh dengan ide-ide segar dan pembaruan mencerminkan kontribusi pemikiran kreatif bagi kemajuan organisasi (Opsi C, skor 5)."
+    },
+    {
+      no: 24,
+      text: "Pada suatu pagi, dalam perjalanan menuju kantor, saya melihat rekan kerja yang tidak saya sukai sedang menuntun motornya yang rusak. Saya akan ....",
+      options: {
+        A: "Menunjukkan kepadanya letak bengkel terdekat",
+        B: "Membiarkannya saja supaya dia terlambat masuk kantor",
+        C: "Membantu membawa motornya ke bengkel terdekat",
+        D: "Berpura-pura tidak melihatnya dan melanjutkan perjalanan",
+        E: "Mengantar motornya ke bengkel dan memberinya tumpangan"
+      },
+      points: { E: 5, C: 4, A: 3, D: 2, B: 1 },
+      explanation: "Aspek <strong>Kepedulian Sosial dan Jejaring Kerja</strong>. Mengesampingkan rasa tidak suka pribadi dengan memberikan bantuan tulus secara menyeluruh—membantu membawa motor ke bengkel sekaligus memberinya tumpangan ke kantor—menunjukkan kelapangan hati dan empati tertinggi (Opsi E, skor 5)."
+    },
+    {
+      no: 25,
+      text: "Ketika kantor mengadakan rapat saya biasanya datang ....",
+      options: {
+        A: "Sedikit terlambat",
+        B: "Telat setelah rapat dimulai",
+        C: "Setelah semua peserta rapat hadir",
+        D: "Paling awal",
+        E: "Tidak pernah terlambat, namun bukan yang paling awal"
+      },
+      points: { D: 5, E: 4, C: 3, A: 2, B: 1 },
+      explanation: "Aspek <strong>Integritas dan Kedisiplinan</strong>. Datang paling awal sebelum rapat dimulai mencerminkan tingkat disiplin waktu, kesiapan, dan penghargaan tinggi terhadap agenda kerja (Opsi D, skor 5)."
+    },
+    {
+      no: 26,
+      text: "Hal pertama yang akan saya lakukan saat saya ditempatkan di sebuah tempat tugas yang baru adalah ....",
+      options: {
+        A: "Menyapa rekan kerja baru dan bertanya tentang sistem kerja di tempat tersebut",
+        B: "Diam saja, sambil mengamati sistem kerja pegawai di tempat kerja tersebut",
+        C: "Menunggu perintah kerja dari atasan",
+        D: "Mencari tahu apa yang harus saya kerjakan",
+        E: "Mempelajari sistem kerja di tempat tersebut dari peraturan dan data yang ada"
+      },
+      points: { A: 5, E: 4, D: 3, B: 2, C: 1 },
+      explanation: "Aspek <strong>Kemampuan Beradaptasi dan Jejaring Kerja</strong>. Bersikap proaktif menyapa rekan kerja baru sekaligus menggali informasi mengenai alur dan sistem kerja mempercepat proses adaptasi sosial maupun teknis di lingkungan baru (Opsi A, skor 5)."
+    },
+    {
+      no: 27,
+      text: "Tempat kerja saya kehilangan salah satu benda inventaris kantor. Saya akan ....",
+      options: {
+        A: "Mencari barang yang hilang tersebut",
+        B: "Menggantinya dengan barang yang berkualitas lebih buruk",
+        C: "Segera menggantinya karena itu tanggung jawab saya",
+        D: "Tidak mau menggantinya",
+        E: "Mengantisipasi agar tidak kehilangan barang inventaris lagi"
+      },
+      points: { C: 5, A: 4, E: 3, B: 2, D: 1 },
+      explanation: "Aspek <strong>Integritas dan Tanggung Jawab</strong>. Jika barang inventaris kantor yang berada dalam tanggung jawab kita hilang, sikap penuh integritas adalah berani bertanggung jawab penuh untuk segera menggantinya (Opsi C, skor 5)."
+    },
+    {
+      no: 28,
+      text: "Dalam perjalanan hidup saya, sifat utama yang ada dalam pribadi saya adalah ....",
+      options: {
+        A: "Berani",
+        B: "Jujur",
+        C: "Ulet",
+        D: "Rajin",
+        E: "Disiplin"
+      },
+      points: { B: 5, E: 4, C: 3, D: 2, A: 1 },
+      explanation: "Aspek <strong>Integritas Diri</strong>. Kejujuran merupakan fondasi utama dari integritas moral dan etika seorang aparatur maupun individu dalam menjalankan amanah kehidupan dan pekerjaan (Opsi B, skor 5)."
+    },
+    {
+      no: 29,
+      text: "Rekan kerja yang paling baik menurut saya adalah rekan kerja yang mampu ....",
+      options: {
+        A: "Mengikuti segala langkah yang saya ambil",
+        B: "Membimbing dan mengingatkan saya",
+        C: "Memberikan ide yang segar kepada saya",
+        D: "Menutupi kekurangan saya",
+        E: "Saling mengerti dan melengkapi dengan saya"
+      },
+      points: { E: 5, C: 4, D: 3, B: 2, A: 1 },
+      explanation: "Aspek <strong>Kemampuan Bekerja Sama dalam Kelompok</strong>. Esensi kerja sama tim yang harmonis adalah hubungan timbal balik yang saling memahami dan saling melengkapi kelebihan serta kekurangan masing-masing (Opsi E, skor 5)."
+    },
+    {
+      no: 30,
+      text: "Dalam menghadapi suatu problem biasanya saya akan....",
+      options: {
+        A: "Tidak bersemangat dalam bekerja",
+        B: "Merenung dan berintropeksi diri",
+        C: "Stres dan mudah marah",
+        D: "Mencari hiburan untuk menenangkan diri saya",
+        E: "Mengomunikasikan masalah saya dengan teman dekat"
+      },
+      points: { B: 5, E: 4, D: 3, A: 2, C: 1 },
+      explanation: "Aspek <strong>Pengendalian Diri</strong>. Menghadapi masalah dengan tenang melalui perenungan dan introspeksi diri membantu menemukan akar persoalan secara objektif tanpa terbawa emosi (Opsi B, skor 5)."
+    },
+    {
+      no: 31,
+      text: "Teman saya melakukan sebuah tindakan yang sangat tidak saya sukai. Yang akan saya lakukan adalah ....",
+      options: {
+        A: "Membiarkannya saja sambil berharap ia berubah sendiri",
+        B: "Memberitahukan kepada teman yang lain tentang tindakannya tersebut",
+        C: "Membicarakannya baik-baik dan menjelaskan bahwa saya tidak suka dengan tindakannya",
+        D: "Menegur dan memarahinya, supaya ia tidak mengulanginya lagi",
+        E: "Memutuskan pertemanan dengannya"
+      },
+      points: { C: 5, D: 4, A: 3, B: 2, E: 1 },
+      explanation: "Aspek <strong>Pengendalian Diri dan Komunikasi Asertif</strong>. Menyampaikan ketidaksukaan secara langsung kepada yang bersangkutan dengan bahasa yang baik-baik dan terbuka menghindari kesalahpahaman serta menjaga hubungan baik (Opsi C, skor 5)."
+    },
+    {
+      no: 32,
+      text: "Dalam suatu kesempatan, atasan mengajak saya ke suatu tempat hiburan setelah pulang kantor. Padahal saya tidak suka untuk pergi ke tempat hiburan. Saya akan ....",
+      options: {
+        A: "Terpaksa ikut dengan perasaan kesal",
+        B: "Menolak dan menjelaskan baik-baik bahwa saya tidak suka keluar ke tempat hiburan",
+        C: "Mengikuti ajakannya supaya atasan tidak tersinggung",
+        D: "Mengikutinya karena banyak teman lain yang ikut",
+        E: "Pulang dengan diam-diam untuk menghindarinya"
+      },
+      points: { B: 5, E: 4, C: 3, D: 2, A: 1 },
+      explanation: "Aspek <strong>Integritas dan Komunikasi Asertif</strong>. Tetap teguh pada prinsip diri di luar jam dinas dengan cara menolak secara sopan dan memberikan penjelasan yang jujur serta santun kepada atasan (Opsi B, skor 5)."
+    },
+    {
+      no: 33,
+      text: "Ketika hidup dan tinggal di tempat yang jauh dari rumah, biasanya saya ....",
+      options: {
+        A: "Tidak betah dan selalu teringat rumah",
+        B: "Biasa saja dan mudah menyesuaikan dengan tempat tinggal baru tersebut",
+        C: "Mengalami kendala dalam menyesuaikan diri dengan situasi sekitar",
+        D: "Membutuhkan waktu untuk dapat menyesuaikan diri dengan lingkungan sekitar",
+        E: "Membawa beberapa barang yang dapat mengingatkan saya dengan rumah sehingga saya merasa betah"
+      },
+      points: { B: 5, D: 4, C: 3, E: 2, A: 1 },
+      explanation: "Aspek <strong>Kemampuan Beradaptasi</strong>. Mampu merasa nyaman dan cepat menyesuaikan diri dengan lingkungan tempat tinggal baru menunjukkan fleksibilitas dan kesiapan ditempatkan di mana saja (Opsi B, skor 5)."
+    },
+    {
+      no: 34,
+      text: "Saya membuat sebuah tindakan yang membuat teman saya marah. Saya akan ....",
+      options: {
+        A: "Merasa bingung dan terus memikirkannya",
+        B: "Cuek saja, saya masih punya banyak teman yang lain",
+        C: "Membiarkan saja, nanti pasti akan baik sendiri",
+        D: "Meminta maaf kepadanya dan berusaha untuk memperbaiki",
+        E: "Merasa takut ia akan meninggalkan saya"
+      },
+      points: { D: 5, A: 4, E: 3, C: 2, B: 1 },
+      explanation: "Aspek <strong>Integritas dan Pengendalian Diri</strong>. Berani mengakui kekeliruan, segera meminta maaf secara tulus, dan berupaya memperbaiki keadaan mencerminkan kedewasaan emosional (Opsi D, skor 5)."
+    },
+    {
+      no: 35,
+      text: "Dalam pergaulan saya senang apabila bertemu dengan orang baru yang ....",
+      options: {
+        A: "Periang dan berpikir positif",
+        B: "Memiliki wawasan luas",
+        C: "Santun dan rendah hati",
+        D: "Mudah menyesuaikan diri",
+        E: "Memiliki pengalaman yang banyak"
+      },
+      points: { A: 5, C: 4, D: 3, B: 2, E: 1 },
+      explanation: "Aspek <strong>Sosial Budaya dan Jejaring Kerja</strong>. Lingkungan pergaulan yang periang dan berpikir positif menularkan energi optimisme serta memudahkan terjalinnya relasi sosial yang hangat (Opsi A, skor 5)."
+    },
+    {
+      no: 36,
+      text: "Dalam melaksanakan pekerjaan sehari-hari saya adalah tipe pekerja yang ....",
+      options: {
+        A: "Senang menyelesaikan semua tanggung jawab sebelum waktunya",
+        B: "Menyelesaikan pekerjaan mendekati masa akhir deadline",
+        C: "Bekerja dengan hati-hati dan tepat waktu",
+        D: "Melakukan pekerjaan sedikit demi sedikit sampai tuntas",
+        E: "Menyelesaikan pekerjaan dengan sangat cepat"
+      },
+      points: { C: 5, A: 4, D: 3, E: 2, B: 1 },
+      explanation: "Aspek <strong>Orientasi pada Hasil dan Ketelitian</strong>. Bekerja dengan penuh kehati-hatian (meminimalkan kesalahan) sekaligus tepat waktu menjamin kualitas dan ketepatan penyelesaian tugas (Opsi C, skor 5)."
+    },
+    {
+      no: 37,
+      text: "Saat sedang dikejar deadline tugas yang penting, datang seorang tamu yang meminta informasi suatu tempat di kantor kepada saya. Sikap saya adalah ....",
+      options: {
+        A: "Mengantarkannya sampai ke tujuan tamu",
+        B: "Menelepon tempat tujuan tamu, dan memintanya untuk menjemput tamu di ruangan saya",
+        C: "Memberinya petunjuk arah ke tempat tujuan dan kemudian melanjutkan pekerjaan kembali",
+        D: "Mengacuhkannya sampai ia keluar dengan sendirinya dari ruangan saya",
+        E: "Tetap fokus pada kerjaan dan meminta teman untuk mengantarkannya ke tempat tujuan"
+      },
+      points: { A: 5, C: 4, B: 3, E: 2, D: 1 },
+      explanation: "Aspek <strong>Orientasi pada Pelayanan Publik</strong>. Memberikan pelayanan prima kepada tamu kantor dengan mengantarkannya secara ramah sampai ke tempat tujuan mencerminkan dedikasi pelayanan yang maksimal (Opsi A, skor 5)."
+    },
+    {
+      no: 38,
+      text: "Dalam suatu tugas saya diharuskan bekerja sama dengan orang-orang yang belum saya kenal. Saya akan ....",
+      options: {
+        A: "Meminta kepada atasan untuk memindah saya ke tim yang telah saya kenal",
+        B: "Berusaha mengenal anggota tim dan melaksanakan tugas bersama-sama",
+        C: "Berusaha mengenal anggota tim setelah pekerjaan selesai",
+        D: "Meminta bagian tugas dan fokus menyelesaikan tugas bagian saya",
+        E: "Berkoordinasi dengan anggota tim yang lain hanya bila diperlukan"
+      },
+      points: { B: 5, E: 4, C: 3, D: 2, A: 1 },
+      explanation: "Aspek <strong>Kemampuan Bekerja Sama dalam Kelompok dan Adaptasi</strong>. Membangun keakraban dengan mengenal rekan tim sejak awal dan mengerjakan tugas secara kolaboratif akan menciptakan sinergi tim yang solid (Opsi B, skor 5)."
+    },
+    {
+      no: 39,
+      text: "Saya menjadi sasaran kemarahan atasan atas kesalahan yang dilakukan oleh rekan setim saya. Yang saya lakukan adalah ....",
+      options: {
+        A: "Menganggap itu sebagai pelajaran untuk saya supaya lebih berhati-hati dalam bekerja",
+        B: "Menjelaskan kepada atasan bahwa itu bukanlah kesalahan saya",
+        C: "Menerima kemarahan atasan meskipun itu bukan merupakan kesalahan saya",
+        D: "Tidak terima dan mengadukan teman yang membuat masalah tersebut",
+        E: "Menegur teman saya dan memintanya menjelaskan masalah sebenarnya kepada atasan"
+      },
+      points: { A: 5, C: 4, B: 3, E: 2, D: 1 },
+      explanation: "Aspek <strong>Pengendalian Diri dan Kebesaran Jiwa dalam Tim</strong>. Tidak terpancing emosi maupun saling menyalahkan di hadapan atasan, melainkan menerimanya dengan lapang dada sebagai bahan evaluasi agar tim bekerja lebih teliti (Opsi A, skor 5)."
+    },
+    {
+      no: 40,
+      text: "Dalam sebuah diskusi terjadi perdebatan yang sangat sengit karena adanya perbedaan pendapat. Saya akan ....",
+      options: {
+        A: "Meninggalkan diskusi tersebut",
+        B: "Menengahi perdebatan dan mengajak semuanya untuk berdiskusi dengan tenang",
+        C: "Mendukung pihak yang sependapat dengan saya",
+        D: "Menganggap itu adalah hal yang wajar dalam sebuah diskusi",
+        E: "Meninggalkan ruangan diskusi dan kembali lagi setelah perdebatan selesai"
+      },
+      points: { B: 5, D: 4, E: 3, C: 2, A: 1 },
+      explanation: "Aspek <strong>Pengendalian Diri dan Kemampuan Mengoordinir Orang Lain</strong>. Mengambil peran sebagai penengah untuk meredakan ketegangan dan mengarahkan forum kembali berdiskusi secara tenang dan konstruktif (Opsi B, skor 5)."
+    },
+    {
+      no: 41,
+      text: "Saya mengalami kekalahan dalam suatu perlombaan. Perasaan yang saya rasakan adalah ....",
+      options: {
+        A: "Kecewa dan tidak terima",
+        B: "Biasa saja, karena menang dan kalah adalah bagian dari perlombaan",
+        C: "Bersemangat untuk memenangkan perlombaan berikutnya",
+        D: "Malu dan menyesal telah mengikuti perlombaan",
+        E: "Sedih dan tidak mau mengikuti lomba lagi"
+      },
+      points: { C: 5, B: 4, A: 3, E: 2, D: 1 },
+      explanation: "Aspek <strong>Semangat Berprestasi dan Pengendalian Diri</strong>. Menjadikan kekalahan sebagai motivasi positif untuk berlatih lebih baik dan bersemangat meraih kemenangan pada kesempatan berikutnya (Opsi C, skor 5)."
+    },
+    {
+      no: 42,
+      text: "Saya melihat sebuah lowongan pekerjaan yang sangat saya butuhkan. Namun, ada beberapa kriteria yang tidak sesuai dengan saya. Saya akan ....",
+      options: {
+        A: "Melihat pesaing saya terlebih dahulu sebelum mendaftar",
+        B: "Tetap mencoba untuk mendaftar",
+        C: "Tidak jadi mendaftar karena pasti ditolak",
+        D: "Mencoba mencari lowongan lain yang sesuai kriterianya",
+        E: "Mencari celah agar dapat lolos dari kriteria tersebut"
+      },
+      points: { B: 5, A: 4, E: 3, D: 2, C: 1 },
+      explanation: "Aspek <strong>Semangat Berprestasi dan Keberanian Mengambil Inisiatif</strong>. Tidak menyerah sebelum berjuang dengan tetap berani mencoba mendaftar selama masih ada peluang yang sah (Opsi B, skor 5)."
+    },
+    {
+      no: 43,
+      text: "Saya mendapat tawaran pekerjaan yang sudah saya idam-idamkan sejak lama. Namun, pekerjaan tersebut memiliki gaji yang lebih kecil dari pekerjaan saya saat ini. Saya akan ....",
+      options: {
+        A: "Tidak meninggalkan pekerjaan saat ini",
+        B: "Mempertimbangkan baik buruknya sebelum mengambil keputusan",
+        C: "Mengambil pekerjaan baru tersebut",
+        D: "Meminta pendapat keluarga",
+        E: "Konsultasi kepada rekan kerja"
+      },
+      points: { B: 5, D: 4, C: 3, A: 2, E: 1 },
+      explanation: "Aspek <strong>Kemampuan Pengambilan Keputusan yang Bijak</strong>. Sebelum mengambil langkah karier besar yang berdampak pada finansial dan kepuasan kerja, menimbang secara matang aspek baik dan buruknya merupakan sikap paling rasional (Opsi B, skor 5)."
+    },
+    {
+      no: 44,
+      text: "Saat saya tidak dapat mengerjakan tugas tepat waktu biasanya saya akan ....",
+      options: {
+        A: "Mencari alasan terbaik supaya terhindar dari kemarahan atasan",
+        B: "Seolah-olah tidak ingat waktu deadline",
+        C: "Menjelaskan alasan keterlambatan dan meminta maaf kepada atasan",
+        D: "Meminta bantuan teman untuk menyelesaikannya",
+        E: "Tidak masuk kerja pada hari deadline"
+      },
+      points: { C: 5, D: 4, A: 3, B: 2, E: 1 },
+      explanation: "Aspek <strong>Integritas dan Tanggung Jawab</strong>. Bersikap jujur dengan menjelaskan kendala penyebab keterlambatan secara objektif dan meminta maaf kepada atasan menunjukkan akuntabilitas diri yang tinggi (Opsi C, skor 5)."
+    },
+    {
+      no: 45,
+      text: "Di tengah perjalanan ke kantor saya melihat sebuah kecelakaan. Padahal saat itu saya sedang tergesa-gesa. Saya akan ....",
+      options: {
+        A: "Berhenti dan memberikan pertolongan",
+        B: "Biasa, tetap melanjutkan perjalanan",
+        C: "Mencari orang dan memintanya untuk menolong korban, sementara saya melanjutkan perjalanan",
+        D: "Berhenti sebentar untuk melihat lalu cepat melanjutkan perjalanan",
+        E: "Melanjutkan perjalanan dengan rasa bersalah karena tidak bisa menolongnya"
+      },
+      points: { A: 5, C: 4, E: 3, D: 2, B: 1 },
+      explanation: "Aspek <strong>Kepedulian Sosial dan Kemanusiaan</strong>. Keselamatan nyawa manusia di situasi darurat kecelakaan harus diutamakan dengan segera berhenti dan memberikan pertolongan pertama yang dibutuhkan (Opsi A, skor 5)."
+    },
+    {
+      no: 46,
+      text: "Seorang teman meminta saya untuk membantunya mengerjakan tugasnya. Sikap saya adalah ....",
+      options: {
+        A: "Tidak mau membantunya karena itu bukan urusan saya",
+        B: "Menasihatinya untuk mengerjakan tugasnya sendiri",
+        C: "Menolak karena saya tidak pernah memintanya mengerjakan tugas saya",
+        D: "Membantu sebisa saya",
+        E: "Membantunya dengan meminta imbalan"
+      },
+      points: { D: 5, B: 4, C: 3, A: 2, E: 1 },
+      explanation: "Aspek <strong>Kepedulian Sosial dan Bekerja Sama</strong>. Ringan tangan membantu rekan yang mengalami kesulitan sesuai dengan kapasitas kemampuan diri tanpa pamrih memperkuat solidaritas di lingkungan kerja (Opsi D, skor 5)."
+    },
+    {
+      no: 47,
+      text: "Seorang teman merasa sangat bangga karena berhasil bertemu dengan tokoh idolanya. Menurut saya, reaksinya ....",
+      options: {
+        A: "Sangat wajar",
+        B: "Wajar",
+        C: "Terlalu berlebihan",
+        D: "Menyebalkan",
+        E: "Norak"
+      },
+      points: { B: 5, A: 4, C: 3, E: 2, D: 1 },
+      explanation: "Aspek <strong>Sosial Budaya dan Empati</strong>. Memahami dan menghargai kebahagiaan orang lain sebagai ekspresi yang wajar dan proporsional tanpa menghakimi secara negatif (Opsi B, skor 5)."
+    },
+    {
+      no: 48,
+      text: "Karena ada acara keluarga yang mendadak, rekan kerja saya tidak masuk kerja selama beberapa hari. Padahal saat itu kami sedang dikejar deadline untuk menyelesaikan suatu pekerjaan. Saya akan ....",
+      options: {
+        A: "Mengerjakan tugas sendiri, namun teman saya harus melanjutkan tugas tersebut sendirian setelah ia masuk kerja kembali",
+        B: "Menunggu teman saya kembali bekerja untuk menyelesaikannya bersama-sama",
+        C: "Membagi pekerjaan menjadi dua bagian dan mengerjakan bagian saya sendiri",
+        D: "Menyelesaikan tugas sendirian sambil menunggu teman saya kembali bekerja",
+        E: "Mengerjakan tugas, dan meminta bagian honor tugas dari teman saya"
+      },
+      points: { D: 5, C: 4, B: 3, A: 2, E: 1 },
+      explanation: "Aspek <strong>Orientasi pada Hasil dan Kemampuan Bekerja Mandiri</strong>. Demi menjaga ketepatan waktu penyelesaian target tim saat rekan berhalangan mendadak, mengambil inisiatif mengerjakan tugas tersebut semaksimal mungkin adalah langkah paling bertanggung jawab (Opsi D, skor 5)."
+    },
+    {
+      no: 49,
+      text: "Saya mendapatkan tawaran untuk melanjutkan pendidikan dari kantor. Namun, separuh biaya pendidikan harus ditanggung oleh saya sendiri. Saya akan ....",
+      options: {
+        A: "Menolak tawaran tersebut",
+        B: "Memikirkan baik dan buruknya peluang tersebut",
+        C: "Menawarkan kesempatan tersebut terhadap rekan kerja lain",
+        D: "Menerima tawaran tersebut",
+        E: "Meminta pertimbangan keluarga"
+      },
+      points: { D: 5, B: 4, E: 3, C: 2, A: 1 },
+      explanation: "Aspek <strong>Kemauan dan Kemampuan Belajar Berkelanjutan</strong>. Kesempatan pengembangan kompetensi melalui pendidikan lanjut merupakan investasi berharga bagi peningkatan kualitas diri dan karier sehingga patut disambut dan diterima dengan antusias (Opsi D, skor 5)."
+    },
+    {
+      no: 50,
+      text: "Orang-orang di sekitar saya mengenal saya sebagai sosok pribadi yang ....",
+      options: {
+        A: "Rajin",
+        B: "Periang",
+        C: "Mudah akrab",
+        D: "Pantang menyerah",
+        E: "Visioner"
+      },
+      points: { D: 5, A: 4, E: 3, B: 2, C: 1 },
+      explanation: "Aspek <strong>Semangat Berprestasi dan Daya Juang</strong>. Karakter pantang menyerah mencerminkan ketangguhan mental dalam menghadapi berbagai tantangan tugas dan perubahan di lingkungan kerja (Opsi D, skor 5)."
+    }
+  ];
+
+  // =========================================================================
+  // STATE & LOGIKA APLIKASI CAT
+  // =========================================================================
+  const EXAM_DURATION_SECONDS = 50 * 60; // 50 Menit (50 Soal)
+  let currentUser = { user: "", nama: "" };
+  let currentIndex = 0;
+  let userAnswers = new Array(questions.length).fill(null);
+  let doubtStatus = new Array(questions.length).fill(false);
+  let timeLeft = EXAM_DURATION_SECONDS;
+  let timerInterval = null;
+
+  // Fungsi Modal Custom (Pengganti alert & confirm agar aman di semua iframe/browser)
+  function showModal(title, message, buttons) {
+    const overlay = document.getElementById("custom-modal");
+    document.getElementById("modal-title").textContent = title;
+    document.getElementById("modal-message").textContent = message;
+    const btnContainer = document.getElementById("modal-buttons");
+    btnContainer.innerHTML = "";
+
+    buttons.forEach(b => {
+      const btn = document.createElement("button");
+      btn.className = "btn " + (b.className || "btn-primary");
+      btn.style.width = "auto";
+      btn.textContent = b.text;
+      btn.onclick = () => {
+        overlay.style.display = "none";
+        if (b.onClick) b.onClick();
+      };
+      btnContainer.appendChild(btn);
+    });
+
+    overlay.style.display = "flex";
+  }
+
+  // Handle Login ke Google Sheet
+  document.getElementById("login-form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const userVal = document.getElementById("username").value.trim();
+    const passVal = document.getElementById("password").value.trim();
+    const btn = document.getElementById("btn-login");
+    const errBox = document.getElementById("login-error");
+
+    btn.disabled = true;
+    btn.textContent = "Memverifikasi...";
+    errBox.style.display = "none";
+
+    try {
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({ username: userVal, password: passVal })
+      });
+      
+      const textRes = await response.text();
+      let result;
+      try {
+        result = JSON.parse(textRes);
+      } catch (parseErr) {
+        throw new Error("Format respons server tidak valid.");
+      }
+
+      if (result.status === "success") {
+        currentUser = { user: result.user, nama: result.nama };
+        startExam();
+      } else {
+        errBox.style.display = "block";
+        errBox.textContent = result.message || "Username atau Password salah!";
+      }
+    } catch (error) {
+      errBox.style.display = "block";
+      errBox.textContent = "Gagal memproses login. Pastikan Web App sudah di-deploy ulang dengan 'Who has access' diset ke 'Anyone'.";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Masuk Ujian";
+    }
+  });
+
+  function resetExamState() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    currentIndex = 0;
+    userAnswers = new Array(questions.length).fill(null);
+    doubtStatus = new Array(questions.length).fill(false);
+    timeLeft = EXAM_DURATION_SECONDS;
+
+    const timerEl = document.getElementById("timer");
+    timerEl.textContent = "50:00";
+    timerEl.style.color = "white";
+  }
+
+  function startExam() {
+    resetExamState();
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("exam-screen").style.display = "block";
+    document.getElementById("peserta-info").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+
+    initNumberGrid();
+    renderQuestion(0);
+    startTimer();
+  }
+
+  function retryExam() {
+    startExam();
+  }
+
+  function confirmLogout() {
+    showModal(
+      "Konfirmasi Logout",
+      "Apakah Anda yakin ingin keluar dari ujian? Progres jawaban Anda saat ini akan direset.",
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Logout", className: "btn-logout", onClick: logoutUser }
+      ]
+    );
+  }
+
+  function logoutUser() {
+    resetExamState();
+    currentUser = { user: "", nama: "" };
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("login-error").style.display = "none";
+
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("login-screen").style.display = "flex";
+  }
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+      const s = (timeLeft % 60).toString().padStart(2, '0');
+      document.getElementById("timer").textContent = `${m}:${s}`;
+
+      if (timeLeft <= 300) {
+        document.getElementById("timer").style.color = "#fca5a5";
+      }
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        showModal(
+          "Waktu Habis",
+          "Waktu ujian telah habis! Jawaban Anda akan dikumpulkan otomatis.",
+          [{ text: "Lihat Hasil", className: "btn-primary", onClick: finishExam }]
+        );
+      }
+    }, 1000);
+  }
+
+  function initNumberGrid() {
+    const grid = document.getElementById("number-grid");
+    grid.innerHTML = "";
+    questions.forEach((q, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "num-btn";
+      btn.id = `num-btn-${idx}`;
+      btn.textContent = q.no;
+      btn.onclick = () => renderQuestion(idx);
+      grid.appendChild(btn);
+    });
+  }
+
+  function updateNumberGrid() {
+    questions.forEach((_, idx) => {
+      const btn = document.getElementById(`num-btn-${idx}`);
+      if (!btn) return;
+      btn.className = "num-btn";
+      if (idx === currentIndex) btn.classList.add("active");
+      if (doubtStatus[idx]) {
+        btn.classList.add("doubt");
+      } else if (userAnswers[idx] !== null) {
+        btn.classList.add("answered");
+      }
+    });
+  }
+
+  function renderQuestion(index) {
+    currentIndex = index;
+    const q = questions[index];
+
+    document.getElementById("q-number").textContent = `Soal No. ${q.no} dari ${questions.length}`;
+    document.getElementById("q-text").innerHTML = q.text;
+
+    const statusEl = document.getElementById("q-status");
+    if (doubtStatus[index]) {
+      statusEl.textContent = "Ditandai Ragu-Ragu";
+      statusEl.style.color = "#b45309";
+    } else if (userAnswers[index]) {
+      statusEl.textContent = `Terjawab (${userAnswers[index]})`;
+      statusEl.style.color = "var(--success)";
+    } else {
+      statusEl.textContent = "Belum dijawab";
+      statusEl.style.color = "var(--muted)";
+    }
+
+    const optContainer = document.getElementById("q-options");
+    optContainer.innerHTML = "";
+
+    ["A", "B", "C", "D", "E"].forEach(letter => {
+      const div = document.createElement("div");
+      div.className = "option-item" + (userAnswers[index] === letter ? " selected" : "");
+      div.onclick = () => selectOption(letter);
+      div.innerHTML = `
+        <div class="option-letter">${letter}</div>
+        <div>${q.options[letter]}</div>
+      `;
+      optContainer.appendChild(div);
+    });
+
+    document.getElementById("btn-prev").disabled = (index === 0);
+    document.getElementById("btn-next").disabled = (index === questions.length - 1);
+    updateNumberGrid();
+  }
+
+  function selectOption(letter) {
+    userAnswers[currentIndex] = letter;
+    renderQuestion(currentIndex);
+  }
+
+  function toggleDoubt() {
+    doubtStatus[currentIndex] = !doubtStatus[currentIndex];
+    renderQuestion(currentIndex);
+  }
+
+  function prevQuestion() {
+    if (currentIndex > 0) renderQuestion(currentIndex - 1);
+  }
+
+  function nextQuestion() {
+    if (currentIndex < questions.length - 1) renderQuestion(currentIndex + 1);
+  }
+
+  function confirmFinish() {
+    const unanswered = userAnswers.filter(a => a === null).length;
+    const msg = unanswered > 0 
+      ? `Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin mengakhiri ujian?`
+      : "Apakah Anda yakin ingin mengumpulkan semua jawaban sekarang?";
+    
+    showModal(
+      "Kumpulkan Jawaban",
+      msg,
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Kumpulkan", className: "btn-finish", onClick: finishExam }
+      ]
+    );
+  }
+
+  function finishExam() {
+    clearInterval(timerInterval);
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "block";
+
+    let totalSkor = 0;
+    let dijawab = 0;
+    let kosong = 0;
+    let jumlahPoin5 = 0;
+
+    const maxSkor = questions.length * 5;
+    const reviewContainer = document.getElementById("review-container");
+    reviewContainer.innerHTML = "";
+
+    questions.forEach((q, idx) => {
+      const uAns = userAnswers[idx];
+      const earnedPoints = uAns ? q.points[uAns] : 0;
+      totalSkor += earnedPoints;
+
+      if (uAns === null) {
+        kosong++;
+      } else {
+        dijawab++;
+        if (earnedPoints === 5) jumlahPoin5++;
+      }
+
+      // Cari opsi dengan poin 5
+      const bestOption = ["A", "B", "C", "D", "E"].find(opt => q.points[opt] === 5);
+
+      // Tentukan warna border kartu review berdasarkan poin yang diraih
+      let cardStatusClass = "wrong";
+      let statusLabelColor = "var(--danger)";
+      if (earnedPoints === 5) {
+        cardStatusClass = "correct";
+        statusLabelColor = "var(--success)";
+      } else if (earnedPoints >= 3) {
+        cardStatusClass = "mid";
+        statusLabelColor = "#b45309";
+      }
+
+      // Susun badge rincian poin per opsi (diurutkan dari skor 5 ke 1 atau A ke E)
+      const poinPillsHtml = ["A", "B", "C", "D", "E"].map(opt => {
+        const pt = q.points[opt];
+        const isMax = pt === 5 ? " max-poin" : "";
+        const isUser = uAns === opt ? " user-poin" : "";
+        return `<span class="poin-pill${isMax}${isUser}">Opsi ${opt}: ${pt} Poin</span>`;
+      }).join("");
+
+      const card = document.createElement("div");
+      card.className = `card review-card ${cardStatusClass}`;
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+          <strong>Soal No. ${q.no}</strong>
+          <span style="font-weight:bold; color:${statusLabelColor}">
+            ${uAns === null ? 'Tidak Dijawab (0 Poin)' : `Skor Anda: ${earnedPoints} / 5 Poin`}
+          </span>
+        </div>
+        <p style="margin-bottom:10px;">${q.text}</p>
+        <p style="margin-bottom:6px;"><strong>Jawaban Anda:</strong> ${uAns ? `${uAns}. ${q.options[uAns]} (Poin ${earnedPoints})` : '-'}</p>
+        <p style="margin-bottom:10px;"><strong style="color:var(--success)">Jawaban Poin Tertinggi (5):</strong> ${bestOption}. ${q.options[bestOption]}</p>
+        <div class="pembahasan-box">
+          <strong>Distribusi Poin Setiap Opsi:</strong>
+          <div class="poin-badge-row">${poinPillsHtml}</div>
+          <strong>Pembahasan:</strong>
+          <div style="margin-top:6px;">${q.explanation}</div>
+        </div>
+      `;
+      reviewContainer.appendChild(card);
+    });
+
+    document.getElementById("res-peserta").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+    document.getElementById("res-score").textContent = `${totalSkor} / ${maxSkor}`;
+    document.getElementById("res-detail").textContent = `Dijawab: ${dijawab} | Kosong: ${kosong} | Poin Maksimal (5): ${jumlahPoin5} Soal`;
+  }
+</script>
+</body>
+</html>
