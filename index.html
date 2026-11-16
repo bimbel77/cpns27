@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Latihan & Tryout CAT</title>
+    <!-- Menggunakan Tailwind CSS untuk tata letak modern & responsif -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Inter untuk keterbacaan optimal -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f8fafc;
+        }
+        /* Animasi halus untuk perpindahan konten menu */
+        .fade-in {
+            animation: fadeIn 0.25s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(6px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col text-slate-800 antialiased selection:bg-blue-100 selection:text-blue-900">
+
+    <!-- Header / Navigasi Atas -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-10 shadow-sm">
+        <div class="max-w-3xl mx-auto px-4 py-4 flex items-center justify-between">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-600 text-white p-2 rounded-xl shadow-sm">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold text-slate-900 tracking-tight">Portal Latihan & Tryout</h1>
+                    <p class="text-xs text-slate-500">Pilih menu di bawah untuk mulai mengerjakan soal</p>
+                </div>
+            </div>
+            
+            <!-- Tombol Home cepat saat berada di dalam sub-menu -->
+            <button id="btn-home" onclick="resetToRoot()" class="hidden text-xs sm:text-sm font-medium text-blue-600 hover:text-blue-800 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition">
+                Menu Utama
+            </button>
+        </div>
+    </header>
+
+    <!-- Konten Utama -->
+    <main class="flex-grow max-w-3xl w-full mx-auto px-4 py-6 sm:py-8">
+        
+        <!-- Breadcrumb & Tombol Kembali (Muncul hanya di Sub Menu) -->
+        <div id="nav-bar" class="hidden mb-5 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-3.5 rounded-xl border border-slate-200 shadow-sm">
+            <div class="flex items-center space-x-2 text-sm text-slate-600 overflow-x-auto whitespace-nowrap">
+                <span class="font-medium text-blue-600 cursor-pointer hover:underline" onclick="resetToRoot()">Menu Utama</span>
+                <span id="breadcrumb-trail" class="flex items-center space-x-2"></span>
+            </div>
+            <button onclick="goBack()" class="inline-flex items-center justify-center space-x-1.5 text-sm font-medium text-slate-700 bg-slate-100 hover:bg-slate-200 px-3.5 py-2 rounded-lg transition w-full sm:w-auto">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                </svg>
+                <span>Kembali</span>
+            </button>
+        </div>
+
+        <!-- Judul Bagian Aktif -->
+        <div class="mb-4">
+            <h2 id="current-title" class="text-base sm:text-lg font-semibold text-slate-800">Menu Utama</h2>
+            <p id="current-subtitle" class="text-xs sm:text-sm text-slate-500 mt-0.5">Silakan pilih salah satu dari 4 kategori utama berikut:</p>
+        </div>
+
+        <!-- Wadah Daftar Menu Dinamis -->
+        <div id="menu-container" class="space-y-3 fade-in">
+            <!-- Item menu akan dirender oleh JavaScript -->
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
+        <div class="max-w-3xl mx-auto px-4 text-center text-xs text-slate-400">
+            Pastikan semua file <code class="text-slate-600 bg-slate-100 px-1 py-0.5 rounded">.html</code> berada dalam satu folder yang sama dengan <code class="text-slate-600 bg-slate-100 px-1 py-0.5 rounded">index.html</code> di GitHub.
+        </div>
+    </footer>
+
+    <!-- Logika Struktur Data & Navigasi Menu -->
+    <script>
+        /**
+         * Struktur data lengkap sesuai tabel gambar:
+         * - Jika properti `file` ada -> Langsung membuka file .html tersebut saat diklik.
+         * - Jika properti `children` ada -> Membuka daftar sub-menu di dalamnya.
+         */
+        const menuData = [
+            {
+                title: "Informasi",
+                subtitle: "Panduan, petunjuk pengerjaan, dan informasi paket soal",
+                file: "informasi_paket.html",
+                icon: "info"
+            },
+            {
+                title: "Paket Latihan",
+                subtitle: "Kumpulan soal latihan dasar untuk pemanasan",
+                icon: "book",
+                children: [
+                    {
+                        title: "Paket Latihan 1",
+                        subtitle: "Latihan soal tahap pertama",
+                        file: "latihan_1.html"
+                    },
+                    {
+                        title: "Paket Latihan 2",
+                        subtitle: "Latihan soal tahap kedua",
+                        file: "latihan_2.html"
+                    }
+                ]
+            },
+            {
+                title: "Paket Tryout Mini",
+                subtitle: "Simulasi khusus per sub-materi TWK, TIU, dan TKP",
+                icon: "layers",
+                children: [
+                    {
+                        title: "Tes Wawasan Kebangsaan (TWK)",
+                        subtitle: "4 Paket Tryout Mini TWK",
+                        children: [
+                            { title: "Tryout Mini Bhinneka Tunggal Ika", file: "twk_bhinneka_tunggal_ika.html" },
+                            { title: "Tryout Mini NKRI", file: "twk_nkri.html" },
+                            { title: "Tryout Mini Pancasila", file: "twk_pancasila.html" },
+                            { title: "Tryout Mini UUD 1945", file: "twk_uud_1945.html" }
+                        ]
+                    },
+                    {
+                        title: "Tes Intelegensi Umum (TIU)",
+                        subtitle: "10 Paket Tryout Mini TIU",
+                        children: [
+                            { title: "Tryout Mini Sinonim", file: "tiu_sinonim.html" },
+                            { title: "Tryout Mini Antonim", file: "tiu_antonim.html" },
+                            { title: "Tryout Mini Analogi", file: "tiu_analogi.html" },
+                            { title: "Tryout Mini Hitung Cepat", file: "tiu_berhitung_cepat.html" },
+                            { title: "Tryout Mini Deret Angka", file: "tiu_deret_angka.html" },
+                            { title: "Tryout Mini Deret Huruf", file: "tiu_deret_huruf.html" },
+                            { title: "Tryout Mini Geometri", file: "tiu_geometri.html" },
+                            { title: "Tryout Mini Matematika Aljabar", file: "tiu_matematika_aljabar.html" },
+                            { title: "Tryout Mini Penalaran Analitis", file: "tiu_penalaran_analitis.html" },
+                            { title: "Tryout Mini Penalaran Logis", file: "tiu_penalaran_logis.html" }
+                        ]
+                    },
+                    {
+                        title: "Tes Karakteristik Pribadi (TKP)",
+                        subtitle: "1 Paket Tryout Mini TKP",
+                        children: [
+                            { title: "Tryout Mini TKP", file: "tkp_1.html" }
+                        ]
+                    }
+                ]
+            },
+            {
+                title: "Paket Tryout Utama",
+                subtitle: "Simulasi CAT penuh (TWK + TIU + TKP)",
+                icon: "award",
+                children: [
+                    {
+                        title: "Paket Tryout Utama Paket 1",
+                        subtitle: "Simulasi CAT Lengkap Paket 1",
+                        file: "cat_tryout_1.html"
+                    },
+                    {
+                        title: "Paket Tryout Utama Paket 2",
+                        subtitle: "Simulasi CAT Lengkap Paket 2",
+                        file: "cat_tryout_2.html"
+                    },
+                    {
+                        title: "Paket Tryout Utama Paket 3",
+                        subtitle: "Simulasi CAT Lengkap Paket 3",
+                        file: "cat_tryout_3.html"
+                    },
+                    {
+                        title: "Paket Tryout Utama Paket 4",
+                        subtitle: "Simulasi CAT Lengkap Paket 4",
+                        file: "cat_tryout_4.html"
+                    }
+                ]
+            }
+        ];
+
+        // Menyimpan riwayat navigasi (stack) agar tombol "Kembali" berfungsi bertingkat
+        let navigationStack = [];
+
+        // Helper ikon SVG berdasarkan jenis menu
+        function getIconSVG(type, isFile) {
+            if (isFile) {
+                return `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>`;
+            }
+            switch (type) {
+                case 'info':
+                    return `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-sky-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>`;
+                case 'book':
+                    return `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-amber-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                    </svg>`;
+                case 'layers':
+                    return `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                    </svg>`;
+                case 'award':
+                    return `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-rose-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z" />
+                    </svg>`;
+                default:
+                    return `<svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                    </svg>`;
+            }
+        }
+
+        // Fungsi utama untuk merender daftar menu sesuai level saat ini
+        function renderMenu() {
+            const container = document.getElementById('menu-container');
+            const navBar = document.getElementById('nav-bar');
+            const btnHome = document.getElementById('btn-home');
+            const breadcrumbTrail = document.getElementById('breadcrumb-trail');
+            const currentTitle = document.getElementById('current-title');
+            const currentSubtitle = document.getElementById('current-subtitle');
+
+            // Tentukan item mana yang harus ditampilkan (Root atau Children terakhir di stack)
+            const currentItems = navigationStack.length === 0 
+                ? menuData 
+                : navigationStack[navigationStack.length - 1].children;
+
+            // Atur tampilan header navigasi & judul
+            if (navigationStack.length === 0) {
+                navBar.classList.add('hidden');
+                btnHome.classList.add('hidden');
+                currentTitle.textContent = "Menu Utama";
+                currentSubtitle.textContent = "Silakan pilih salah satu dari 4 kategori utama berikut:";
+            } else {
+                navBar.classList.remove('hidden');
+                btnHome.classList.remove('hidden');
+                
+                const activeMenu = navigationStack[navigationStack.length - 1];
+                currentTitle.textContent = activeMenu.title;
+                currentSubtitle.textContent = activeMenu.subtitle || "Pilih paket soal atau sub-menu di bawah ini:";
+
+                // Render jejak breadcrumb
+                breadcrumbTrail.innerHTML = navigationStack.map((item, idx) => {
+                    const isLast = idx === navigationStack.length - 1;
+                    return `
+                        <span class="text-slate-400">/</span>
+                        <span class="${isLast ? 'font-semibold text-slate-800' : 'text-blue-600 cursor-pointer hover:underline'}" 
+                              ${!isLast ? `onclick="jumpToLevel(${idx})"` : ''}>
+                            ${item.title}
+                        </span>
+                    `;
+                }).join('');
+            }
+
+            // Kosongkan container & reset animasi
+            container.innerHTML = '';
+            container.classList.remove('fade-in');
+            void container.offsetWidth; // trigger reflow
+            container.classList.add('fade-in');
+
+            // Buat kartu tombol untuk setiap item menu
+            currentItems.forEach((item) => {
+                const isFile = Boolean(item.file);
+                const card = document.createElement(isFile ? 'a' : 'button');
+                
+                if (isFile) {
+                    card.href = item.file;
+                } else {
+                    card.type = 'button';
+                    card.onclick = () => openSubMenu(item);
+                }
+
+                card.className = "w-full text-left bg-white hover:bg-blue-50/60 active:scale-[0.99] border border-slate-200 hover:border-blue-300 rounded-xl p-4 sm:p-5 shadow-sm hover:shadow transition-all duration-150 flex items-center justify-between group cursor-pointer";
+
+                // Badge keterangan kanan (Buka File vs Sub-menu)
+                const rightBadge = isFile
+                    ? `<span class="inline-flex items-center space-x-1 text-xs font-medium text-emerald-700 bg-emerald-50 border border-emerald-200 px-2.5 py-1 rounded-lg group-hover:bg-emerald-600 group-hover:text-white group-hover:border-emerald-600 transition">
+                        <span>Buka</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" />
+                        </svg>
+                       </span>`
+                    : `<span class="inline-flex items-center text-slate-400 group-hover:text-blue-600 transition">
+                        <span class="text-xs font-medium mr-1.5 hidden sm:inline">${item.children.length} Pilihan</span>
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform group-hover:translate-x-0.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7" />
+                        </svg>
+                       </span>`;
+
+                card.innerHTML = `
+                    <div class="flex items-center space-x-3.5 pr-3">
+                        <div class="p-2.5 rounded-xl bg-slate-50 border border-slate-100 group-hover:bg-white transition shrink-0">
+                            ${getIconSVG(item.icon, isFile)}
+                        </div>
+                        <div>
+                            <h3 class="font-semibold text-slate-800 group-hover:text-blue-700 text-sm sm:text-base transition">
+                                ${item.title}
+                            </h3>
+                            ${item.subtitle ? `<p class="text-xs text-slate-500 mt-0.5">${item.subtitle}</p>` : ''}
+                        </div>
+                    </div>
+                    <div class="shrink-0">
+                        ${rightBadge}
+                    </div>
+                `;
+
+                container.appendChild(card);
+            });
+        }
+
+        // Masuk ke sub-menu
+        function openSubMenu(item) {
+            navigationStack.push(item);
+            renderMenu();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        // Kembali 1 tingkat ke menu sebelumnya
+        function goBack() {
+            if (navigationStack.length > 0) {
+                navigationStack.pop();
+                renderMenu();
+            }
+        }
+
+        // Lompat ke level tertentu via breadcrumb
+        function jumpToLevel(index) {
+            navigationStack = navigationStack.slice(0, index + 1);
+            renderMenu();
+        }
+
+        // Kembali langsung ke 4 menu awal
+        function resetToRoot() {
+            navigationStack = [];
+            renderMenu();
+        }
+
+        // Inisialisasi tampilan saat halaman dimuat
+        document.addEventListener('DOMContentLoaded', renderMenu);
+    </script>
+</body>
+</html>
