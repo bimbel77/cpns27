@@ -379,35 +379,75 @@
             });
         }
 
+        // Helper untuk mencari jalur menu berdasarkan daftar judul (untuk sinkronisasi tombol back HP)
+        function findMenuPathByTitles(titles) {
+            let path = [];
+            let currentList = menuData;
+            for (const title of titles) {
+                const found = currentList.find(item => item.title === title);
+                if (found && found.children) {
+                    path.push(found);
+                    currentList = found.children;
+                } else {
+                    break;
+                }
+            }
+            return path;
+        }
+
         // Masuk ke sub-menu
         function openSubMenu(item) {
             navigationStack.push(item);
             renderMenu();
             window.scrollTo({ top: 0, behavior: 'smooth' });
+            // Simpan state navigasi ke riwayat browser agar tombol back HP bisa menangkapnya
+            history.pushState({ stackTitles: navigationStack.map(i => i.title) }, "");
         }
 
         // Kembali 1 tingkat ke menu sebelumnya
         function goBack() {
             if (navigationStack.length > 0) {
-                navigationStack.pop();
-                renderMenu();
+                // Gunakan history.back() agar riwayat browser tetap sinkron dengan tampilan
+                history.back();
             }
         }
 
         // Lompat ke level tertentu via breadcrumb
         function jumpToLevel(index) {
-            navigationStack = navigationStack.slice(0, index + 1);
-            renderMenu();
+            const stepsBack = (navigationStack.length - 1) - index;
+            if (stepsBack > 0) {
+                history.go(-stepsBack);
+            }
         }
 
         // Kembali langsung ke 4 menu awal
         function resetToRoot() {
-            navigationStack = [];
-            renderMenu();
+            if (navigationStack.length > 0) {
+                history.go(-navigationStack.length);
+            }
         }
 
+        // Menangani tombol Kembali (Back) fisik/gestur pada HP / Browser
+        window.addEventListener('popstate', function(event) {
+            if (event.state && Array.isArray(event.state.stackTitles)) {
+                // Jika ada riwayat sub-menu sebelumnya, kembalikan tampilan ke level tersebut
+                navigationStack = findMenuPathByTitles(event.state.stackTitles);
+                renderMenu();
+            } else {
+                // Jika sudah berada di Menu Utama (root), tahan agar tidak langsung keluar dari aplikasi
+                navigationStack = [];
+                renderMenu();
+                history.pushState({ stackTitles: [] }, "");
+            }
+        });
+
         // Inisialisasi tampilan saat halaman dimuat
-        document.addEventListener('DOMContentLoaded', renderMenu);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Pasang state awal dan buffer riwayat agar tombol back pertama kali di HP tidak menutup aplikasi
+            history.replaceState({ stackTitles: [] }, "");
+            history.pushState({ stackTitles: [] }, "");
+            renderMenu();
+        });
     </script>
 </body>
 </html>
