@@ -77,13 +77,6 @@
 
     </main>
 
-    <!-- Footer -->
-    <footer class="bg-white border-t border-slate-200 py-4 mt-auto">
-        <div class="max-w-3xl mx-auto px-4 text-center text-xs text-slate-400">
-            Pastikan semua file <code class="text-slate-600 bg-slate-100 px-1 py-0.5 rounded">.html</code> berada dalam satu folder yang sama dengan <code class="text-slate-600 bg-slate-100 px-1 py-0.5 rounded">index.html</code> di GitHub.
-        </div>
-    </footer>
-
     <!-- Logika Struktur Data & Navigasi Menu -->
     <script>
         /**
@@ -104,14 +97,80 @@
                 icon: "book",
                 children: [
                     {
-                        title: "Paket Latihan 1",
-                        subtitle: "Latihan soal tahap pertama",
+                        title: "Gratis Latihan TWK TKP TIU 100 Nomor",
+                        file: "Latihan Soal Gratis.html"
+                    },
+                    {
+                        title: "Latihan Mini TWK (Bhinneka Tunggal Ika)",
+                        file: "twk_latihan_bhinneka_tunggal_ika.html"
+                    },
+                    {
+                        title: "Latihan Mini TWK (NKRI)",
+                        file: "twk_latihan_nkri.html"
+                    },
+                    {
+                        title: "Latihan Mini TWK (Pancasila)",
+                        file: "twk_latihan_pancasila_50_soal.html"
+                    },
+                    {
+                        title: "Latihan Mini TWK (UUD 1945)",
+                        file: "twk_latihan_uud_1945_50_soal.html"
+                    },
+                    {
+                        title: "Latihan Mini TIU (Analogi)",
+                        file: "tiu_latihan_interaktif_tiu_analogi.html"
+                    },
+                    {
+                        title: "Latihan Mini TIU (Antonim)",
+                        file: "tiu_latihan_interaktif_tiu_antonim.html"
+                    },
+                    {
+                        title: "Latihan Mini TIU (Berhitung Cepat)",
+                        file: "tiu_latihan_interaktif_tiu_berhitung_cepat.html"
+                    },
+                    {
+                        title: "Latihan Mini TIU (Deret Angka)",
+                        file: "tiu_latihan_interaktif_tiu_deret_angka.html"
+                    },
+                    {
+                        title: "Latihan Mini TIU (Deret Huruf)",
+                        file: "tiu_latihan_interaktif_tiu_deret_huruf.html"
+                    },
+                    {
+                        title: "Latihan Mini TIU (Matematika Aljabar)",
+                        file: "tiu_latihan_interaktif_tiu_matematika_aljabar.html"
+                    },
+                    {
+                        title: "Latihan Mini TIU (Matematika Geometri)",
+                        file: "tiu_latihan_interaktif_tiu_matematika_geometri.html"
+                    },
+                    {
+                        title: "Latihan Mini TIU (Penalaran Analitis)",
+                        file: "tiu_latihan_interaktif_tiu_penalaran_analitis.html"
+                    },
+                    {
+                        title: "Latihan Mini TIU (Penalaran Logis)",
+                        file: "tiu_latihan_interaktif_tiu_penalaran_logis.html"
+                    },
+                    {
+                        title: "Latihan Mini TIU (Sinonim)",
+                        file: "tiu_latihan_interaktif_tiu_sinonim.html"
+                    },
+                    {
+                        title: "Latihan Mini TKP 50 Soal",
+                        file: "tkp_latihan_50_soal.html"
+                    },
+                    {
+                        title: "Latihan TWK TKP TIU 100 Nomor I",
                         file: "latihan_1.html"
                     },
                     {
-                        title: "Paket Latihan 2",
-                        subtitle: "Latihan soal tahap kedua",
+                        title: "Latihan TWK TKP TIU 100 Nomor II",
                         file: "latihan_2.html"
+                    },
+                    {
+                        title: "Latihan TWK TKP TIU 100 Nomor III",
+                        file: "latihan_3.html"
                     }
                 ]
             },
@@ -161,6 +220,11 @@
                 icon: "award",
                 children: [
                     {
+                        title: "Gratis Paket Tryout TWK TIU TKP 100 Nomor",
+                        subtitle: "Simulasi CAT Gratis 100 Soal",
+                        file: "tryout_gratis_cpns_versi_cat.html"
+                    },
+                    {
                         title: "Paket Tryout Utama Paket 1",
                         subtitle: "Simulasi CAT Lengkap Paket 1",
                         file: "cat_tryout_1.html"
@@ -186,24 +250,6 @@
 
         // Menyimpan riwayat navigasi (stack) agar tombol "Kembali" berfungsi bertingkat
         let navigationStack = [];
-        let isHandlingPopState = false;
-
-        // Menyelaraskan state history browser dengan kedalaman navigationStack
-        function syncHistoryState() {
-            if (isHandlingPopState) return;
-            const depth = navigationStack.length;
-            const currentDepth = history.state && typeof history.state.menuDepth === 'number'
-                ? history.state.menuDepth
-                : 0;
-
-            if (depth > currentDepth) {
-                for (let i = currentDepth + 1; i <= depth; i++) {
-                    history.pushState({ menuDepth: i }, '', '#menu-' + i);
-                }
-            } else if (depth < currentDepth) {
-                history.go(depth - currentDepth);
-            }
-        }
 
         // Helper ikon SVG berdasarkan jenis menu
         function getIconSVG(type, isFile) {
@@ -331,8 +377,6 @@
 
                 container.appendChild(card);
             });
-
-            syncHistoryState();
         }
 
         // Masuk ke sub-menu
@@ -362,29 +406,8 @@
             renderMenu();
         }
 
-        // Menangani tombol Back fisik / gestur di HP
-        window.addEventListener('popstate', function(event) {
-            const targetDepth = event.state && typeof event.state.menuDepth === 'number'
-                ? event.state.menuDepth
-                : 0;
-
-            isHandlingPopState = true;
-            if (targetDepth < navigationStack.length) {
-                navigationStack = navigationStack.slice(0, targetDepth);
-                renderMenu();
-            } else if (targetDepth > navigationStack.length) {
-                // Jika maju melalui history, sesuaikan atau tetap aman di batas stack
-                navigationStack = navigationStack.slice(0, Math.min(targetDepth, navigationStack.length));
-                renderMenu();
-            }
-            isHandlingPopState = false;
-        });
-
         // Inisialisasi tampilan saat halaman dimuat
-        document.addEventListener('DOMContentLoaded', function() {
-            history.replaceState({ menuDepth: 0 }, '', window.location.pathname + window.location.search);
-            renderMenu();
-        });
+        document.addEventListener('DOMContentLoaded', renderMenu);
     </script>
 </body>
 </html>
