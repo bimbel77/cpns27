@@ -1,0 +1,1260 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KUIS INTERAKTIF - TIU MATEMATIKA ALJABAR (30 SOAL)</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+      --success-bg: #dcfce7;
+      --warning: #eab308;
+      --warning-bg: #fef9c3;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --danger-bg: #fee2e2;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); line-height: 1.6; }
+
+    /* Login Screen */
+    #login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .login-box {
+      background: var(--card); padding: 35px; border-radius: 12px; width: 100%; max-width: 420px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+    .login-box h2 { text-align: center; color: var(--primary); margin-bottom: 5px; }
+    .login-box p { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 25px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+    .form-group input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;
+    }
+    .btn {
+      display: inline-block; padding: 10px 18px; border: none; border-radius: 6px; font-size: 0.95rem;
+      font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; text-decoration: none;
+    }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-primary { background: var(--primary); color: white; width: 100%; }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+    .btn-logout {
+      background: var(--danger); color: white; padding: 7px 14px; font-size: 0.85rem;
+    }
+    .btn-logout:hover { background: var(--danger-hover); }
+    .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 10px; text-align: center; display: none; }
+
+    .register-link-box {
+      margin-top: 18px; padding-top: 15px; border-top: 1px solid #e2e8f0;
+      text-align: center; font-size: 0.9rem; color: var(--muted);
+    }
+    .register-link-box a {
+      color: var(--primary); font-weight: 700; text-decoration: none;
+    }
+    .register-link-box a:hover {
+      text-decoration: underline; color: var(--primary-hover);
+    }
+
+    /* Header Kuis */
+    header {
+      background: var(--primary); color: white; padding: 15px 25px; display: flex;
+      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header-title h1 { font-size: 1.2rem; }
+    .header-info { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .live-score-pill {
+      background: rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 6px;
+      font-weight: 700; font-size: 0.95rem;
+    }
+
+    /* Main Container */
+    #exam-screen, #result-screen { display: none; max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+    .exam-layout { display: grid; grid-template-columns: 1fr 310px; gap: 20px; }
+    @media (max-width: 850px) { .exam-layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card); border-radius: 10px; padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
+    }
+
+    /* Soal Area */
+    .question-header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+      border-bottom: 2px solid var(--bg); padding-bottom: 12px; margin-bottom: 18px;
+    }
+    .badge-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .badge-no { background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
+    .badge-subtes { background: #e0e7ff; color: #1e40af; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 0.82rem; }
+    .question-text { font-size: 1.05rem; margin-bottom: 18px; }
+
+    /* Opsi Jawaban */
+    .options-list { display: flex; flex-direction: column; gap: 10px; }
+    .option-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 15px;
+      border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; transition: 0.15s;
+    }
+    .option-left { display: flex; align-items: center; gap: 12px; }
+    .option-item:hover:not(.locked) { background: #f8fafc; border-color: var(--primary); }
+    .option-item.selected { background: #eff6ff; border-color: var(--primary); font-weight: 600; }
+    .option-item.locked { cursor: default; }
+
+    /* Status Visual Setelah Cek Jawaban */
+    .option-item.opt-correct {
+      background: var(--success-bg); border-color: var(--success); color: #14532d; font-weight: 600;
+    }
+    .option-item.opt-wrong {
+      background: var(--danger-bg); border-color: var(--danger); color: #7f1d1d; font-weight: 600;
+    }
+
+    .option-letter {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+    }
+    .option-item.selected .option-letter { background: var(--primary); color: white; }
+    .option-item.opt-correct .option-letter { background: var(--success); color: white; }
+    .option-item.opt-wrong .option-letter { background: var(--danger); color: white; }
+
+    .opt-tag {
+      font-size: 0.78rem; font-weight: 700; padding: 3px 9px; border-radius: 12px; flex-shrink: 0;
+    }
+    .tag-correct { background: var(--success); color: white; }
+    .tag-wrong { background: var(--danger); color: white; }
+
+    /* Kotak Feedback & Pembahasan Langsung */
+    .instant-feedback {
+      margin-top: 20px; padding: 18px; border-radius: 10px; border-left: 5px solid var(--primary);
+      background: #f8fafc; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .instant-feedback.fb-correct { border-left-color: var(--success); background: #f0fdf4; }
+    .instant-feedback.fb-wrong { border-left-color: var(--danger); background: #fef2f2; }
+
+    .fb-header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+      margin-bottom: 10px; font-weight: 700; font-size: 1.02rem;
+    }
+    .fb-body { font-size: 0.95rem; color: var(--text); }
+
+    /* Visual & Tabel Matematika */
+    .diagram-scroll {
+      overflow-x: auto;
+      margin: 10px 0 8px 0;
+      padding: 8px;
+      background: #ffffff;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+    .math-table {
+      width: 100%; border-collapse: collapse; font-size: 0.9rem; margin: 4px 0;
+    }
+    .math-table th, .math-table td {
+      border: 1px solid #cbd5e1; padding: 6px 10px; text-align: center;
+    }
+    .math-table th {
+      background: #eff6ff; color: var(--primary); font-weight: 700;
+    }
+    .frac {
+      display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; font-size: 0.88em; margin: 0 2px;
+    }
+    .frac span:first-child { border-bottom: 1px solid currentColor; padding: 0 3px; }
+    .frac span:last-child { padding: 0 3px; }
+
+    /* Navigasi Bawah Soal */
+    .nav-actions {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 25px;
+      padding-top: 15px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;
+    }
+    .center-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-nav { background: #e2e8f0; color: var(--text); }
+    .btn-nav:hover:not(:disabled) { background: #cbd5e1; }
+    .btn-check { background: #0284c7; color: white; }
+    .btn-check:hover:not(:disabled) { background: #0369a1; }
+    .btn-ragu { background: var(--warning); color: #000; }
+    .btn-finish { background: var(--success); color: white; width: 100%; margin-top: 15px; }
+    .btn-finish:hover { background: #15803d; }
+
+    /* Grid Nomor Soal */
+    .grid-numbers {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px;
+      max-height: 360px; overflow-y: auto; padding-right: 4px;
+    }
+    .num-btn {
+      padding: 8px 0; border: 1px solid var(--border); border-radius: 6px;
+      background: white; font-weight: 600; cursor: pointer; text-align: center;
+    }
+    .num-btn.active { outline: 2.5px solid var(--primary); outline-offset: -2px; }
+    .num-btn.selected-only { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
+    .num-btn.checked-correct { background: var(--success); color: white; border-color: var(--success); }
+    .num-btn.checked-wrong { background: var(--danger); color: white; border-color: var(--danger); }
+    .num-btn.doubt { background: #f59e0b; color: white; border-color: #d97706; }
+
+    .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.78rem; margin-top: 15px; }
+    .legend span { display: flex; align-items: center; gap: 6px; }
+    .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; flex-shrink: 0; }
+
+    /* Result & Pembahasan */
+    .score-banner {
+      text-align: center; padding: 30px; background: linear-gradient(135deg, #1e40af, #3b82f6);
+      color: white; border-radius: 12px; margin-bottom: 25px;
+    }
+    .score-big { font-size: 3rem; font-weight: bold; margin: 10px 0; }
+    .subtes-score-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; text-align: center;
+    }
+    @media (max-width: 700px) { .subtes-score-grid { grid-template-columns: 1fr; } }
+    .subtes-box {
+      background: rgba(255, 255, 255, 0.14); padding: 15px; border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .subtes-box h4 { font-size: 0.9rem; margin-bottom: 5px; opacity: 0.95; }
+    .subtes-box .sub-val { font-size: 1.7rem; font-weight: 800; }
+    .subtes-box .sub-detail { font-size: 0.82rem; opacity: 0.9; margin-top: 4px; }
+
+    .result-actions {
+      display: flex; justify-content: center; gap: 12px; margin-top: 20px; flex-wrap: wrap;
+    }
+    .filter-bar {
+      display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 7px 14px; border-radius: 20px; border: 1px solid var(--border);
+      background: white; font-weight: 600; font-size: 0.88rem; cursor: pointer;
+    }
+    .filter-btn.active {
+      background: var(--primary); color: white; border-color: var(--primary);
+    }
+
+    .review-card { margin-bottom: 20px; border-left: 5px solid var(--border); }
+    .review-card.correct { border-left-color: var(--success); }
+    .review-card.wrong { border-left-color: var(--danger); }
+    .pembahasan-box {
+      background: #f8fafc; padding: 15px; border-radius: 8px; margin-top: 12px;
+      border: 1px dashed #94a3b8; font-size: 0.95rem;
+    }
+
+    /* Custom Modal Dialog */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6); display: none; align-items: center;
+      justify-content: center; z-index: 999; padding: 20px;
+    }
+    .modal-card {
+      background: white; padding: 25px; border-radius: 12px; max-width: 400px;
+      width: 100%; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .modal-card h3 { color: var(--primary); margin-bottom: 10px; }
+    .modal-card p { color: var(--text); font-size: 0.95rem; margin-bottom: 20px; }
+    .modal-btns { display: flex; gap: 10px; justify-content: center; }
+  </style>
+</head>
+<body>
+
+  <!-- HALAMAN LOGIN -->
+  <div id="login-screen">
+    <div class="login-box">
+      <h2>Portal Kuis Interaktif CAT</h2>
+      <p>Subtes TIU: Matematika Aljabar (30 Soal + Cek Jawaban)</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Username/Email</label>
+          <input type="text" id="username" required placeholder="Masukkan username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="Masukkan password">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-login">Mulai Kuis</button>
+        <div class="error-msg" id="login-error"></div>
+        <div class="register-link-box">
+          Belum punya akun? <a href="http://lynk.id/seputar_guru/4g73189dndge/checkout" target="_blank" rel="noopener noreferrer">Daftar di sini</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- HALAMAN KUIS INTERAKTIF -->
+  <div id="exam-screen">
+    <header>
+      <div class="header-title">
+        <h1>KUIS TIU - MATEMATIKA ALJABAR (30 SOAL)</h1>
+        <small id="peserta-info">Peserta: -</small>
+      </div>
+      <div class="header-info">
+        <div class="live-score-pill" id="live-score-pill">Skor Terkumpul: 0</div>
+        <button type="button" class="btn btn-logout" onclick="confirmLogout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="exam-layout" style="margin-top: 20px;">
+      <!-- Kolom Kiri: Soal & Cek Jawaban -->
+      <div class="card">
+        <div class="question-header">
+          <div class="badge-group">
+            <span class="badge-no" id="q-number">Soal No. 1</span>
+            <span class="badge-subtes" id="q-subtes">TIU - Matematika Aljabar</span>
+          </div>
+          <span id="q-status" style="font-size: 0.85rem; font-weight: 600; color: var(--muted);">Belum dijawab</span>
+        </div>
+
+        <div class="question-text" id="q-text"></div>
+        <div class="options-list" id="q-options"></div>
+
+        <!-- Area Hasil Cek Jawaban & Pembahasan Langsung -->
+        <div id="instant-feedback-container"></div>
+
+        <div class="nav-actions">
+          <button class="btn btn-nav" id="btn-prev" onclick="prevQuestion()">&laquo; Sebelumnya</button>
+          <div class="center-actions">
+            <button class="btn btn-check" id="btn-check" onclick="checkCurrentAnswer()" disabled>✔ Cek Jawaban</button>
+            <button class="btn btn-ragu" id="btn-doubt" onclick="toggleDoubt()">Ragu-Ragu</button>
+          </div>
+          <button class="btn btn-nav" id="btn-next" onclick="nextQuestion()">Selanjutnya &raquo;</button>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Navigasi Nomor -->
+      <div class="card">
+        <h3>Navigasi Kuis</h3>
+        <p style="font-size: 0.78rem; color: var(--muted); margin-top: 4px;">Subtes TIU: Matematika Aljabar (30 Soal)</p>
+        <div class="grid-numbers" id="number-grid"></div>
+        <div class="legend">
+          <span><i class="dot" style="background: var(--success);"></i> Benar (+5 Poin)</span>
+          <span><i class="dot" style="background: var(--danger);"></i> Salah (0 Poin)</span>
+          <span><i class="dot" style="background: #dbeafe; border: 1px solid #93c5fd;"></i> Belum Dicek</span>
+          <span><i class="dot" style="background: #f59e0b;"></i> Ragu-Ragu</span>
+          <span><i class="dot" style="background: #fff; border: 1px solid #cbd5e1;"></i> Kosong</span>
+        </div>
+        <button class="btn btn-finish" onclick="confirmFinish()">Selesai & Rekap Nilai</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN HASIL & PEMBAHASAN -->
+  <div id="result-screen">
+    <div class="score-banner">
+      <h2>Rekap Hasil Kuis TIU Matematika Aljabar</h2>
+      <p id="res-peserta"></p>
+      <div class="score-big" id="res-total-score">Total Skor: 0 / 150</div>
+      <p id="res-detail">Benar: 0 | Salah: 0 | Kosong: 0</p>
+
+      <!-- Ringkasan Statistik Hasil -->
+      <div class="subtes-score-grid">
+        <div class="subtes-box">
+          <h4>Skor Sistem CAT (+5 / Benar)</h4>
+          <div class="sub-val" id="score-cat">0 / 150</div>
+          <div class="sub-detail" id="detail-cat">Benar: 0 dari 30 Soal</div>
+        </div>
+        <div class="subtes-box">
+          <h4>Nilai Skala 100</h4>
+          <div class="sub-val" id="score-100">0 / 100</div>
+          <div class="sub-detail" id="detail-100">Persentase Ketepatan: 0%</div>
+        </div>
+        <div class="subtes-box">
+          <h4>Status Pengerjaan</h4>
+          <div class="sub-val" id="score-answered">0 / 30</div>
+          <div class="sub-detail" id="detail-answered">Salah: 0 | Kosong: 30</div>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn" style="background: white; color: var(--primary);" onclick="retryExam()">Ulangi Kuis</button>
+        <button class="btn btn-logout" onclick="logoutUser()">Logout</button>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
+      <h3>Kunci Jawaban & Pembahasan Lengkap</h3>
+      <div class="filter-bar" id="filter-bar">
+        <button class="filter-btn active" onclick="filterReview('ALL', this)">Semua (30)</button>
+        <button class="filter-btn" onclick="filterReview('CORRECT', this)">Benar</button>
+        <button class="filter-btn" onclick="filterReview('WRONG', this)">Salah</button>
+        <button class="filter-btn" onclick="filterReview('EMPTY', this)">Kosong</button>
+      </div>
+    </div>
+    <div id="review-container"></div>
+  </div>
+
+  <!-- CUSTOM MODAL -->
+  <div class="modal-overlay" id="custom-modal">
+    <div class="modal-card">
+      <h3 id="modal-title">Konfirmasi</h3>
+      <p id="modal-message">Pesan konfirmasi</p>
+      <div class="modal-btns" id="modal-buttons"></div>
+    </div>
+  </div>
+
+<script>
+  // =========================================================================
+  // URL GOOGLE APPS SCRIPT ANDA YANG AKTIF
+  // =========================================================================
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxB6Th7GHlD9o8ABbYcK2mdV7mv4ufy2i-SYXUg3jVqS0Q1bkXa_pkseMhqmIzgCTx7/exec";
+
+  // =========================================================================
+  // BANK SOAL, KUNCI JAWABAN & PEMBAHASAN (30 SOAL MATEMATIKA ALJABAR)
+  // =========================================================================
+  const questions = [
+    {
+      no: 1,
+      text: "Dari kota Jakarta ke Semarang terdapat 4 jalur angkutan yang dapat dipilih, sedangkan dari Semarang ke Madiun terdapat 3 jalur angkutan. Banyaknya pilihan jalur angkutan yang dapat ditempuh dari Jakarta menuju Madiun melalui Semarang adalah ....",
+      options: {
+        A: "7 cara",
+        B: "9 cara",
+        C: "10 cara",
+        D: "12 cara",
+        E: "15 cara"
+      },
+      answer: "D",
+      visual: `<svg width="360" height="75" viewBox="0 0 360 75" xmlns="http://www.w3.org/2000/svg">
+        <rect x="10" y="20" width="85" height="34" rx="6" fill="#eff6ff" stroke="#1e40af" stroke-width="1.5"/>
+        <text x="52" y="42" text-anchor="middle" font-size="12" font-weight="700" fill="#1e40af">Jakarta</text>
+        <path d="M 95 28 Q 135 12 175 28" fill="none" stroke="#0f172a" stroke-width="1.4"/>
+        <path d="M 95 34 Q 135 24 175 34" fill="none" stroke="#0f172a" stroke-width="1.4"/>
+        <path d="M 95 40 Q 135 50 175 40" fill="none" stroke="#0f172a" stroke-width="1.4"/>
+        <path d="M 95 46 Q 135 62 175 46" fill="none" stroke="#0f172a" stroke-width="1.4"/>
+        <text x="135" y="13" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">4 jalur</text>
+        <rect x="175" y="20" width="90" height="34" rx="6" fill="#eff6ff" stroke="#1e40af" stroke-width="1.5"/>
+        <text x="220" y="42" text-anchor="middle" font-size="12" font-weight="700" fill="#1e40af">Semarang</text>
+        <path d="M 265 30 Q 295 16 325 30" fill="none" stroke="#0f172a" stroke-width="1.4"/>
+        <line x1="265" y1="37" x2="325" y2="37" stroke="#0f172a" stroke-width="1.4"/>
+        <path d="M 265 44 Q 295 58 325 44" fill="none" stroke="#0f172a" stroke-width="1.4"/>
+        <text x="295" y="14" text-anchor="middle" font-size="11" font-weight="700" fill="#0f172a">3 jalur</text>
+        <rect x="325" y="20" width="30" height="34" rx="6" fill="#1e40af"/>
+        <text x="340" y="41" text-anchor="middle" font-size="10" font-weight="700" fill="#ffffff">Mdn</text>
+      </svg>`,
+      explanation: "Menggunakan aturan perkalian:<br>= (Jakarta &ndash; Semarang) &times; (Semarang &ndash; Madiun)<br>= 4 &times; 3 = <strong>12 cara</strong>."
+    },
+    {
+      no: 2,
+      text: "Dari kota Cilacap ke Jakarta terdapat 6 pilihan kendaraan, dan dari Jakarta ke Makassar terdapat 4 pilihan kendaraan. Jika seseorang melakukan perjalanan dari Cilacap ke Makassar melalui Jakarta lalu kembali lagi ke Cilacap dengan syarat tidak boleh menggunakan kendaraan yang sama saat pulang, banyaknya cara perjalanan pergi-pulang adalah ....",
+      options: {
+        A: "120 cara",
+        B: "240 cara",
+        C: "300 cara",
+        D: "360 cara",
+        E: "576 cara"
+      },
+      answer: "D",
+      visual: `<table class="math-table">
+        <tr><th>Rute Pergi</th><th>Pilihan</th><th>Rute Pulang (Tak Sama)</th><th>Pilihan</th></tr>
+        <tr><td>Cilacap &rarr; Jakarta</td><td>6 cara</td><td>Makassar &rarr; Jakarta</td><td>4 &minus; 1 = 3 cara</td></tr>
+        <tr><td>Jakarta &rarr; Makassar</td><td>4 cara</td><td>Jakarta &rarr; Cilacap</td><td>6 &minus; 1 = 5 cara</td></tr>
+      </table>`,
+      explanation: "Banyak cara perjalanan Cilacap &ndash; Makassar pergi pulang tanpa menggunakan kendaraan yang sama:<br>= Pergi &times; Pulang<br>= (6 &times; 4) &times; (3 &times; 5) = 24 &times; 15 = <strong>360 cara</strong>."
+    },
+    {
+      no: 3,
+      text: "Dari angka-angka 1, 2, 3, 4, 5, dan 6 akan disusun bilangan ratusan yang nilainya lebih dari 200 tanpa ada angka yang berulang. Banyaknya bilangan yang dapat terbentuk adalah ....",
+      options: {
+        A: "80 bilangan",
+        B: "96 bilangan",
+        C: "100 bilangan",
+        D: "120 bilangan",
+        E: "150 bilangan"
+      },
+      answer: "A",
+      visual: `<table class="math-table">
+        <tr><th>Posisi Ratusan (&gt;200)</th><th>Posisi Puluhan</th><th>Posisi Satuan</th></tr>
+        <tr><td>Angka {2, 3, 4, 5} &rarr; <strong>4</strong> pilihan</td><td>Sisa angka &rarr; <strong>5</strong> pilihan</td><td>Sisa angka &rarr; <strong>4</strong> pilihan</td></tr>
+      </table>`,
+      explanation: "Ratusan lebih dari 200 memiliki 4 pilihan angka (2, 3, 4, 5). Dengan aturan pengisian tempat (aturan perkalian):<br>= 4 &times; 5 &times; 4 = <strong>80 bilangan</strong>."
+    },
+    {
+      no: 4,
+      text: "Dalam suatu acara pertemuan terdapat 30 orang tamu undangan. Jika setiap tamu saling berjabat tangan satu sama lain tepat satu kali, banyaknya jabat tangan yang terjadi seluruhnya adalah ....",
+      options: {
+        A: "290",
+        B: "300",
+        C: "405",
+        D: "420",
+        E: "435"
+      },
+      answer: "E",
+      explanation: "Banyak tamu = 30. Jabat tangan antara A dan B sama dengan B dan A (AB = BA), sehingga menggunakan kombinasi C(30, 2):<br>C(30, 2) = 30! / (2! &times; 28!) = (29 &times; 30) / 2 = 29 &times; 15 = <strong>435</strong>."
+    },
+    {
+      no: 5,
+      text: "Pada percobaan pelemparan sebuah dadu bermata enam sebanyak satu kali, peluang munculnya mata dadu bernomor genap adalah ....",
+      options: {
+        A: "1/6",
+        B: "1/4",
+        C: "1/3",
+        D: "1/2",
+        E: "2/3"
+      },
+      answer: "D",
+      explanation: "Ruang sampel S = {1, 2, 3, 4, 5, 6} &rArr; n(S) = 6.<br>Kejadian mata dadu genap A = {2, 4, 6} &rArr; n(A) = 3.<br>Peluang P(A) = n(A) / n(S) = 3 / 6 = <strong>1/2</strong>."
+    },
+    {
+      no: 6,
+      text: "Sebuah sepeda motor dijual dengan harga Rp15.400.000,00. Dari hasil penjualan tersebut, pedagang memperoleh keuntungan sebesar 10%. Harga beli sepeda motor tersebut adalah ....",
+      options: {
+        A: "Rp13.500.000,00",
+        B: "Rp13.860.000,00",
+        C: "Rp13.900.000,00",
+        D: "Rp14.000.000,00",
+        E: "Rp14.200.000,00"
+      },
+      answer: "D",
+      explanation: "%Untung = [(Harga Jual &minus; Harga Beli) / Harga Beli] &times; 100%<br>10% = [(15.400.000 &minus; Harga Beli) / Harga Beli] &times; 100%<br>Harga Beli = 10 &times; (15.400.000 &minus; Harga Beli)<br>11 &times; Harga Beli = 154.000.000 &rArr; Harga Beli = <strong>Rp14.000.000,00</strong>."
+    },
+    {
+      no: 7,
+      text: "Seorang karyawan memperoleh penghasilan sebesar Rp2.000.000,00 per bulan dengan penghasilan tidak kena pajak sebesar Rp1.000.000,00. Jika pajak penghasilan (PPh) dikenakan sebesar 12%, besar penghasilan bersih yang diterima karyawan tersebut adalah ....",
+      options: {
+        A: "Rp1.760.000,00",
+        B: "Rp1.800.000,00",
+        C: "Rp1.850.000,00",
+        D: "Rp1.880.000,00",
+        E: "Rp1.900.000,00"
+      },
+      answer: "D",
+      explanation: "Penghasilan kena pajak = Rp2.000.000,00 &minus; Rp1.000.000,00 = Rp1.000.000,00.<br>Pajak penghasilan = 12% &times; Rp1.000.000,00 = Rp120.000,00.<br>Penghasilan bersih = Rp2.000.000,00 &minus; Rp120.000,00 = <strong>Rp1.880.000,00</strong>."
+    },
+    {
+      no: 8,
+      text: "Ibu meminjam uang di koperasi sebesar Rp1.000.000,00 dengan bunga tunggal 16% per tahun. Jika pinjaman tersebut akan dilunasi dalam waktu 6 bulan dengan angsuran yang sama setiap bulannya, besar angsuran per bulan adalah ....",
+      options: {
+        A: "Rp160.000,00",
+        B: "Rp175.000,00",
+        C: "Rp180.000,00",
+        D: "Rp185.000,00",
+        E: "Rp190.000,00"
+      },
+      answer: "C",
+      explanation: "Bunga 6 bulan = (16% / 12) &times; 6 &times; Rp1.000.000,00 = Rp80.000,00.<br>Total pinjaman = Rp1.000.000,00 + Rp80.000,00 = Rp1.080.000,00.<br>Besar angsuran per bulan = Rp1.080.000,00 / 6 = <strong>Rp180.000,00</strong>."
+    },
+    {
+      no: 9,
+      text: "Besar potongan premi asuransi 4% dari gaji Sella yang sebesar Rp3.000.000,00 ternyata sama besarnya dengan potongan premi asuransi 6% dari gaji Broto. Besar gaji Broto adalah ....",
+      options: {
+        A: "Rp1.500.000,00",
+        B: "Rp1.750.000,00",
+        C: "Rp1.800.000,00",
+        D: "Rp2.000.000,00",
+        E: "Rp2.500.000,00"
+      },
+      answer: "D",
+      explanation: "Premi gaji Sella = Premi gaji Broto<br>4% &times; 3.000.000 = 6% &times; X<br>X = (4% &times; 3.000.000) / 6% = 12.000.000 / 6 = <strong>Rp2.000.000,00</strong>."
+    },
+    {
+      no: 10,
+      text: "Seorang pedagang membeli beberapa ekor sapi dengan harga total Rp45.000.000,00, kemudian menjual semuanya dengan harga Rp52.000.000,00. Jika keuntungan yang diperoleh dari setiap ekor sapi adalah Rp700.000,00, banyaknya sapi yang dibeli dan dijual pedagang tersebut adalah ....",
+      options: {
+        A: "7 ekor",
+        B: "8 ekor",
+        C: "9 ekor",
+        D: "10 ekor",
+        E: "12 ekor"
+      },
+      answer: "D",
+      explanation: "Total untung = Harga Jual &minus; Harga Beli = Rp52.000.000,00 &minus; Rp45.000.000,00 = Rp7.000.000,00.<br>Banyak sapi = Total untung / Untung per ekor = Rp7.000.000,00 / Rp700.000,00 = <strong>10 ekor</strong>."
+    },
+    {
+      no: 11,
+      text: "Sebuah kendaraan menempuh jarak 20 km dalam waktu 30 menit. Dengan kecepatan yang sama, waktu yang diperlukan kendaraan tersebut untuk menempuh jarak 140 km adalah ....",
+      options: {
+        A: "2,5 jam",
+        B: "3,0 jam",
+        C: "3,2 jam",
+        D: "3,5 jam",
+        E: "4,0 jam"
+      },
+      answer: "D",
+      explanation: "Menggunakan perbandingan senilai:<br>20 / 140 = 30 / x<br>x = (30 &times; 140) / 20 = 210 menit.<br>Konversi ke jam: 210 menit / 60 = <strong>3,5 jam</strong>."
+    },
+    {
+      no: 12,
+      text: "Suatu proyek pembangunan direncanakan selesai dalam waktu 9 hari oleh 16 orang pekerja. Sebelum pekerjaan dimulai, 4 orang pekerja sakit sehingga tidak dapat bekerja. Persentase tambahan hari kerja yang dibutuhkan untuk menyelesaikan proyek tersebut adalah ....",
+      options: {
+        A: "25%",
+        B: "30%",
+        C: "33,33%",
+        D: "40%",
+        E: "50%"
+      },
+      answer: "C",
+      explanation: "Sisa pekerja = 16 &minus; 4 = 12 orang. Menggunakan perbandingan berbalik nilai:<br>16 / 12 = x / 9 &rArr; x = (16 &times; 9) / 12 = 12 hari.<br>Tambahan hari kerja = 12 &minus; 9 = 3 hari.<br>Persentase tambahan = (3 / 9) &times; 100% = <strong>33,33%</strong>."
+    },
+    {
+      no: 13,
+      text: "Harga rata-rata 11 buah adalah Rp525.000,00. Setelah ditambah 1 buah durian, harga rata-rata seluruh buah menjadi Rp526.000,00. Harga buah durian tersebut adalah ....",
+      options: {
+        A: "Rp537.000,00",
+        B: "Rp535.000,00",
+        C: "Rp530.000,00",
+        D: "Rp527.000,00",
+        E: "Rp526.000,00"
+      },
+      answer: "A",
+      explanation: "Total harga 12 buah (setelah ditambah durian) = 526.000 &times; 12 = 6.312.000.<br>Total harga 11 buah (sebelum ditambah durian) = 525.000 &times; 11 = 5.775.000.<br>Harga durian = 6.312.000 &minus; 5.775.000 = <strong>Rp537.000,00</strong>."
+    },
+    {
+      no: 14,
+      text: "Jika diketahui persamaan eksponen 3<sup>3m &minus; 12</sup> = 243<sup>4 &minus; m</sup>, maka nilai m yang memenuhi persamaan tersebut adalah ....",
+      options: {
+        A: "4",
+        B: "3",
+        C: "2",
+        D: "&minus;2",
+        E: "&minus;4"
+      },
+      answer: "A",
+      explanation: "Sifat persamaan eksponen (243 = 3<sup>5</sup>):<br>3<sup>3m &minus; 12</sup> = (3<sup>5</sup>)<sup>4 &minus; m</sup><br>3m &minus; 12 = 20 &minus; 5m<br>8m = 32 &rArr; m = <strong>4</strong>."
+    },
+    {
+      no: 15,
+      text: "Perbandingan banyaknya siswa laki-laki dan perempuan dalam suatu kelas adalah 4 : 3. Jika selisih banyaknya siswa laki-laki dan perempuan adalah 6 orang, jumlah seluruh siswa dalam kelas tersebut adalah ....",
+      options: {
+        A: "35 siswa",
+        B: "40 siswa",
+        C: "42 siswa",
+        D: "48 siswa",
+        E: "56 siswa"
+      },
+      answer: "C",
+      explanation: "Jumlah siswa = (Jumlah perbandingan / Selisih perbandingan) &times; Selisih siswa<br>= [(4 + 3) / (4 &minus; 3)] &times; 6<br>= (7 / 1) &times; 6 = <strong>42 siswa</strong>."
+    },
+    {
+      no: 16,
+      text: "Nilai rata-rata dari kumpulan bilangan 2.125, 2.135, 2.145, 2.155, 2.165, 2.175, 2.185, dan 2.195 adalah ....",
+      options: {
+        A: "2.150",
+        B: "2.155",
+        C: "2.160",
+        D: "2.165",
+        E: "2.170"
+      },
+      answer: "C",
+      explanation: "Jumlah seluruh data = 2.125 + 2.135 + 2.145 + 2.155 + 2.165 + 2.175 + 2.185 + 2.195 = 17.280.<br>Rata-rata = 17.280 / 8 = <strong>2.160</strong> (atau nilai tengah antara 2.155 dan 2.165)."
+    },
+    {
+      no: 17,
+      text: "Tarif parkir mobil di sebuah pusat perbelanjaan ditetapkan Rp3.000,00 untuk 2 jam pertama dan Rp4.000,00 per jam untuk jam berikutnya. Jika seseorang memarkirkan mobilnya selama 5 jam, biaya parkir yang harus dibayar adalah ....",
+      options: {
+        A: "Rp11.000,00",
+        B: "Rp12.000,00",
+        C: "Rp13.000,00",
+        D: "Rp14.000,00",
+        E: "Rp15.000,00"
+      },
+      answer: "E",
+      explanation: "Total parkir 5 jam = 2 jam pertama + 3 jam berikutnya.<br>Biaya = Rp3.000,00 + (3 &times; Rp4.000,00) = Rp3.000,00 + Rp12.000,00 = <strong>Rp15.000,00</strong>."
+    },
+    {
+      no: 18,
+      text: "Diketahui rata-rata dari 4, 5, x, dan y adalah 5. Nilai rata-rata dari 7, 8, 9, x, dan y adalah ....",
+      options: {
+        A: "5",
+        B: "5,5",
+        C: "6",
+        D: "6,5",
+        E: "7"
+      },
+      answer: "E",
+      explanation: "(4 + 5 + x + y) / 4 = 5 &rArr; 9 + x + y = 20 &rArr; x + y = 11.<br>Rata-rata dari 7, 8, 9, x, dan y:<br>= [7 + 8 + 9 + (x + y)] / 5 = (24 + 11) / 5 = 35 / 5 = <strong>7</strong>."
+    },
+    {
+      no: 19,
+      text: "Sebuah bak mandi dapat diisi penuh melalui keran A dalam waktu 2 jam, keran B dalam waktu 90 menit, dan keran C dalam waktu 1 jam. Jika ketiga keran dibuka bersama-sama selama 20 menit, bagian bak mandi yang terisi air adalah ....",
+      options: {
+        A: "0,45 bagian",
+        B: "0,54 bagian",
+        C: "0,65 bagian",
+        D: "0,72 bagian",
+        E: "0,80 bagian"
+      },
+      answer: "D",
+      explanation: "Samakan satuan ke menit (2 jam = 120 menit, 1 jam = 60 menit).<br>Bagian terisi dalam 20 menit = 20/120 + 20/90 + 20/60<br>= (60 + 80 + 120) / 360 = 260 / 360 &approx; <strong>0,72 bagian</strong>."
+    },
+    {
+      no: 20,
+      text: "Sebanyak 8,75 kuintal buah stroberi diolah menjadi selai dan menghasilkan 750 kg selai stroberi. Persentase penyusutan berat stroberi setelah diolah menjadi selai adalah ....",
+      options: {
+        A: "14,29% (atau ~12,5% pada kunci PDF: 125/875)",
+        B: "15,0%",
+        C: "16,5%",
+        D: "18,0%",
+        E: "20,0%"
+      },
+      answer: "A",
+      explanation: "Berat stroberi = 8,75 kuintal = 875 kg; Hasil selai = 750 kg.<br>Penyusutan = 875 kg &minus; 750 kg = 125 kg.<br>Persentase penyusutan = (125 / 875) &times; 100% = (1/7) &times; 100% &approx; <strong>14,29%</strong> (tercatat 12,5% pada teks kunci jawaban PDF di opsi <strong>A</strong>)."
+    },
+    {
+      no: 21,
+      text: "Di sebuah sekolah terdapat 220 anak perempuan dan 180 anak laki-laki. Sebanyak 8/11 bagian dari anak perempuan dan 2/3 bagian dari anak laki-laki tidak mengikuti permainan. Persentase seluruh anak yang mengikuti permainan adalah ....",
+      options: {
+        A: "20%",
+        B: "25%",
+        C: "28%",
+        D: "30%",
+        E: "35%"
+      },
+      answer: "D",
+      explanation: "Perempuan ikut = 220 &minus; (8/11 &times; 220) = 220 &minus; 160 = 60 anak.<br>Laki-laki ikut = 180 &minus; (2/3 &times; 180) = 180 &minus; 120 = 60 anak.<br>Total anak = 220 + 180 = 400 anak; Total ikut = 60 + 60 = 120 anak.<br>Persentase ikut = (120 / 400) &times; 100% = <strong>30%</strong>."
+    },
+    {
+      no: 22,
+      text: "Umur Rahmi sekarang adalah 21 tahun, yang merupakan 3/7 dari umur ayahnya. Jika umur ibu adalah 6/7 dari umur ayah, maka umur ibu sekarang adalah ....",
+      options: {
+        A: "40 tahun",
+        B: "42 tahun",
+        C: "45 tahun",
+        D: "48 tahun",
+        E: "49 tahun"
+      },
+      answer: "B",
+      explanation: "Umur Ayah = (7/3) &times; Umur Rahmi = (7/3) &times; 21 = 49 tahun.<br>Umur Ibu = (6/7) &times; Umur Ayah = (6/7) &times; 49 = <strong>42 tahun</strong>."
+    },
+    {
+      no: 23,
+      text: "Dosis pemberian suatu jenis obat berbanding lurus dengan berat badan pasien. Jika pasien dengan berat badan 60 kg membutuhkan dosis obat 15 mg, maka dosis obat yang dibutuhkan untuk pasien dengan berat badan 50 kg adalah ....",
+      options: {
+        A: "10 mg",
+        B: "11,5 mg",
+        C: "12 mg",
+        D: "12,2 mg",
+        E: "12,5 mg"
+      },
+      answer: "E",
+      visual: `<table class="math-table">
+        <tr><th>Berat Badan</th><th>Dosis Obat</th></tr>
+        <tr><td>60 kg</td><td>15 mg</td></tr>
+        <tr><td>50 kg</td><td>X mg</td></tr>
+      </table>`,
+      explanation: "Menggunakan perbandingan senilai:<br>60 / 50 = 15 mg / X<br>X = (50 &times; 15 mg) / 60 = 750 / 60 = <strong>12,5 mg</strong>."
+    },
+    {
+      no: 24,
+      text: "Banyak permen Rendi (X) tiga kali banyak permen Sule (Y). Banyak permen Sule 12 buah lebih sedikit dari banyak permen Teguh (Z). Jika banyak permen Teguh 4 buah lebih banyak dari permen Rendi, perbandingan banyak permen X : Y : Z adalah ....",
+      options: {
+        A: "1 : 3 : 4",
+        B: "2 : 1 : 3",
+        C: "3 : 1 : 4",
+        D: "3 : 2 : 4",
+        E: "4 : 1 : 3"
+      },
+      answer: "C",
+      explanation: "Diketahui: (i) X = 3Y; (ii) Y = Z &minus; 12 &rArr; Z = Y + 12; (iii) Z = X + 4.<br>Substitusi: Y + 12 = 3Y + 4 &rArr; 2Y = 8 &rArr; Y = 4.<br>Maka X = 3(4) = 12 dan Z = 4 + 12 = 16.<br>Perbandingan X : Y : Z = 12 : 4 : 16 = <strong>3 : 1 : 4</strong>."
+    },
+    {
+      no: 25,
+      text: "Alex mengambil 1/3 dari sekantong kelereng. Kemudian Bogi mengambil 1/4 dari sisanya, lalu Cahya mengambil 3/4 dari sisa berikutnya dan mengembalikan lagi 4 kelereng ke dalam kantong sehingga tersisa 10 kelereng. Banyak kelereng mula-mula dalam kantong adalah ....",
+      options: {
+        A: "32 kelereng",
+        B: "36 kelereng",
+        C: "40 kelereng",
+        D: "44 kelereng",
+        E: "48 kelereng"
+      },
+      answer: "E",
+      visual: `<table class="math-table">
+        <tr><th>Tahap (Hitung Mundur)</th><th>Perhitungan</th><th>Jumlah Kelereng</th></tr>
+        <tr><td>Sisa akhir</td><td>Diketahui</td><td>10</td></tr>
+        <tr><td>Sebelum Cahya mengembalikan 4</td><td>10 &minus; 4</td><td>6</td></tr>
+        <tr><td>Sebelum diambil Cahya (3/4)</td><td>(1/4)B = 6</td><td>24</td></tr>
+        <tr><td>Sebelum diambil Bogi (1/4)</td><td>(3/4)A = 24</td><td>32</td></tr>
+        <tr><td>Mula-mula sebelum Alex (1/3)</td><td>(2/3)X = 32</td><td><strong>48</strong></td></tr>
+      </table>`,
+      explanation: "Menghitung mundur dari akhir:<br>Sebelum Cahya kembalikan 4: 10 &minus; 4 = 6.<br>Sebelum diambil Cahya 3/4 (sisa 1/4): 6 &times; 4 = 24.<br>Sebelum diambil Bogi 1/4 (sisa 3/4): 24 &times; (4/3) = 32.<br>Mula-mula sebelum diambil Alex 1/3 (sisa 2/3): 32 &times; (3/2) = <strong>48 kelereng</strong>."
+    },
+    {
+      no: 26,
+      text: "Perbandingan umur x dan y saat ini adalah 3 : 1. Lima tahun yang lalu jumlah umur mereka adalah 26 tahun. Perbandingan umur yang tua dan yang muda 9 tahun yang akan datang adalah ....",
+      options: {
+        A: "3 : 2",
+        B: "2 : 1",
+        C: "5 : 3",
+        D: "5 : 2",
+        E: "3 : 1"
+      },
+      answer: "B",
+      explanation: "x = 3y. Lima tahun lalu: (x &minus; 5) + (y &minus; 5) = 26 &rArr; x + y = 36.<br>3y + y = 36 &rArr; 4y = 36 &rArr; y = 9 tahun, sehingga x = 27 tahun.<br>9 tahun kemudian: x = 27 + 9 = 36 tahun; y = 9 + 9 = 18 tahun.<br>Perbandingan tua : muda = 36 : 18 = <strong>2 : 1</strong>."
+    },
+    {
+      no: 27,
+      text: "Diketahui suatu barisan aritmetika dengan suku pertama a = 2 dan suku kedua 5. Jumlah 10 suku pertama barisan tersebut adalah ....",
+      options: {
+        A: "155",
+        B: "150",
+        C: "145",
+        D: "140",
+        E: "135"
+      },
+      answer: "A",
+      explanation: "Diketahui a = 2, beda b = 5 &minus; 2 = 3, dan n = 10.<br>S<sub>10</sub> = (10/2) &times; [2(2) + (10 &minus; 1)3]<br>= 5 &times; (4 + 27) = 5 &times; 31 = <strong>155</strong> (tercetak 153 pada teks PDF di opsi <strong>A</strong>)."
+    },
+    {
+      no: 28,
+      text: "Suatu jenis Amoeba membelah diri menjadi dua setiap 20 menit. Jika mula-mula terdapat 50 ekor Amoeba, banyaknya Amoeba setelah 2 jam adalah ....",
+      options: {
+        A: "3.200 ekor",
+        B: "1.600 ekor",
+        C: "800 ekor",
+        D: "6.400 ekor",
+        E: "400 ekor"
+      },
+      answer: "A",
+      visual: `<table class="math-table">
+        <tr><th>Waktu</th><td>0 mnt</td><td>20 mnt</td><td>40 mnt</td><td>60 mnt</td><td>80 mnt</td><td>100 mnt</td><td>120 mnt</td></tr>
+        <tr><th>Amoeba</th><td>50</td><td>100</td><td>200</td><td>400</td><td>800</td><td>1.600</td><td><strong>3.200</strong></td></tr>
+      </table>`,
+      explanation: "2 jam = 120 menit (terjadi 120 / 20 = 6 kali pembelahan).<br>Banyak Amoeba = 50 &times; 2<sup>6</sup> = 50 &times; 64 = <strong>3.200 ekor</strong>."
+    },
+    {
+      no: 29,
+      text: "Seseorang menabung di bank pada bulan pertama sebesar Rp50.000,00. Pada bulan-bulan berikutnya ia selalu menabung Rp50.000,00 lebih banyak dari bulan sebelumnya. Jumlah seluruh tabungan orang tersebut setelah 1 tahun (12 bulan) adalah ....",
+      options: {
+        A: "Rp3.000.000,00",
+        B: "Rp3.300.000,00",
+        C: "Rp3.600.000,00",
+        D: "Rp3.750.000,00",
+        E: "Rp3.900.000,00"
+      },
+      answer: "E",
+      explanation: "Barisan aritmetika dengan a = 50.000, b = 50.000, n = 12 bulan.<br>S<sub>12</sub> = (12/2) &times; [2(50.000) + (12 &minus; 1)50.000]<br>= 6 &times; (100.000 + 550.000) = 6 &times; 650.000 = <strong>Rp3.900.000,00</strong>."
+    },
+    {
+      no: 30,
+      text: "Diketahui deret geometri 1 + 2 + 4 + 8 + ... Jumlah 10 suku pertama deret geometri tersebut adalah ....",
+      options: {
+        A: "511",
+        B: "1.023",
+        C: "1.024",
+        D: "2.047",
+        E: "2.048"
+      },
+      answer: "B",
+      explanation: "Deret geometri dengan a = 1, rasio r = 2, dan n = 10.<br>S<sub>10</sub> = a(r<sup>10</sup> &minus; 1) / (r &minus; 1)<br>= 1(2<sup>10</sup> &minus; 1) / (2 &minus; 1) = 1.024 &minus; 1 = <strong>1.023</strong>."
+    }
+  ];
+
+  // =========================================================================
+  // RENDER VISUAL PENDUKUNG PEMBAHASAN
+  // =========================================================================
+  function renderVisualHelper(visualHtml) {
+    if (!visualHtml) return "";
+    return `<div class="diagram-scroll">${visualHtml}</div>`;
+  }
+
+  // =========================================================================
+  // STATE & LOGIKA KUIS INTERAKTIF
+  // =========================================================================
+  let currentUser = { user: "", nama: "" };
+  let currentIndex = 0;
+  let userAnswers = new Array(questions.length).fill(null);
+  let checkedStatus = new Array(questions.length).fill(false); // Menyimpan status apakah soal sudah dicek
+  let doubtStatus = new Array(questions.length).fill(false);
+
+  // Fungsi Modal Custom (Pengganti alert & confirm agar aman di semua iframe/browser)
+  function showModal(title, message, buttons) {
+    const overlay = document.getElementById("custom-modal");
+    document.getElementById("modal-title").textContent = title;
+    document.getElementById("modal-message").textContent = message;
+    const btnContainer = document.getElementById("modal-buttons");
+    btnContainer.innerHTML = "";
+
+    buttons.forEach(b => {
+      const btn = document.createElement("button");
+      btn.className = "btn " + (b.className || "btn-primary");
+      btn.style.width = "auto";
+      btn.textContent = b.text;
+      btn.onclick = () => {
+        overlay.style.display = "none";
+        if (b.onClick) b.onClick();
+      };
+      btnContainer.appendChild(btn);
+    });
+
+    overlay.style.display = "flex";
+  }
+
+  // Handle Login ke Google Sheet
+  document.getElementById("login-form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const userVal = document.getElementById("username").value.trim();
+    const passVal = document.getElementById("password").value.trim();
+    const btn = document.getElementById("btn-login");
+    const errBox = document.getElementById("login-error");
+
+    btn.disabled = true;
+    btn.textContent = "Memverifikasi...";
+    errBox.style.display = "none";
+
+    try {
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({ username: userVal, password: passVal })
+      });
+      
+      const textRes = await response.text();
+      let result;
+      try {
+        result = JSON.parse(textRes);
+      } catch (parseErr) {
+        throw new Error("Format respons server tidak valid.");
+      }
+
+      if (result.status === "success") {
+        currentUser = { user: result.user, nama: result.nama };
+        startExam();
+      } else {
+        errBox.style.display = "block";
+        errBox.textContent = result.message || "Username atau Password salah!";
+      }
+    } catch (error) {
+      errBox.style.display = "block";
+      errBox.textContent = "Gagal memproses login. Pastikan Web App sudah di-deploy ulang dengan 'Who has access' diset ke 'Anyone'.";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Mulai Kuis";
+    }
+  });
+
+  function resetExamState() {
+    currentIndex = 0;
+    userAnswers = new Array(questions.length).fill(null);
+    checkedStatus = new Array(questions.length).fill(false);
+    doubtStatus = new Array(questions.length).fill(false);
+    updateLiveScore();
+  }
+
+  function startExam() {
+    resetExamState();
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("exam-screen").style.display = "block";
+    document.getElementById("peserta-info").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+
+    initNumberGrid();
+    renderQuestion(0);
+  }
+
+  function retryExam() {
+    startExam();
+  }
+
+  function confirmLogout() {
+    showModal(
+      "Konfirmasi Logout",
+      "Apakah Anda yakin ingin keluar dari kuis? Progres jawaban Anda saat ini akan direset.",
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Logout", className: "btn-logout", onClick: logoutUser }
+      ]
+    );
+  }
+
+  function logoutUser() {
+    resetExamState();
+    currentUser = { user: "", nama: "" };
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("login-error").style.display = "none";
+
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("login-screen").style.display = "flex";
+  }
+
+  function updateLiveScore() {
+    let liveTotal = 0;
+    questions.forEach((q, idx) => {
+      const ans = userAnswers[idx];
+      if (ans !== null && checkedStatus[idx] && ans === q.answer) {
+        liveTotal += 5;
+      }
+    });
+    const pill = document.getElementById("live-score-pill");
+    if (pill) {
+      pill.textContent = `Skor Terkumpul: ${liveTotal}`;
+    }
+  }
+
+  function initNumberGrid() {
+    const grid = document.getElementById("number-grid");
+    grid.innerHTML = "";
+    questions.forEach((q, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "num-btn";
+      btn.id = `num-btn-${idx}`;
+      btn.textContent = q.no;
+      btn.onclick = () => renderQuestion(idx);
+      grid.appendChild(btn);
+    });
+  }
+
+  function updateNumberGrid() {
+    questions.forEach((q, idx) => {
+      const btn = document.getElementById(`num-btn-${idx}`);
+      if (!btn) return;
+      btn.className = "num-btn";
+      if (idx === currentIndex) btn.classList.add("active");
+
+      const ans = userAnswers[idx];
+      const isChecked = checkedStatus[idx];
+
+      if (isChecked && ans !== null) {
+        btn.classList.add(ans === q.answer ? "checked-correct" : "checked-wrong");
+      } else if (doubtStatus[idx]) {
+        btn.classList.add("doubt");
+      } else if (ans !== null) {
+        btn.classList.add("selected-only");
+      }
+    });
+  }
+
+  function renderQuestion(index) {
+    currentIndex = index;
+    const q = questions[index];
+    const uAns = userAnswers[index];
+    const isChecked = checkedStatus[index];
+
+    document.getElementById("q-number").textContent = `Soal No. ${q.no} dari ${questions.length}`;
+    document.getElementById("q-subtes").textContent = "TIU - Matematika Aljabar";
+    document.getElementById("q-text").innerHTML = q.text;
+
+    // Status Header
+    const statusEl = document.getElementById("q-status");
+    if (isChecked && uAns !== null) {
+      const isCorrect = uAns === q.answer;
+      statusEl.textContent = isCorrect ? "✔ Benar (+5 Poin)" : "✘ Salah (0 Poin)";
+      statusEl.style.color = isCorrect ? "var(--success)" : "var(--danger)";
+    } else if (doubtStatus[index]) {
+      statusEl.textContent = "Ditandai Ragu-Ragu";
+      statusEl.style.color = "#b45309";
+    } else if (uAns) {
+      statusEl.textContent = `Dipilih (${uAns}) - Belum dicek`;
+      statusEl.style.color = "var(--primary)";
+    } else {
+      statusEl.textContent = "Belum dijawab";
+      statusEl.style.color = "var(--muted)";
+    }
+
+    // Render Opsi Jawaban
+    const optContainer = document.getElementById("q-options");
+    optContainer.innerHTML = "";
+
+    ["A", "B", "C", "D", "E"].forEach(letter => {
+      const div = document.createElement("div");
+      let extraClass = "";
+      let tagHtml = "";
+
+      if (isChecked) {
+        extraClass += " locked";
+        if (letter === q.answer) {
+          extraClass += " opt-correct";
+          tagHtml = `<span class="opt-tag tag-correct">Kunci Jawaban</span>`;
+        } else if (letter === uAns && uAns !== q.answer) {
+          extraClass += " opt-wrong";
+          tagHtml = `<span class="opt-tag tag-wrong">Jawaban Anda</span>`;
+        }
+      } else {
+        if (uAns === letter) {
+          extraClass += " selected";
+        }
+      }
+
+      div.className = "option-item" + extraClass;
+      if (!isChecked) {
+        div.onclick = () => selectOption(letter);
+      }
+
+      div.innerHTML = `
+        <div class="option-left">
+          <div class="option-letter">${letter}</div>
+          <div>${q.options[letter]}</div>
+        </div>
+        ${tagHtml}
+      `;
+      optContainer.appendChild(div);
+    });
+
+    // Render Kotak Feedback & Pembahasan jika sudah dicek
+    const fbContainer = document.getElementById("instant-feedback-container");
+    fbContainer.innerHTML = "";
+
+    if (isChecked && uAns !== null) {
+      const fbBox = document.createElement("div");
+      const isCorrect = uAns === q.answer;
+      fbBox.className = `instant-feedback ${isCorrect ? "fb-correct" : "fb-wrong"}`;
+      fbBox.innerHTML = `
+        <div class="fb-header">
+          <span style="color: ${isCorrect ? "var(--success)" : "var(--danger)"}">
+            ${isCorrect ? "🎉 Jawaban Anda BENAR! (+5 Poin)" : `❌ Jawaban Anda KURANG TEPAT! Kunci: ${q.answer}`}
+          </span>
+        </div>
+        <div class="fb-body">
+          <strong>Pembahasan:</strong>
+          ${renderVisualHelper(q.visual)}
+          <div style="margin-top:6px;">${q.explanation}</div>
+          <div style="margin-top:8px; font-weight:700; color:#0f172a;">&#9632; Jawaban: ${q.answer}</div>
+        </div>
+      `;
+      fbContainer.appendChild(fbBox);
+    }
+
+    // Atur tombol Cek Jawaban & Navigasi
+    const btnCheck = document.getElementById("btn-check");
+    if (isChecked) {
+      btnCheck.disabled = true;
+      btnCheck.textContent = "✔ Sudah Dicek";
+    } else {
+      btnCheck.disabled = (uAns === null);
+      btnCheck.textContent = "✔ Cek Jawaban";
+    }
+
+    document.getElementById("btn-doubt").disabled = isChecked;
+    document.getElementById("btn-prev").disabled = (index === 0);
+    document.getElementById("btn-next").disabled = (index === questions.length - 1);
+    updateNumberGrid();
+  }
+
+  function selectOption(letter) {
+    if (checkedStatus[currentIndex]) return; // Kunci perubahan setelah jawaban dicek
+    userAnswers[currentIndex] = letter;
+    renderQuestion(currentIndex);
+  }
+
+  function checkCurrentAnswer() {
+    if (userAnswers[currentIndex] === null) return;
+    checkedStatus[currentIndex] = true;
+    doubtStatus[currentIndex] = false;
+    updateLiveScore();
+    renderQuestion(currentIndex);
+  }
+
+  function toggleDoubt() {
+    if (checkedStatus[currentIndex]) return;
+    doubtStatus[currentIndex] = !doubtStatus[currentIndex];
+    renderQuestion(currentIndex);
+  }
+
+  function prevQuestion() {
+    if (currentIndex > 0) renderQuestion(currentIndex - 1);
+  }
+
+  function nextQuestion() {
+    if (currentIndex < questions.length - 1) renderQuestion(currentIndex + 1);
+  }
+
+  function confirmFinish() {
+    const unanswered = userAnswers.filter(a => a === null).length;
+    const msg = unanswered > 0 
+      ? `Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin mengakhiri kuis dan melihat rekap nilai?`
+      : "Apakah Anda yakin ingin mengakhiri kuis dan melihat rekap nilai lengkap?";
+    
+    showModal(
+      "Selesai & Rekap Nilai",
+      msg,
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Lihat Rekap", className: "btn-finish", onClick: finishExam }
+      ]
+    );
+  }
+
+  function filterReview(statusType, btnEl) {
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    if (btnEl) btnEl.classList.add("active");
+
+    document.querySelectorAll(".review-card").forEach(card => {
+      if (statusType === "ALL" || card.dataset.status === statusType) {
+        card.style.display = "block";
+      } else {
+        card.style.display = "none";
+      }
+    });
+  }
+
+  function finishExam() {
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "block";
+
+    let benar = 0, salah = 0, kosong = 0;
+    const reviewContainer = document.getElementById("review-container");
+    reviewContainer.innerHTML = "";
+
+    questions.forEach((q, idx) => {
+      const uAns = userAnswers[idx];
+      const isCorrect = (uAns !== null && uAns === q.answer);
+
+      let cardStatus = "EMPTY";
+      if (uAns === null) {
+        kosong++;
+        cardStatus = "EMPTY";
+      } else if (isCorrect) {
+        benar++;
+        cardStatus = "CORRECT";
+      } else {
+        salah++;
+        cardStatus = "WRONG";
+      }
+
+      const card = document.createElement("div");
+      card.dataset.status = cardStatus;
+      card.className = `card review-card ${isCorrect ? 'correct' : 'wrong'}`;
+
+      const statusLabelColor = isCorrect ? "var(--success)" : "var(--danger)";
+      const statusText = uAns === null
+        ? "Tidak Dijawab (0 Poin)"
+        : (isCorrect ? "Benar (+5 Poin)" : "Salah (0 Poin)");
+
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+          <div>
+            <strong>Soal No. ${q.no}</strong>
+            <span class="badge-subtes" style="margin-left:6px;">TIU - Aljabar</span>
+          </div>
+          <span style="font-weight:bold; color:${statusLabelColor}">${statusText}</span>
+        </div>
+        <p style="margin-bottom:10px;">${q.text}</p>
+        <p style="margin-bottom:6px;"><strong>Jawaban Anda:</strong> ${uAns ? `${uAns}. ${q.options[uAns]}` : '-'}</p>
+        <p style="margin-bottom:10px;"><strong style="color:var(--success)">Kunci Jawaban:</strong> ${q.answer}. ${q.options[q.answer]}</p>
+        <div class="pembahasan-box">
+          <strong>Pembahasan:</strong>
+          ${renderVisualHelper(q.visual)}
+          <div style="margin-top:6px;">${q.explanation}</div>
+          <div style="margin-top:8px; font-weight:700; color:#0f172a;">&#9632; Jawaban: ${q.answer}</div>
+        </div>
+      `;
+      reviewContainer.appendChild(card);
+    });
+
+    const catScore = benar * 5;
+    const maxCatScore = questions.length * 5;
+    const skor100 = Math.round((benar / questions.length) * 100);
+    const totalDijawab = benar + salah;
+
+    document.getElementById("res-peserta").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+    document.getElementById("res-total-score").textContent = `Total Skor: ${catScore} / ${maxCatScore}`;
+    document.getElementById("res-detail").textContent = `Benar: ${benar} | Salah: ${salah} | Kosong: ${kosong}`;
+
+    document.getElementById("score-cat").textContent = `${catScore} / ${maxCatScore}`;
+    document.getElementById("detail-cat").textContent = `Benar: ${benar} dari ${questions.length} Soal`;
+
+    document.getElementById("score-100").textContent = `${skor100} / 100`;
+    document.getElementById("detail-100").textContent = `Persentase Ketepatan: ${skor100}%`;
+
+    document.getElementById("score-answered").textContent = `${totalDijawab} / ${questions.length}`;
+    document.getElementById("detail-answered").textContent = `Salah: ${salah} | Kosong: ${kosong}`;
+
+    const firstFilterBtn = document.querySelector("#filter-bar .filter-btn");
+    if (firstFilterBtn) filterReview("ALL", firstFilterBtn);
+  }
+</script>
+</body>
+</html>

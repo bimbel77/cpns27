@@ -1,0 +1,1434 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KUIS INTERAKTIF - TWK PANCASILA (50 SOAL)</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+      --success-bg: #dcfce7;
+      --warning: #eab308;
+      --warning-bg: #fef9c3;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --danger-bg: #fee2e2;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); line-height: 1.6; }
+
+    /* Login Screen */
+    #login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .login-box {
+      background: var(--card); padding: 35px; border-radius: 12px; width: 100%; max-width: 420px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+    .login-box h2 { text-align: center; color: var(--primary); margin-bottom: 5px; }
+    .login-box p { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 25px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+    .form-group input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;
+    }
+    .btn {
+      display: inline-block; padding: 10px 18px; border: none; border-radius: 6px; font-size: 0.95rem;
+      font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; text-decoration: none;
+    }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-primary { background: var(--primary); color: white; width: 100%; }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+    .btn-logout {
+      background: var(--danger); color: white; padding: 7px 14px; font-size: 0.85rem;
+    }
+    .btn-logout:hover { background: var(--danger-hover); }
+    .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 10px; text-align: center; display: none; }
+
+    .register-link-box {
+      margin-top: 18px; padding-top: 15px; border-top: 1px solid #e2e8f0;
+      text-align: center; font-size: 0.9rem; color: var(--muted);
+    }
+    .register-link-box a {
+      color: var(--primary); font-weight: 700; text-decoration: none;
+    }
+    .register-link-box a:hover {
+      text-decoration: underline; color: var(--primary-hover);
+    }
+
+    /* Header Kuis */
+    header {
+      background: var(--primary); color: white; padding: 15px 25px; display: flex;
+      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header-title h1 { font-size: 1.2rem; }
+    .header-info { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .live-score-pill {
+      background: rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 6px;
+      font-weight: 700; font-size: 0.95rem;
+    }
+
+    /* Main Container */
+    #exam-screen, #result-screen { display: none; max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+    .exam-layout { display: grid; grid-template-columns: 1fr 310px; gap: 20px; }
+    @media (max-width: 850px) { .exam-layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card); border-radius: 10px; padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
+    }
+
+    /* Soal Area */
+    .question-header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+      border-bottom: 2px solid var(--bg); padding-bottom: 12px; margin-bottom: 18px;
+    }
+    .badge-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .badge-no { background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
+    .badge-subtes { background: #e0e7ff; color: #1e40af; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 0.82rem; }
+    .question-text { font-size: 1.05rem; margin-bottom: 18px; }
+
+    /* Opsi Jawaban */
+    .options-list { display: flex; flex-direction: column; gap: 10px; }
+    .option-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 15px;
+      border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; transition: 0.15s;
+    }
+    .option-left { display: flex; align-items: center; gap: 12px; }
+    .option-item:hover:not(.locked) { background: #f8fafc; border-color: var(--primary); }
+    .option-item.selected { background: #eff6ff; border-color: var(--primary); font-weight: 600; }
+    .option-item.locked { cursor: default; }
+
+    /* Status Visual Setelah Cek Jawaban */
+    .option-item.opt-correct {
+      background: var(--success-bg); border-color: var(--success); color: #14532d; font-weight: 600;
+    }
+    .option-item.opt-wrong {
+      background: var(--danger-bg); border-color: var(--danger); color: #7f1d1d; font-weight: 600;
+    }
+
+    .option-letter {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+    }
+    .option-item.selected .option-letter { background: var(--primary); color: white; }
+    .option-item.opt-correct .option-letter { background: var(--success); color: white; }
+    .option-item.opt-wrong .option-letter { background: var(--danger); color: white; }
+
+    .opt-tag {
+      font-size: 0.78rem; font-weight: 700; padding: 3px 9px; border-radius: 12px; flex-shrink: 0;
+    }
+    .tag-correct { background: var(--success); color: white; }
+    .tag-wrong { background: var(--danger); color: white; }
+
+    /* Kotak Feedback & Pembahasan Langsung */
+    .instant-feedback {
+      margin-top: 20px; padding: 18px; border-radius: 10px; border-left: 5px solid var(--primary);
+      background: #f8fafc; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .instant-feedback.fb-correct { border-left-color: var(--success); background: #f0fdf4; }
+    .instant-feedback.fb-wrong { border-left-color: var(--danger); background: #fef2f2; }
+
+    .fb-header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+      margin-bottom: 10px; font-weight: 700; font-size: 1.02rem;
+    }
+    .fb-body { font-size: 0.95rem; color: var(--text); }
+
+    /* Navigasi Bawah Soal */
+    .nav-actions {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 25px;
+      padding-top: 15px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;
+    }
+    .center-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-nav { background: #e2e8f0; color: var(--text); }
+    .btn-nav:hover:not(:disabled) { background: #cbd5e1; }
+    .btn-check { background: #0284c7; color: white; }
+    .btn-check:hover:not(:disabled) { background: #0369a1; }
+    .btn-ragu { background: var(--warning); color: #000; }
+    .btn-finish { background: var(--success); color: white; width: 100%; margin-top: 15px; }
+    .btn-finish:hover { background: #15803d; }
+
+    /* Grid Nomor Soal */
+    .grid-numbers {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px;
+      max-height: 360px; overflow-y: auto; padding-right: 4px;
+    }
+    .num-btn {
+      padding: 8px 0; border: 1px solid var(--border); border-radius: 6px;
+      background: white; font-weight: 600; cursor: pointer; text-align: center;
+    }
+    .num-btn.active { outline: 2.5px solid var(--primary); outline-offset: -2px; }
+    .num-btn.selected-only { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
+    .num-btn.checked-correct { background: var(--success); color: white; border-color: var(--success); }
+    .num-btn.checked-wrong { background: var(--danger); color: white; border-color: var(--danger); }
+    .num-btn.doubt { background: #f59e0b; color: white; border-color: #d97706; }
+
+    .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.78rem; margin-top: 15px; }
+    .legend span { display: flex; align-items: center; gap: 6px; }
+    .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; flex-shrink: 0; }
+
+    /* Result & Pembahasan */
+    .score-banner {
+      text-align: center; padding: 30px; background: linear-gradient(135deg, #1e40af, #3b82f6);
+      color: white; border-radius: 12px; margin-bottom: 25px;
+    }
+    .score-big { font-size: 3rem; font-weight: bold; margin: 10px 0; }
+    .subtes-score-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; text-align: center;
+    }
+    @media (max-width: 700px) { .subtes-score-grid { grid-template-columns: 1fr; } }
+    .subtes-box {
+      background: rgba(255, 255, 255, 0.14); padding: 15px; border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .subtes-box h4 { font-size: 0.95rem; margin-bottom: 5px; opacity: 0.95; }
+    .subtes-box .sub-val { font-size: 1.8rem; font-weight: 800; }
+    .subtes-box .sub-detail { font-size: 0.82rem; opacity: 0.9; margin-top: 4px; }
+
+    .result-actions {
+      display: flex; justify-content: center; gap: 12px; margin-top: 20px; flex-wrap: wrap;
+    }
+    .filter-bar {
+      display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 7px 14px; border-radius: 20px; border: 1px solid var(--border);
+      background: white; font-weight: 600; font-size: 0.88rem; cursor: pointer;
+    }
+    .filter-btn.active {
+      background: var(--primary); color: white; border-color: var(--primary);
+    }
+
+    .review-card { margin-bottom: 20px; border-left: 5px solid var(--border); }
+    .review-card.correct { border-left-color: var(--success); }
+    .review-card.wrong { border-left-color: var(--danger); }
+    .pembahasan-box {
+      background: #f8fafc; padding: 15px; border-radius: 8px; margin-top: 12px;
+      border: 1px dashed #94a3b8; font-size: 0.95rem;
+    }
+
+    /* Custom Modal Dialog */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6); display: none; align-items: center;
+      justify-content: center; z-index: 999; padding: 20px;
+    }
+    .modal-card {
+      background: white; padding: 25px; border-radius: 12px; max-width: 400px;
+      width: 100%; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .modal-card h3 { color: var(--primary); margin-bottom: 10px; }
+    .modal-card p { color: var(--text); font-size: 0.95rem; margin-bottom: 20px; }
+    .modal-btns { display: flex; gap: 10px; justify-content: center; }
+  </style>
+</head>
+<body>
+
+  <!-- HALAMAN LOGIN -->
+  <div id="login-screen">
+    <div class="login-box">
+      <h2>Portal Kuis Interaktif CAT</h2>
+      <p>Subtes 1: TWK Pancasila (50 Soal + Cek Jawaban)</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Username/Email</label>
+          <input type="text" id="username" required placeholder="Masukkan username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="Masukkan password">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-login">Mulai Kuis</button>
+        <div class="error-msg" id="login-error"></div>
+        <div class="register-link-box">
+          Belum punya akun? <a href="http://lynk.id/seputar_guru/4g73189dndge/checkout" target="_blank" rel="noopener noreferrer">Daftar di sini</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- HALAMAN KUIS INTERAKTIF -->
+  <div id="exam-screen">
+    <header>
+      <div class="header-title">
+        <h1>KUIS INTERAKTIF - TWK PANCASILA</h1>
+        <small id="peserta-info">Peserta: -</small>
+      </div>
+      <div class="header-info">
+        <div class="live-score-pill" id="live-score-pill">Skor Terkumpul: 0</div>
+        <button type="button" class="btn btn-logout" onclick="confirmLogout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="exam-layout" style="margin-top: 20px;">
+      <!-- Kolom Kiri: Soal & Cek Jawaban -->
+      <div class="card">
+        <div class="question-header">
+          <div class="badge-group">
+            <span class="badge-no" id="q-number">Soal No. 1</span>
+            <span class="badge-subtes" id="q-subtes">TWK - Pancasila</span>
+          </div>
+          <span id="q-status" style="font-size: 0.85rem; font-weight: 600; color: var(--muted);">Belum dijawab</span>
+        </div>
+
+        <div class="question-text" id="q-text"></div>
+        <div class="options-list" id="q-options"></div>
+
+        <!-- Area Hasil Cek Jawaban & Pembahasan Langsung -->
+        <div id="instant-feedback-container"></div>
+
+        <div class="nav-actions">
+          <button class="btn btn-nav" id="btn-prev" onclick="prevQuestion()">&laquo; Sebelumnya</button>
+          <div class="center-actions">
+            <button class="btn btn-check" id="btn-check" onclick="checkCurrentAnswer()" disabled>✔ Cek Jawaban</button>
+            <button class="btn btn-ragu" id="btn-doubt" onclick="toggleDoubt()">Ragu-Ragu</button>
+          </div>
+          <button class="btn btn-nav" id="btn-next" onclick="nextQuestion()">Selanjutnya &raquo;</button>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Navigasi Nomor -->
+      <div class="card">
+        <h3>Navigasi Kuis</h3>
+        <p style="font-size: 0.78rem; color: var(--muted); margin-top: 4px;">1-50: TWK Pancasila (5 Poin / Benar)</p>
+        <div class="grid-numbers" id="number-grid"></div>
+        <div class="legend">
+          <span><i class="dot" style="background: var(--success);"></i> Benar (+5 Poin)</span>
+          <span><i class="dot" style="background: var(--danger);"></i> Salah (0 Poin)</span>
+          <span><i class="dot" style="background: #dbeafe; border: 1px solid #93c5fd;"></i> Belum Dicek</span>
+          <span><i class="dot" style="background: #f59e0b;"></i> Ragu-Ragu</span>
+          <span><i class="dot" style="background: #fff; border: 1px solid #cbd5e1;"></i> Kosong</span>
+        </div>
+        <button class="btn btn-finish" onclick="confirmFinish()">Selesai & Rekap Nilai</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN HASIL & PEMBAHASAN -->
+  <div id="result-screen">
+    <div class="score-banner">
+      <h2>Rekap Hasil Kuis TWK Pancasila</h2>
+      <p id="res-peserta"></p>
+      <div class="score-big" id="res-total-score">Total Skor: 0 / 250</div>
+      <p id="res-detail">Benar: 0 | Salah: 0 | Kosong: 0</p>
+
+      <!-- Ringkasan Statistik Subtes TWK Pancasila -->
+      <div class="subtes-score-grid">
+        <div class="subtes-box">
+          <h4>Total Skor TWK (Skala BKN)</h4>
+          <div class="sub-val" id="score-twk">0 / 250</div>
+          <div class="sub-detail">5 Poin setiap jawaban benar</div>
+        </div>
+        <div class="subtes-box">
+          <h4>Akurasi & Ketepatan</h4>
+          <div class="sub-val" id="score-percent">0%</div>
+          <div class="sub-detail" id="detail-twk">Benar: 0 | Salah: 0 | Kosong: 0</div>
+        </div>
+        <div class="subtes-box">
+          <h4>Status Kelulusan Subtes</h4>
+          <div class="sub-val" id="status-lulus">-</div>
+          <div class="sub-detail">Target minimal ≥ 65% (165 Poin)</div>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn" style="background: white; color: var(--primary);" onclick="retryExam()">Ulangi Kuis</button>
+        <button class="btn btn-logout" onclick="logoutUser()">Logout</button>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
+      <h3>Kunci Jawaban & Pembahasan Lengkap</h3>
+      <div class="filter-bar" id="filter-bar">
+        <button class="filter-btn active" onclick="filterReview('ALL', this)">Semua (50)</button>
+        <button class="filter-btn" onclick="filterReview('CORRECT', this)">Benar</button>
+        <button class="filter-btn" onclick="filterReview('WRONG', this)">Salah</button>
+        <button class="filter-btn" onclick="filterReview('EMPTY', this)">Kosong</button>
+      </div>
+    </div>
+    <div id="review-container"></div>
+  </div>
+
+  <!-- CUSTOM MODAL -->
+  <div class="modal-overlay" id="custom-modal">
+    <div class="modal-card">
+      <h3 id="modal-title">Konfirmasi</h3>
+      <p id="modal-message">Pesan konfirmasi</p>
+      <div class="modal-btns" id="modal-buttons"></div>
+    </div>
+  </div>
+
+<script>
+  // =========================================================================
+  // URL GOOGLE APPS SCRIPT ANDA YANG AKTIF
+  // =========================================================================
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxB6Th7GHlD9o8ABbYcK2mdV7mv4ufy2i-SYXUg3jVqS0Q1bkXa_pkseMhqmIzgCTx7/exec";
+
+  // =========================================================================
+  // BANK SOAL, KUNCI JAWABAN & PEMBAHASAN (50 SOAL TWK PANCASILA - TETAP ASLI)
+  // =========================================================================
+  const questions = [
+    {
+      no: 1,
+      text: "Masyarakat Indonesia mempunyai cita-cita bersama yang harus diwujudkan untuk kesejahteraan seluruh rakyat. Berbagai cara dilakukan agar cita-cita tersebut dapat terwujud. Hal ini karena Pancasila berperan sebagai ...",
+      options: {
+        A: "Falsafah bangsa.",
+        B: "Dasar negara.",
+        C: "Ideologi negara.",
+        D: "Cita-cita bangsa.",
+        E: "Instrumen bangsa."
+      },
+      answer: "C",
+      explanation: "Ideologi merupakan cara berpikir seseorang ataupun suatu golongan yang di dalamnya terdapat arah dan tujuan hidup yang akan dicapai."
+    },
+    {
+      no: 2,
+      text: "Suatu negara pasti memiliki ideologinya masing-masing. Ideologi mempunyai fungsi yang sangat penting dalam menjalankan roda kehidupan suatu negara. Berikut yang termasuk salah satu fungsi ideologi adalah ...",
+      options: {
+        A: "Menghargai sejarah yang telah terlewati.",
+        B: "Menyatukan perbedaan yang ada di dalamnya.",
+        C: "Menjadi alat untuk menjalankan pemerintahan.",
+        D: "Mengedepankan pendapat golongannya.",
+        E: "Mengesampingkan ideologi lainnya."
+      },
+      answer: "B",
+      explanation: "Ideologi merupakan pandangan hidup sebuah negara sehingga dapat membentuk identitas yang membedakan dengan negara lain. Dengan adanya pandangan hidup itu maka seluruh rakyat dari berbagai macam perbedaan bersatu agar yang dicita-citakan bersama dapat terwujud."
+    },
+    {
+      no: 3,
+      text: "Piagam Jakarta berisi perlawanan terhadap imperialisme, kapitalisme, fasisme, serta memulai dasar pembentukan Republik Indonesia. Sebelum akhirnya dijadikan sebagai Pembukaan UUD 1945, naskah Piagam Jakarta disusun untuk dijadikan teks proklamasi kemerdekaan Indonesia oleh panitia yang merumuskannya. Yang merumuskan Piagam Jakarta adalah ...",
+      options: {
+        A: "BPUPKI.",
+        B: "PPKI.",
+        C: "Muh. Yamin.",
+        D: "Panitia kecil.",
+        E: "Panitia sembilan."
+      },
+      answer: "E",
+      explanation: "Panitia sembilan dibentuk pada tanggal 22 Juni 1945. Panitia sembilan beranggotakan Ir. Soekarno, Drs. Muh. Hatta, Mr. AA Maramis, K.H. Wachid Hasyim, Abdul Kahar Muzakkir, Abikusno Tjokrosujoso, H. Agus Salim, Mr. Ahmad Subardjo, dan Mr. Muh. Yamin."
+    },
+    {
+      no: 4,
+      text: "Peraturan yang ada di negara ini, baik itu yang tertulis maupun tidak tertulis semuanya harus bersumber pada Pancasila, karena Pancasila sebagai ...",
+      options: {
+        A: "Ideologi bangsa.",
+        B: "Falsafah bangsa.",
+        C: "Instrumen bangsa.",
+        D: "Dasar negara.",
+        E: "Cita-cita negara."
+      },
+      answer: "D",
+      explanation: "Sebagai dasar negara Indonesia, Pancasila menjadi sumber nilai, norma, dan hukum yang bersifat universal yang berlaku di seluruh bagian Indonesia sehingga mengikat kepada seluruh rakyat. Segala peraturan yang ada tidak boleh bertentangan dengan nilai-nilai yang terkandung di Pancasila."
+    },
+    {
+      no: 5,
+      text: "Kedudukan Pancasila sebagai dasar negara Indonesia tercantum di dalam ...",
+      options: {
+        A: "Pembukaan UUD 1945 alinea kedua.",
+        B: "Pembukaan UUD 1945 alinea ketiga.",
+        C: "Pembukaan UUD 1945 alinea keempat.",
+        D: "Batang tubuh UUD 1945.",
+        E: "TAP MPR."
+      },
+      answer: "C",
+      explanation: "Walaupun tidak secara eksplisit disebutkan kata Pancasila. Namun, pada pembukaan UUD 1945 alinea keempat berbunyi: <i>\"... maka disusunlah kemerdekaan kebangsaan Indonesia itu dalam suatu Undang-Undang Dasar Negara Indonesia, yang terbentuk dalam suatu susunan Negara Republik Indonesia yang berkedaulatan rakyat dengan berdasar kepada Ketuhanan Yang Maha Esa, Kemanusiaan yang adil dan beradab, Persatuan Indonesia, dan Kerakyatan yang dipimpin oleh hikmat kebijaksanaan dalam permusyawaratan/perwakilan, serta dengan mewujudkan suatu Keadilan sosial bagi seluruh rakyat Indonesia.\"</i>"
+    },
+    {
+      no: 6,
+      text: "Pancasila sebagai dasar negara Indonesia melewati proses yang panjang hingga akhirnya sampai pada perumusan final, yaitu pengesahan kontitusional. Pengesahan Pancasila sebagai dasar negara terjadi pada tanggal ...",
+      options: {
+        A: "1 Juni 1945.",
+        B: "22 Juni 1945.",
+        C: "17 Agustus 1945.",
+        D: "18 Agustus 1945.",
+        E: "19 Agustus 1945."
+      },
+      answer: "D",
+      explanation: "Pada tanggal 18 Agustus 1945 PPKI mengadakan sidang dan menghasilkan:<br>1) Menetapkan UUD 1945 sebagai dasar negara.<br>2) Memilih dan mengangkat presiden dan wakil presiden.<br>3) Membentuk Komite Nasional untuk membantu kinerja presiden sebelum MPR dan DPR dibentuk.<br>Pembukaan UUD 1945 memuat cita-cita negara yang dijabarkan dalam pasal-pasal UUD 1945. Pancasila sebagai dasar negara tidak secara eksplisit disebutkan dalam pembukaan alinea keempat."
+    },
+    {
+      no: 7,
+      text: "Dalam kehidupan yang berdasarkan Pancasila, kehidupan bermasyarakat tidak dapat dipisahkan satu dengan yang lainnya, begitu pula dalam hal perekonomian yang harus mengedepankan kepentingan bersama. Hal ini sesuai dengan prinsip Pancasila yaitu sila ...",
+      options: {
+        A: "Ketuhanan Yang Maha Esa.",
+        B: "Kemanusiaan yang adil dan beradab.",
+        C: "Persatuan Indonesia.",
+        D: "Kerakyatan yang dipimpin oleh hikmat kebijaksanaan dalam permusyawaratan/perwakilan.",
+        E: "Keadilan sosial bagi seluruh rakyat Indonesia."
+      },
+      answer: "E",
+      explanation: "Prinsip sila kelima adalah keadilan di segala bidang dimana seluruh rakyat Indonesia mendapatkan perlakuan yang adil dalam hal hukum, ekonomi, sosial, dan budaya sehingga keseimbangan antara kehidupan pribadi bermasyarakat dapat terwujud."
+    },
+    {
+      no: 8,
+      text: "Pancasila memenuhi syarat sebagai <i>staats fundamental norm</i> karena tercantum dalam Pembukaan UUD 1945. Yang dimaksud dengan Pancasila sebagai <i>staats fundamental norm</i> adalah ...",
+      options: {
+        A: "Pancasila berfungsi untuk memberikan pandangan bagi bangsa lain.",
+        B: "Pancasila menjadi sumber hukum tertinggi di Indonesia yang isi dan kedudukannya tidak dapat diubah.",
+        C: "Pancasila sebagai peraturan untuk mengatur hidup orang banyak.",
+        D: "Pancasila sebagai dasar hukum yang digunakan Indonesia untuk bergaul dengan negara lain.",
+        E: "Norma yang berlaku di Indonesia disesuaikan dengan norma-norma yang berlaku di seluruh dunia."
+      },
+      answer: "B",
+      explanation: "<i>Staats fundamental norm</i> adalah kaidah negara yang fundamental. Dalam hal ini, Pancasila sebagai sumber segala hukum yang ada di Indonesia, kedudukannya berada di tingkatan paling tinggi sehingga tidak dapat diubah. Teori <i>staats fundamental norm</i> dikembangkan oleh Hans Nawiasky seorang ahli hukum berasal dari Jerman."
+    },
+    {
+      no: 9,
+      text: "Sikap menjunjung tinggi keadilan, menjaga kelestarian lingkungan sekitar, serta menghormati pemeluk agama lain merupakan salah satu contoh pengamalan nilai Pancasila dalam kehidupan sehari-hari. Nilai Pancasila yang dimaksud adalah ...",
+      options: {
+        A: "Nilai kerohanian.",
+        B: "Nilai filosofis.",
+        C: "Nilai filsafat.",
+        D: "Nilai abstrak.",
+        E: "Nilai umum."
+      },
+      answer: "A",
+      explanation: "Pancasila mengandung nilai-nilai kerohanian seperti keadilan, kebijaksanaan, keindahan, etika, kebaikan, dan agama yang perwujudannya sesuai dengan hati nurani bangsa karena bersumber dari kepribadian bangsa Indonesia."
+    },
+    {
+      no: 10,
+      text: "Pancasila menjadi petunjuk untuk membuat aturan hukum serta pedoman untuk menjalankan kehidupan bernegara. Hal ini karena Pancasila merupakan ...",
+      options: {
+        A: "Dasar dan ideologi Negara.",
+        B: "Kemauan Negara.",
+        C: "Keputusan bersama seluruh rakyat.",
+        D: "Pemikiran Negara baru.",
+        E: "Perangkat yang digunakan untuk menjalankan roda pemerintahan."
+      },
+      answer: "A",
+      explanation: "Pancasila dijadikan dasar pembuatan segala peraturan dan hukum karena Pancasila sebagai dasar Negara sehingga segala peraturan yang dibuat tidak boleh bertentangan dengan nilai-nilai yang terkandung di dalamnya. Pancasila sebagai ideologi Negara mengandung cita-cita yang akan dicapai Negara Indonesia. Dengan memiliki dasar dan ideologi, sebuah Negara dapat hidup dengan arah dan tujuan yang jelas. Pancasila dianggap paling sesuai dengan sendi dan kebudayaan Indonesia."
+    },
+    {
+      no: 11,
+      text: "Proses pembuatan Pancasila untuk menjadi dasar negara melalui proses yang panjang. Yang memperkenalkan istilah Pancasila pertama kali adalah ...",
+      options: {
+        A: "Drs. Moh. Hatta.",
+        B: "Muh. Yamin.",
+        C: "Ir. Soekarno.",
+        D: "Dr. Radjiman Widyodiningrat.",
+        E: "Soepomo."
+      },
+      answer: "C",
+      explanation: "Nama Pancasila dipilih oleh Ir. Soekarno atas saran ahli bahasa. Ia mengajukan usul mengenai calon dasar Negara terdiri atas lima hal, yaitu:<br>1) Nasionalisme (Kebangsaan Indonesia)<br>2) Internasionalisme (Perikemanusiaan)<br>3) Mufakat atau Demokrasi<br>4) Kesejahteraan Sosial<br>5) Ketuhanan yang Berkebudayaan"
+    },
+    {
+      no: 12,
+      text: "Negara Indonesia merupakan negara demokrasi. Hal tersebut merupakan penjabaran sila ...",
+      options: {
+        A: "Ketuhanan Yang Maha Esa.",
+        B: "Kemanusiaan yang adil dan beradab.",
+        C: "Persatuan Indonesia.",
+        D: "Kerakyatan yang dipimpin oleh hikmat kebijaksanaan dalam permusyawaratan/perwakilan.",
+        E: "Keadilan sosial bagi seluruh rakyat Indonesia."
+      },
+      answer: "D",
+      explanation: "Makna yang terkandung dalam demokrasi adalah dari rakyat, oleh rakyat, dan untuk rakyat sehingga segala keputusan diambil berdasarkan keinginan rakyat. Sila keempat Pancasila menyiratkan makna demokrasi."
+    },
+    {
+      no: 13,
+      text: "Negara yang melindungi segenap bangsa dan seluruh tumpah darah Indonesia merupakan penjabaran sila ke ...",
+      options: {
+        A: "1",
+        B: "2",
+        C: "3",
+        D: "4",
+        E: "5"
+      },
+      answer: "C",
+      explanation: "Makna yang terkandung pada sila ketiga adalah dengan melindungi segenap bangsa dan tumpah darah maka rakyat Indonesia akan bersatu agar Indonesia dapat terjaga dari segala ancaman sehingga dapat dikatakan bahwa pada sila ketiga menyiratkan bahwa Negara Indonesia adalah Negara persatuan."
+    },
+    {
+      no: 14,
+      text: "Saling menghormati dan tidak membedakan-bedakan manusia berdasarkan suku atau golongan merupakan salah satu contoh yang terkandung dalam sila ...",
+      options: {
+        A: "1",
+        B: "2",
+        C: "3",
+        D: "4",
+        E: "5"
+      },
+      answer: "B",
+      explanation: "Pada sila kedua, nilai kemanusiaan harus dijunjung tinggi karena manusia mempunyai kedudukan yang sama sehingga harus diperlakukan secara adil dan beradab tanpa ada perbedaan sedikit pun karena semua orang mempunyai hak asasi yang sama untuk dihormati orang lain."
+    },
+    {
+      no: 15,
+      text: "Yang dimaksud dengan nasionalisme religius adalah ...",
+      options: {
+        A: "Menjunjung tinggi Negara di kancah Internasional.",
+        B: "Perasaan bangga terhadap Negara yang berlebihan dan merasa paling benar.",
+        C: "Lebih mengutamakan ajaran-ajaran agama dalam menjalankan Negara.",
+        D: "Semangat kebangsaan yang dilandasi moral dan nilai ketuhanan.",
+        E: "Negara berdasarkan hukum agama."
+      },
+      answer: "D",
+      explanation: "Dalam bernegara apabila kita meyakini adanya Tuhan maka segala yang kita lakukan dapat terkendali. Negara Indonesia dengan perbedaan agama yang ada di dalamnya dapat berjalan sejalan jika kita saling menghormati."
+    },
+    {
+      no: 16,
+      text: "Memberi kesempatan rakyat untuk mengajukan saran dan kritik dalam hal pelaksanaan pembangunan yang dilakukan pemerintah merupakan contoh pengamalan sila ...",
+      options: {
+        A: "Ketuhanan Yang Maha Esa.",
+        B: "Kemanusiaan yang adil dan beradab.",
+        C: "Persatuan Indonesia.",
+        D: "Kerakyatan yang dipimpin oleh hikmat kebijaksanaan dalam permusyawaratan/perwakilan.",
+        E: "Keadilan sosial bagi seluruh rakyat Indonesia."
+      },
+      answer: "D",
+      explanation: "Pada sila keempat mengandung nilai demokrasi yang dijunjung tinggi dimana rakyat dapat ikut serta untuk kemajuan bangsanya, salah satu cara dengan mengadakan kritik dan saran terhadap pembangunan yang dilakukan oleh pemerintah."
+    },
+    {
+      no: 17,
+      text: "Menjalankan pemerintahan yang bersih tanpa adanya kecurangan seperti korupsi merupakan pengamalan sila ...",
+      options: {
+        A: "Ketuhanan Yang Maha Esa.",
+        B: "Kemanusiaan yang adil dan beradab.",
+        C: "Persatuan Indonesia.",
+        D: "Kerakyatan yang dipimpin oleh hikmat kebijaksanaan dalam permusyawaratan/perwakilan.",
+        E: "Keadilan sosial bagi seluruh rakyat Indonesia."
+      },
+      answer: "E",
+      explanation: "Pada sila kelima mengandung makna bahwa keadilan dan pemerataan dalam segala aspek kehidupan bernegara sangat diperlukan agar tercipta Indonesia yang damai dan berkeadilan sosial sesuai dengan cita-cita yang akan dicapai Indonesia yang tercantum dalam pembukaan UUD 1945."
+    },
+    {
+      no: 18,
+      text: "Sebagai ideologi yang digunakan Indonesia, Pancasila dikenal sebagai Ideologi terbuka, maksudnya adalah ...",
+      options: {
+        A: "Pancasila menerima pengaruh ideologi lain dan mengubah kepribadian bangsa.",
+        B: "Pancasila harus membuka diri terhadap perkembangan zaman.",
+        C: "Pancasila adalah ideologi yang berasal dari negara lain.",
+        D: "Adanya pancasila karena melihat keadaan negara lain.",
+        E: "Pancasila memberikan keleluasaan negara lain untuk mengikutinya."
+      },
+      answer: "B",
+      explanation: "Pancasila harus membuka diri terhadap perkembangan zaman, maksudnya Pancasila harus mau mengikuti perkembangan zaman agar tidak tertinggal tanpa mengurangi esensi nilai-nilai yang terkandung di dalamnya."
+    },
+    {
+      no: 19,
+      text: "Dimensi fleksibilitas merupakan salah satu aspek terkait dengan Pancasila sebagai ideologi terbuka, maksudnya adalah ...",
+      options: {
+        A: "Mengandung cita-cita yang ingin dicapai.",
+        B: "Yang terkandung di dalamnya harus berdasarkan nilai yang ada di kehidupan masyarakat.",
+        C: "Mencerminkan kemampuan sebuah ideologi untuk menyesuaikan diri dengan perkembangan yang ada di masyarakat.",
+        D: "Mudah dipengaruhi tanpa adanya pemilahan.",
+        E: "Pancasila dapat diubah kapan pun oleh rakyatnya."
+      },
+      answer: "C",
+      explanation: "Dimensi ini berkaitan dengan ideologi terbuka dimana Pancasila harus dapat membuka diri menyesuaikan dengan perkembangan zaman sehingga tidak kaku."
+    },
+    {
+      no: 20,
+      text: "Prinsip dimana adanya pengakuan bahwa kekuasaan tertinggi ada di tangan rakyat adalah ...",
+      options: {
+        A: "Kebijaksanaan.",
+        B: "Permusyawaratan.",
+        C: "Perwakilan.",
+        D: "Kerakyatan.",
+        E: "Keadilan."
+      },
+      answer: "D",
+      explanation: "Demokrasi menjunjung tinggi nilai kerakyatan dimana rakyat mempunyai kekuasaan tertinggi dalam pemerintahan yang diwakilkan oleh para wakil rakyat di legislatif."
+    },
+    {
+      no: 21,
+      text: "Menjadi salah satu anggota DPD merupakan salah satu contoh bentuk keikutsertaan rakyat dalam ...",
+      options: {
+        A: "Permusyawaratan.",
+        B: "Perwakilan.",
+        C: "Kerakyatan.",
+        D: "Hikmat kebijaksanaan.",
+        E: "Keadilan."
+      },
+      answer: "B",
+      explanation: "Dengan menjadi salah satu anggota DPD, berarti menjadi salah satu wakil rakyat untuk dapat menyampaikan aspirasi masyarakat sehingga masyarakat juga dapat mengontrol kinerja pemerintah."
+    },
+    {
+      no: 22,
+      text: "Pancasila mempunyai peranan sebagai paradigma pembangunan nasional, maksudnya adalah ...",
+      options: {
+        A: "Pancasila menjadi dasar segala aspek pembangunan di Indonesia.",
+        B: "Pertumbuhan yang harus dibangun demi kemajuan yang akan datang.",
+        C: "Pembangunan harus merata sampai pelosok.",
+        D: "Pembangunan tanpa melibatkan pihak luar.",
+        E: "Pancasila menjadi penentu pembangunan yang dilakukan Indonesia."
+      },
+      answer: "A",
+      explanation: "Pancasila sebagai dasar segala aspek pembangunan di Indonesia sehingga segala bentuk pembangunan tidak boleh menyalahi nilai-nilai yang terkandung di dalam Pancasila."
+    },
+    {
+      no: 23,
+      text: "Lambang yang ada pada burung Garuda mengandung makna sesuai dengan sila yang ada pada Pancasila. Sila ke empat pada burung Garuda dilambangkan dengan ...",
+      options: {
+        A: "Rantai.",
+        B: "Pohon beringin.",
+        C: "Kepala banteng.",
+        D: "Padi dan kapas.",
+        E: "Bintang."
+      },
+      answer: "C",
+      explanation: "Kepala banteng melambangkan sila keempat."
+    },
+    {
+      no: 24,
+      text: "Lambang Negara burung Garuda memiliki makna yang terkandung di dalamnya. Jumlah bulu pada masing-masing sayap burung Garuda berjumlah ...",
+      options: {
+        A: "17.",
+        B: "8.",
+        C: "45.",
+        D: "19.",
+        E: "10."
+      },
+      answer: "A",
+      explanation: "Jumlah bulu yang ada pada burung Garuda melambangkan hari proklamasi kemerdekaan:<br>1) Jumlah pada masing-masing sayap: 17.<br>2) Jumlah bulu pada ekor: 8.<br>3) Jumlah bulu di leher: 45.<br>4) Jumlah bulu di bawah perisai/pangkal ekor: 19."
+    },
+    {
+      no: 25,
+      text: "Sesuai dengan Pembukaan UUD 1945, Negara hendak mewujudkan suatu keadilan sosial bagi seluruh rakyat Indonesia. Maksudnya adalah ...",
+      options: {
+        A: "Negara melindungi segenap bangsa dan seluruh tumpah darah.",
+        B: "Negara berkewajiban mewujudkan kesejahteraan umum bagi seluruh warga Negara.",
+        C: "Negara Indonesia adalah Negara demokrasi.",
+        D: "Negara Indonesia menjunjung tinggi nilai-nilai kemanusiaan.",
+        E: "Dalam kehidupan bernegara berdasarkan kepada ajaran Tuhan."
+      },
+      answer: "B",
+      explanation: "Negara bertanggung jawab untuk memberikan keadilan kepada seluruh rakyat dalam segala aspek kehidupan sehingga kesejahteraan masyarakat pun dapat tercapai. Hal ini juga merupakan makna yang terkandung dalam sila kelima Pancasila."
+    },
+    {
+      no: 26,
+      text: "Pancasila sebagai ideologi terbuka isinya tidak langsung operasional, maksudnya adalah ...",
+      options: {
+        A: "Pancasila harus ada penjabaran.",
+        B: "Tidak dapat dioperasionalkan pada semua golongan yang ada.",
+        C: "Pancasila menjawab semua perkembangan zaman.",
+        D: "Pancasila harus dapat mewujudkan cita-cita bersama.",
+        E: "Pancasila dinilai sulit untuk dijalankan dalam kehidupan sehari-hari."
+      },
+      answer: "A",
+      explanation: "Tidak dapat langsung dioperasionalkan karena harus ada penjabaran lebih lanjut menyangkut isi dan makna di dalamnya, kemudian baru diterapkan dalam kehidupan."
+    },
+    {
+      no: 27,
+      text: "Pada Pancasila yang menjadi sumber nilai kehidupan bangsa Indonesia adalah sila ke ...",
+      options: {
+        A: "1.",
+        B: "2.",
+        C: "3.",
+        D: "4.",
+        E: "5."
+      },
+      answer: "A",
+      explanation: "Yang menjadi sumber nilai kehidupan bangsa adalah sila pertama, yaitu Ketuhanan Yang Maha Esa. Sila ini menjadi sumber dari segala nilai kehidupan karena ajaran yang diturunkan dari Tuhan yang mengatur tentang bagaimana berhubungan antar-individu maupun masyarakat sehingga kehidupan bernegara juga dapat berjalan teratur."
+    },
+    {
+      no: 28,
+      text: "Seluruh komponen bangsa melakukan pembangunan dengan bergotong royong yang dilandasi oleh semangat kekeluargaan merupakan salah satu asas dalam pembangunan nasional, yaitu ...",
+      options: {
+        A: "Asas demokrasi.",
+        B: "Asas adil dan merata.",
+        C: "Asas perikemanusiaan.",
+        D: "Asas usaha bersama dan kekeluargaan.",
+        E: "Asas kesamaan."
+      },
+      answer: "D",
+      explanation: "Dengan adanya usaha bersama untuk melakukan pembangunan maka akan berdampak pada waktu tercapainya yang relatif lebih singkat."
+    },
+    {
+      no: 29,
+      text: "Ada beberapa macam bentuk ideologi di dunia ini. Perbedaan ideologi Pancasila dengan Liberalisme ditinjau dari segi hukum ialah ...",
+      options: {
+        A: "Pada Pancasila hukum untuk melindungi individu, sedangkan pada liberalisme untuk kepentingan bersama.",
+        B: "Pada Pancasila hukum digunakan untuk kalangan bawah, sedangkan liberal untuk semua golongan.",
+        C: "Pada Pancasila hukum menjunjung tinggi kesetaraan individu dan masyarakat, sedangkan liberal untuk melindungi individu.",
+        D: "Pada Pancasila hukum untuk satu kekuatan yang berkuasa, sedangkan liberal untuk kepentingan partai politik.",
+        E: "Pada pancasila hukum untuk mewujudkan kapitalis sedangkan liberal untuk mewujudkan sistem sosialis."
+      },
+      answer: "C",
+      explanation: "Pada Pancasila hukum menjunjung tinggi kesetaraan individu dan masyarakat sehingga semua sama di depan hukum, sedangkan liberal untuk hanya melindungi individu."
+    },
+    {
+      no: 30,
+      text: "Pembangunan bagi suatu Negara membawa dampak untuk Negara tersebut. Tujuan utama adanya pembangunan nasional adalah ...",
+      options: {
+        A: "Bersaing dengan Negara lain.",
+        B: "Mengangkat harkat dan martabat manusia dan bangsa itu sendiri.",
+        C: "Menjadikannya sebagai penopang hidup orang-orang.",
+        D: "Menaikkan gengsi di mata internasional.",
+        E: "Melaksanakan hasil musyawarah."
+      },
+      answer: "B",
+      explanation: "Tujuan utama pembangunan adalah mengangkat harkat dan martabat bangsa sehingga tidak diremehkan bangsa lain serta menunjukkan kepada dunia bahwa negara dapat berkembang terus."
+    },
+    {
+      no: 31,
+      text: "Yang diutamakan pada asas demokrasi dalam pembangunan nasional adalah ...",
+      options: {
+        A: "Kebersamaan.",
+        B: "Kerja sama.",
+        C: "Musyawarah mufakat.",
+        D: "Pemerataan.",
+        E: "Manfaat."
+      },
+      answer: "C",
+      explanation: "Salah satu ciri penerapan demokrasi adalah adanya musyawarah mufakat untuk mengambil sebuah keputusan sehingga keputusan yang diambil merupakan keputusan bersama dan untuk kepentingan bersama."
+    },
+    {
+      no: 32,
+      text: "Menjadikan Pancasila sebagai landasan untuk membentuk sebuah organisasi adalah contoh pembangunan dalam bidang ...",
+      options: {
+        A: "Sosial.",
+        B: "Budaya.",
+        C: "Ekonomi.",
+        D: "Politik.",
+        E: "Keagamaan."
+      },
+      answer: "D",
+      explanation: "Membentuk organisasi adalah salah satu contoh kontribusi masyarakat dalam bidang politik. Dengan menjadi anggota suatu organisasi seseorang dapat menyalurkan aspirasinya."
+    },
+    {
+      no: 33,
+      text: "Pancasila mengandung nilai-nilai yang penting dalam aspek kehidupan dan bersifat universal. Maksud dari nilai-nilai Pancasila bersifat universal adalah ...",
+      options: {
+        A: "Nilai-nilai tersebut berlaku untuk seluruh warga negara Indonesia.",
+        B: "Nilai-nilai Pancasila sesungguhnya dapat diterapkan dan digunakan di negara lain.",
+        C: "Pancasila berlaku untuk seluruh agama di Indonesia.",
+        D: "Penerapan Pancasila tidak ada pemaksaan.",
+        E: "Norma yang terkandung dalam Pancasila sama dengan yang ada pada ideologi lain."
+      },
+      answer: "B",
+      explanation: "Nilai yang terkandung dalam Pancasila bersifat universal karena Indonesia terdapat berbagai perbedaan di dalamnya. Sehingga, Pancasila dalam pembuatannya dahulu sebagai dasar negara berdasarkan keanekaragaman yang ada kemudian dijadisatukan tanpa ada yang dikesampingkan. Oleh karena itu, Pancasila dapat diterapkan di negara lain."
+    },
+    {
+      no: 34,
+      text: "Menghargai hak hidup orang lain adalah salah satu contoh pengamalan Pancasila sila ke ...",
+      options: {
+        A: "1",
+        B: "2",
+        C: "3",
+        D: "4",
+        E: "5"
+      },
+      answer: "B",
+      explanation: "Menghargai hak hidup orang lain adalah wujud pengamalan sila kedua Pancasila dimana kita menjunjung tinggi nilai keadilan dan saling menghormati."
+    },
+    {
+      no: 35,
+      text: "Demokrasi yang digunakan di Indonesia adalah demokrasi Pancasila. Salah satu prinsip demokrasi Pancasila adalah berkedaulatan rakyat, maksudnya adalah ...",
+      options: {
+        A: "Negara harus menghargai hak asasi setiap warga negaranya.",
+        B: "Lembaga Negara mempunyai fungsi dan tugasnya masing-masing.",
+        C: "Negara harus mengutamakan kepentingan rakyatnya daripada kepentingan golongan.",
+        D: "Adanya demokrasi Pancasila untuk mencapai kesejahteraan bersama.",
+        E: "Tujuan yang hendak dicapai dengan adanya demokrasi Pancasila, yaitu keadilan sosial bagi seluruh rakyat."
+      },
+      answer: "C",
+      explanation: "Demokrasi Pancasila yang berdasarkan kedaulatan rakyat maksudnya adalah harus mengutamakan kepentingan rakyat karena para wakil rakyat dipilih oleh rakyat untuk dapat mengaspirasikan suara rakyat. Oleh karenanya, kepentingan rakyat harus didahulukan."
+    },
+    {
+      no: 36,
+      text: "Pancasila sebagai ideologi terbuka mengandung tiga nilai fleksibilitas, salah satunya adalah memiliki nilai dasar. Yang menjadi nilai dasar Pancasila adalah ...",
+      options: {
+        A: "UUD 1945.",
+        B: "Peraturan presiden.",
+        C: "Ketetapan MPR.",
+        D: "Peraturan pemerintah.",
+        E: "Kebudayaan."
+      },
+      answer: "E",
+      explanation: "Pancasila sebagai ideologi terbuka mengandung tiga nilai fleksibilitas, yaitu nilai dasar, nilai instrumen, dan nilai praktis. Kebudayaan menjadi nilai dasar Pancasila sebab dibentuknya Pancasila berdasarkan atas nilai budaya Indonesia itu sendiri."
+    },
+    {
+      no: 37,
+      text: "Nilai-nilai dalam Pancasila merupakan filsafat bangsa Indonesia adalah ...",
+      options: {
+        A: "Menjadikannya jati diri bangsa sebagai sumber nilai dan norma yang berlaku di masyarakat.",
+        B: "Pandangan hidup disertai dengan cara-cara yang digunakan untuk mendapat tujuan yang diidam-idamkan.",
+        C: "Dasar/pedoman untuk menyelenggarakan negara.",
+        D: "Untuk menyatukan seluruh rakyat Indonesia tanpa membeda-bedakan.",
+        E: "Merupakan bagian perjalanan negara Indonesia."
+      },
+      answer: "A",
+      explanation: "Pancasila merupakan filsafat bangsa yang timbul dari hasil pemikiran dan penilaian khusus sehingga dijadikan sumber nilai yang berlaku di masyarakat serta perwujudannya sesuai dengan hati nurani bangsa."
+    },
+    {
+      no: 38,
+      text: "Pancasila sebagai ideologi bersifat dinamis dan terbuka mengandung makna bahwa ...",
+      options: {
+        A: "Pancasila dalam penerapan kehidupan sehari-hari berjalan lurus tanpa adanya perubahan.",
+        B: "Pancasila terbuka dengan ideologi lain yang ada.",
+        C: "Pengaruh ideologi lain saling melengkapi dengan Pancasila.",
+        D: "Pancasila dapat digunakan sesuai dengan perkembangan zaman tanpa mengubah nilai dasar yang terkandung di dalamnya.",
+        E: "Pancasila tidak berpihak kepada suatu golongan tertentu."
+      },
+      answer: "D",
+      explanation: "Sifat Pancasila yang dinamis dan terbuka, yaitu dapat disesuaikan dengan perkembangan zaman tanpa mengubah nilai dasarnya."
+    },
+    {
+      no: 39,
+      text: "Indonesia menganut sistem kedaulatan rakyat tapi juga mengakui kedaulatan lain, salah satunya adalah kedaulatan Negara. Pengakuan tentang kedaulatan Negara terdapat pada ...",
+      options: {
+        A: "Pancasila sila ketiga.",
+        B: "Pancasila sila keempat.",
+        C: "UUD 1945 pasal 1 ayat 3.",
+        D: "Pembukaan UUD 1945 alinea 1.",
+        E: "Pembukaan UUD 1945 alinea 4."
+      },
+      answer: "E",
+      explanation: "Pengakuan kedaulatan negara tercermin pada Pembukaan UUD 1945 alinea keempat yang berbunyi: <i>\"... Negara Indonesia yang melindungi segenap bangsa Indonesia dan seluruh tumpah darah Indonesia.\"</i>"
+    },
+    {
+      no: 40,
+      text: "Mengembangkan rasa cinta tanah air dan rela berkorban untuk bangsa adalah salah satu pengamalan sila ...",
+      options: {
+        A: "Ketuhanan Yang Maha Esa.",
+        B: "Kemanusiaan yang adil dan beradab.",
+        C: "Persatuan Indonesia.",
+        D: "Kerakyatan yang dipimpin oleh hikmat kebijaksanaan dalam permusyawaratan/perwakilan.",
+        E: "Keadilan sosial bagi seluruh rakyat Indonesia."
+      },
+      answer: "C",
+      explanation: "Persatuan bangsa mengandung arti bahwa seluruh warga negara Indonesia bersatu untuk mendapatkan kehidupan yang layak sehingga kesejahteraan dapat terwujud."
+    },
+    {
+      no: 41,
+      text: "Sistem Kedaulatan rakyat yang digunakan oleh Indonesia terdapat pada ...",
+      options: {
+        A: "Pembukaan UUD 1945 alinea 1.",
+        B: "Pembukaan UUD 1945 alinea 3.",
+        C: "UUD 1945 pasal 1 ayat 2.",
+        D: "Pancasila sila ketiga.",
+        E: "Pancasila sila kedua."
+      },
+      answer: "C",
+      explanation: "Pada pasal 1 ayat 2 dijelaskan bahwa kedaulatan berada di tangan rakyat dan dilaksanakan menurut undang-undang dasar."
+    },
+    {
+      no: 42,
+      text: "Dalam perjalanan Negara Indonesia dikenal adanya Partai Komunis Indonesia. PKI ini ditumpas karena dianggap tidak sesuai dengan kepribadian bangsa. Prinsip utama komunisme adalah ...",
+      options: {
+        A: "Semua orang diberikan kesempatan yang sama untuk mengembangkan hal-hal yang dimilikinya.",
+        B: "Materialisme yang menyangkal adanya jiwa rohani dan Tuhan sehingga menindas kebebasan pribadi dan agama.",
+        C: "Adanya kerjasama untuk mencapai satu tujuan tertentu.",
+        D: "Mempunyai kekuatan untuk mempengaruhi rakyat yang didasari rasa cinta tanah air.",
+        E: "Kepentingan individu diutamakan."
+      },
+      answer: "B",
+      explanation: "Pada ideologi Komunisme hak pribadi perseorangan tidak diakui, lebih mengutamakan kebersamaan dan menyangkal adanya Tuhan."
+    },
+    {
+      no: 43,
+      text: "Nilai dasar ideologi bersumber dari pengalaman masa lalu merupakan pengertian dimensi ideologi, yaitu ...",
+      options: {
+        A: "Realita.",
+        B: "Idealisme.",
+        C: "Fleksibilitas.",
+        D: "Pengembangan.",
+        E: "Monoisme."
+      },
+      answer: "A",
+      explanation: "Dimensi realita ideologi adalah nilai dasar yang terkandung dalam ideologi secara riil bersumber dari pengalaman masa lalu."
+    },
+    {
+      no: 44,
+      text: "Pada saat pembuatan calon dasar Negara, yang mengajukan usul selain Ir. Soekarno pada saat sidang BPUPKI adalah ...",
+      options: {
+        A: "Moh. Hatta.",
+        B: "Ahmad Subardjo.",
+        C: "Moh. Yamin.",
+        D: "A.A Maramis.",
+        E: "Agus Salim."
+      },
+      answer: "C",
+      explanation: "Moh. Yamin mengajukan usul calon dasar negara secara tertulis terdiri atas:<br>1) Ketuhanan Yang Maha Esa<br>2) Persatuan Indonesia<br>3) Rasa Kemanusiaan yang Adil dan Beradab<br>4) Kerakyatan yang Dipimpin oleh Hikmat Kebijaksanaan dalam Permusyawaratan/Perwakilan<br>5) Keadilan Sosial bagi Seluruh Rakyat Indonesia"
+    },
+    {
+      no: 45,
+      text: "Prinsip nasionalisme Indonesia yang berdasarkan Pancasila bersifat ...",
+      options: {
+        A: "Tunggal tak terpisahkan.",
+        B: "Majemuk tunggal.",
+        C: "Terbuka.",
+        D: "Menyelaraskan.",
+        E: "Menyeimbangkan."
+      },
+      answer: "B",
+      explanation: "Majemuk tunggal maksudnya adalah Indonesia merupakan negara yang memiliki berbagai perbedaan dalam segala hal. Namun, tetap disatukan dalam suatu kedaulatan yang bersifat tunggal yang berasaskan Bhinneka Tunggal Ika."
+    },
+    {
+      no: 46,
+      text: "Sidang BPUPKI dilantik pada tanggal 28 Mei 1945, dan mengadakan sidang pertama pada tanggal ...",
+      options: {
+        A: "29 Mei-1 Juni 1945.",
+        B: "7 Agustus 1945.",
+        C: "10-16 Juli 1945.",
+        D: "14 Agustus 1945.",
+        E: "22 Juni 1945."
+      },
+      answer: "A",
+      explanation: "BPUPKI mengadakan sidang pertama pada tanggal 29 Mei-1 Juni 1945 dengan agenda membuat calon dasar negara Indonesia merdeka."
+    },
+    {
+      no: 47,
+      text: "Bergotong royong dan saling menjaga kerukunan hidup bermasyarakat merupakan salah satu contoh bahwa Pancasila mengandung nilai ...",
+      options: {
+        A: "Instrumental.",
+        B: "Dasar.",
+        C: "Praktis.",
+        D: "Dinamis.",
+        E: "Pragmatis."
+      },
+      answer: "C",
+      explanation: "Nilai praktis adalah nilai yang dilaksanakan dalam kenyataan hidup sehari-hari yang menandakan apakah nilai dasar atau instrumental masih hidup di tengah masyarakat, berbangsa, dan bernegara."
+    },
+    {
+      no: 48,
+      text: "Adanya pajak dan pungutan lain yang bersifat memaksa merupakan salah satu wujud pengamalan sila ...",
+      options: {
+        A: "Ketuhanan Yang Maha Esa.",
+        B: "Kemanusiaan yang adil dan beradab.",
+        C: "Persatuan Indonesia.",
+        D: "Kerakyatan yang dipimpin oleh hikmat kebijaksanaan dalam permusyawaratan/perwakilan.",
+        E: "Keadilan sosial bagi seluruh rakyat Indonesia."
+      },
+      answer: "E",
+      explanation: "Pajak yang kita bayarkan kepada negara nantinya juga akan dirasakan masyarakat melalui penyediaan fasilitas publik ataupun pemerataan. Hal ini perwujudan sila kelima."
+    },
+    {
+      no: 49,
+      text: "Pemilu diselenggarakan berdasarkan asas langsung, umum, bebas, rahasia, jujur, dan adil setiap lima tahun sekali merupakan perwujudan pengamalan sila ke ...",
+      options: {
+        A: "1",
+        B: "2",
+        C: "3",
+        D: "4",
+        E: "5"
+      },
+      answer: "D",
+      explanation: "Adanya pemilu, berarti kita memilih wakil untuk dapat menjadi aspirator warga masyarakat. Hal ini sesuai dengan sila keempat Pancasila."
+    },
+    {
+      no: 50,
+      text: "Salah satu contoh pengamalan sila kemanusiaan yang adil dan beradab adalah ...",
+      options: {
+        A: "Setiap warga negara berhak mendapatkan pendidikan.",
+        B: "Kedaulatan berada di tangan rakyat.",
+        C: "Kemerdekaan untuk mengeluarkan pendapat.",
+        D: "Pemungutan pajak.",
+        E: "Penghormatan terhadap pemeluk agama lain."
+      },
+      answer: "A",
+      explanation: "Setiap warga negara berhak untuk mendapatkan pendidikan yang sama tanpa terkecuali. Hal ini juga tercantum pada pasal 31 ayat 1 UUD 1945."
+    }
+  ];
+
+  // =========================================================================
+  // STATE & LOGIKA KUIS INTERAKTIF
+  // =========================================================================
+  let currentUser = { user: "", nama: "" };
+  let currentIndex = 0;
+  let userAnswers = new Array(questions.length).fill(null);
+  let checkedStatus = new Array(questions.length).fill(false);
+  let doubtStatus = new Array(questions.length).fill(false);
+
+  // Fungsi Modal Custom (Pengganti alert & confirm agar aman di semua iframe/browser)
+  function showModal(title, message, buttons) {
+    const overlay = document.getElementById("custom-modal");
+    document.getElementById("modal-title").textContent = title;
+    document.getElementById("modal-message").textContent = message;
+    const btnContainer = document.getElementById("modal-buttons");
+    btnContainer.innerHTML = "";
+
+    buttons.forEach(b => {
+      const btn = document.createElement("button");
+      btn.className = "btn " + (b.className || "btn-primary");
+      btn.style.width = "auto";
+      btn.textContent = b.text;
+      btn.onclick = () => {
+        overlay.style.display = "none";
+        if (b.onClick) b.onClick();
+      };
+      btnContainer.appendChild(btn);
+    });
+
+    overlay.style.display = "flex";
+  }
+
+  // Handle Login ke Google Sheet
+  document.getElementById("login-form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const userVal = document.getElementById("username").value.trim();
+    const passVal = document.getElementById("password").value.trim();
+    const btn = document.getElementById("btn-login");
+    const errBox = document.getElementById("login-error");
+
+    btn.disabled = true;
+    btn.textContent = "Memverifikasi...";
+    errBox.style.display = "none";
+
+    try {
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({ username: userVal, password: passVal })
+      });
+      
+      const textRes = await response.text();
+      let result;
+      try {
+        result = JSON.parse(textRes);
+      } catch (parseErr) {
+        throw new Error("Format respons server tidak valid.");
+      }
+
+      if (result.status === "success") {
+        currentUser = { user: result.user, nama: result.nama };
+        startExam();
+      } else {
+        errBox.style.display = "block";
+        errBox.textContent = result.message || "Username atau Password salah!";
+      }
+    } catch (error) {
+      errBox.style.display = "block";
+      errBox.textContent = "Gagal memproses login. Pastikan Web App sudah di-deploy ulang dengan 'Who has access' diset ke 'Anyone'.";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Mulai Kuis";
+    }
+  });
+
+  function resetExamState() {
+    currentIndex = 0;
+    userAnswers = new Array(questions.length).fill(null);
+    checkedStatus = new Array(questions.length).fill(false);
+    doubtStatus = new Array(questions.length).fill(false);
+    updateLiveScore();
+  }
+
+  function startExam() {
+    resetExamState();
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("exam-screen").style.display = "block";
+    document.getElementById("peserta-info").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+
+    initNumberGrid();
+    renderQuestion(0);
+  }
+
+  function retryExam() {
+    startExam();
+  }
+
+  function confirmLogout() {
+    showModal(
+      "Konfirmasi Logout",
+      "Apakah Anda yakin ingin keluar dari kuis? Progres jawaban Anda saat ini akan direset.",
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Logout", className: "btn-logout", onClick: logoutUser }
+      ]
+    );
+  }
+
+  function logoutUser() {
+    resetExamState();
+    currentUser = { user: "", nama: "" };
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("login-error").style.display = "none";
+
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("login-screen").style.display = "flex";
+  }
+
+  function updateLiveScore() {
+    let liveTotal = 0;
+    questions.forEach((q, idx) => {
+      const ans = userAnswers[idx];
+      if (ans !== null && checkedStatus[idx]) {
+        if (ans === q.answer) liveTotal += 5;
+      }
+    });
+    const pill = document.getElementById("live-score-pill");
+    if (pill) {
+      pill.textContent = `Skor Terkumpul: ${liveTotal}`;
+    }
+  }
+
+  function initNumberGrid() {
+    const grid = document.getElementById("number-grid");
+    grid.innerHTML = "";
+    questions.forEach((q, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "num-btn";
+      btn.id = `num-btn-${idx}`;
+      btn.textContent = q.no;
+      btn.onclick = () => renderQuestion(idx);
+      grid.appendChild(btn);
+    });
+  }
+
+  function updateNumberGrid() {
+    questions.forEach((q, idx) => {
+      const btn = document.getElementById(`num-btn-${idx}`);
+      if (!btn) return;
+      btn.className = "num-btn";
+      if (idx === currentIndex) btn.classList.add("active");
+
+      const ans = userAnswers[idx];
+      const isChecked = checkedStatus[idx];
+
+      if (isChecked && ans !== null) {
+        btn.classList.add(ans === q.answer ? "checked-correct" : "checked-wrong");
+      } else if (doubtStatus[idx]) {
+        btn.classList.add("doubt");
+      } else if (ans !== null) {
+        btn.classList.add("selected-only");
+      }
+    });
+  }
+
+  function renderQuestion(index) {
+    currentIndex = index;
+    const q = questions[index];
+    const uAns = userAnswers[index];
+    const isChecked = checkedStatus[index];
+
+    document.getElementById("q-number").textContent = `Soal No. ${q.no} dari ${questions.length}`;
+    document.getElementById("q-subtes").textContent = "TWK - Tes Wawasan Kebangsaan";
+    document.getElementById("q-text").innerHTML = q.text;
+
+    // Status Header
+    const statusEl = document.getElementById("q-status");
+    if (isChecked && uAns !== null) {
+      const isCorrect = uAns === q.answer;
+      statusEl.textContent = isCorrect ? "✔ Benar (+5 Poin)" : "✘ Salah (0 Poin)";
+      statusEl.style.color = isCorrect ? "var(--success)" : "var(--danger)";
+    } else if (doubtStatus[index]) {
+      statusEl.textContent = "Ditandai Ragu-Ragu";
+      statusEl.style.color = "#b45309";
+    } else if (uAns) {
+      statusEl.textContent = `Dipilih (${uAns}) - Belum dicek`;
+      statusEl.style.color = "var(--primary)";
+    } else {
+      statusEl.textContent = "Belum dijawab";
+      statusEl.style.color = "var(--muted)";
+    }
+
+    // Render Opsi Jawaban
+    const optContainer = document.getElementById("q-options");
+    optContainer.innerHTML = "";
+
+    ["A", "B", "C", "D", "E"].forEach(letter => {
+      const div = document.createElement("div");
+      let extraClass = "";
+      let tagHtml = "";
+
+      if (isChecked) {
+        extraClass += " locked";
+        if (letter === q.answer) {
+          extraClass += " opt-correct";
+          tagHtml = `<span class="opt-tag tag-correct">Kunci Jawaban</span>`;
+        } else if (letter === uAns && uAns !== q.answer) {
+          extraClass += " opt-wrong";
+          tagHtml = `<span class="opt-tag tag-wrong">Jawaban Anda</span>`;
+        }
+      } else {
+        if (uAns === letter) {
+          extraClass += " selected";
+        }
+      }
+
+      div.className = "option-item" + extraClass;
+      if (!isChecked) {
+        div.onclick = () => selectOption(letter);
+      }
+
+      div.innerHTML = `
+        <div class="option-left">
+          <div class="option-letter">${letter}</div>
+          <div>${q.options[letter]}</div>
+        </div>
+        ${tagHtml}
+      `;
+      optContainer.appendChild(div);
+    });
+
+    // Render Kotak Feedback & Pembahasan jika sudah dicek
+    const fbContainer = document.getElementById("instant-feedback-container");
+    fbContainer.innerHTML = "";
+
+    if (isChecked && uAns !== null) {
+      const fbBox = document.createElement("div");
+      const isCorrect = uAns === q.answer;
+      fbBox.className = `instant-feedback ${isCorrect ? "fb-correct" : "fb-wrong"}`;
+      fbBox.innerHTML = `
+        <div class="fb-header">
+          <span style="color: ${isCorrect ? "var(--success)" : "var(--danger)"}">
+            ${isCorrect ? "🎉 Jawaban Anda BENAR! (+5 Poin)" : `❌ Jawaban Anda KURANG TEPAT! Kunci: ${q.answer}`}
+          </span>
+        </div>
+        <div class="fb-body"><strong>Pembahasan:</strong><br>${q.explanation}</div>
+      `;
+      fbContainer.appendChild(fbBox);
+    }
+
+    // Atur tombol Cek Jawaban & Navigasi
+    const btnCheck = document.getElementById("btn-check");
+    if (isChecked) {
+      btnCheck.disabled = true;
+      btnCheck.textContent = "✔ Sudah Dicek";
+    } else {
+      btnCheck.disabled = (uAns === null);
+      btnCheck.textContent = "✔ Cek Jawaban";
+    }
+
+    document.getElementById("btn-doubt").disabled = isChecked;
+    document.getElementById("btn-prev").disabled = (index === 0);
+    document.getElementById("btn-next").disabled = (index === questions.length - 1);
+    updateNumberGrid();
+  }
+
+  function selectOption(letter) {
+    if (checkedStatus[currentIndex]) return;
+    userAnswers[currentIndex] = letter;
+    renderQuestion(currentIndex);
+  }
+
+  function checkCurrentAnswer() {
+    if (userAnswers[currentIndex] === null) return;
+    checkedStatus[currentIndex] = true;
+    doubtStatus[currentIndex] = false;
+    updateLiveScore();
+    renderQuestion(currentIndex);
+  }
+
+  function toggleDoubt() {
+    if (checkedStatus[currentIndex]) return;
+    doubtStatus[currentIndex] = !doubtStatus[currentIndex];
+    renderQuestion(currentIndex);
+  }
+
+  function prevQuestion() {
+    if (currentIndex > 0) renderQuestion(currentIndex - 1);
+  }
+
+  function nextQuestion() {
+    if (currentIndex < questions.length - 1) renderQuestion(currentIndex + 1);
+  }
+
+  function confirmFinish() {
+    const unanswered = userAnswers.filter(a => a === null).length;
+    const msg = unanswered > 0 
+      ? `Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin mengakhiri kuis dan melihat rekap nilai?`
+      : "Apakah Anda yakin ingin mengakhiri kuis dan melihat rekap nilai lengkap?";
+    
+    showModal(
+      "Selesai & Rekap Nilai",
+      msg,
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Lihat Rekap", className: "btn-finish", onClick: finishExam }
+      ]
+    );
+  }
+
+  function filterReview(statusType, btnEl) {
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    if (btnEl) btnEl.classList.add("active");
+
+    document.querySelectorAll(".review-card").forEach(card => {
+      if (statusType === "ALL" || card.dataset.status === statusType) {
+        card.style.display = "block";
+      } else {
+        card.style.display = "none";
+      }
+    });
+  }
+
+  function finishExam() {
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "block";
+
+    let benar = 0, salah = 0, kosong = 0;
+    const reviewContainer = document.getElementById("review-container");
+    reviewContainer.innerHTML = "";
+
+    questions.forEach((q, idx) => {
+      const uAns = userAnswers[idx];
+      const isCorrect = (uAns !== null && uAns === q.answer);
+
+      let statusType = "EMPTY";
+      if (uAns === null) {
+        kosong++;
+        statusType = "EMPTY";
+      } else if (isCorrect) {
+        benar++;
+        statusType = "CORRECT";
+      } else {
+        salah++;
+        statusType = "WRONG";
+      }
+
+      const cardStatusClass = isCorrect ? "correct" : "wrong";
+      const statusLabelColor = isCorrect ? "var(--success)" : "var(--danger)";
+      const statusText = uAns === null
+        ? "Tidak Dijawab (0 Poin)"
+        : (isCorrect ? "Benar (+5 Poin)" : "Salah (0 Poin)");
+
+      const card = document.createElement("div");
+      card.className = `card review-card ${cardStatusClass}`;
+      card.dataset.status = statusType;
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+          <div>
+            <strong>Soal No. ${q.no}</strong>
+            <span class="badge-subtes" style="margin-left:6px;">TWK Pancasila</span>
+          </div>
+          <span style="font-weight:bold; color:${statusLabelColor}">${statusText}</span>
+        </div>
+        <p style="margin-bottom:10px;">${q.text}</p>
+        <p style="margin-bottom:6px;"><strong>Jawaban Anda:</strong> ${uAns ? `${uAns}. ${q.options[uAns]}` : '-'}</p>
+        <p style="margin-bottom:10px;"><strong style="color:var(--success)">Kunci Jawaban:</strong> ${q.answer}. ${q.options[q.answer]}</p>
+        <div class="pembahasan-box">
+          <strong>Pembahasan:</strong>
+          <div style="margin-top:6px;">${q.explanation}</div>
+        </div>
+      `;
+      reviewContainer.appendChild(card);
+    });
+
+    const maxScore = questions.length * 5; // 50 * 5 = 250
+    const totalScore = benar * 5;
+    const percentScore = Math.round((benar / questions.length) * 100);
+    const isPassed = totalScore >= 165;
+
+    document.getElementById("res-peserta").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+    document.getElementById("res-total-score").textContent = `Total Skor: ${totalScore} / ${maxScore}`;
+    document.getElementById("res-detail").textContent = `Benar: ${benar} | Salah: ${salah} | Kosong: ${kosong}`;
+
+    document.getElementById("score-twk").textContent = `${totalScore} / ${maxScore}`;
+    document.getElementById("score-percent").textContent = `${percentScore}%`;
+    document.getElementById("detail-twk").textContent = `Benar: ${benar} | Salah: ${salah} | Kosong: ${kosong}`;
+    document.getElementById("status-lulus").textContent = isPassed ? "LULUS TARGET" : "BELUM TERCAPAI";
+
+    const firstFilterBtn = document.querySelector("#filter-bar .filter-btn");
+    if (firstFilterBtn) filterReview("ALL", firstFilterBtn);
+  }
+</script>
+</body>
+</html>

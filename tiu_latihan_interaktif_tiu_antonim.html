@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KUIS INTERAKTIF - TIU ANTONIM (50 SOAL)</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+      --success-bg: #dcfce7;
+      --warning: #eab308;
+      --warning-bg: #fef9c3;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --danger-bg: #fee2e2;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); line-height: 1.6; }
+
+    /* Login Screen */
+    #login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .login-box {
+      background: var(--card); padding: 35px; border-radius: 12px; width: 100%; max-width: 420px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+    .login-box h2 { text-align: center; color: var(--primary); margin-bottom: 5px; }
+    .login-box p { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 25px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+    .form-group input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;
+    }
+    .btn {
+      display: inline-block; padding: 10px 18px; border: none; border-radius: 6px; font-size: 0.95rem;
+      font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; text-decoration: none;
+    }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-primary { background: var(--primary); color: white; width: 100%; }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+    .btn-logout {
+      background: var(--danger); color: white; padding: 7px 14px; font-size: 0.85rem;
+    }
+    .btn-logout:hover { background: var(--danger-hover); }
+    .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 10px; text-align: center; display: none; }
+
+    .register-link-box {
+      margin-top: 18px; padding-top: 15px; border-top: 1px solid #e2e8f0;
+      text-align: center; font-size: 0.9rem; color: var(--muted);
+    }
+    .register-link-box a {
+      color: var(--primary); font-weight: 700; text-decoration: none;
+    }
+    .register-link-box a:hover {
+      text-decoration: underline; color: var(--primary-hover);
+    }
+
+    /* Header Kuis */
+    header {
+      background: var(--primary); color: white; padding: 15px 25px; display: flex;
+      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header-title h1 { font-size: 1.2rem; }
+    .header-info { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .live-score-pill {
+      background: rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 6px;
+      font-weight: 700; font-size: 0.95rem;
+    }
+
+    /* Main Container */
+    #exam-screen, #result-screen { display: none; max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+    .exam-layout { display: grid; grid-template-columns: 1fr 310px; gap: 20px; }
+    @media (max-width: 850px) { .exam-layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card); border-radius: 10px; padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
+    }
+
+    /* Soal Area */
+    .question-header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+      border-bottom: 2px solid var(--bg); padding-bottom: 12px; margin-bottom: 18px;
+    }
+    .badge-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .badge-no { background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
+    .badge-subtes { background: #e0e7ff; color: #1e40af; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 0.82rem; }
+    .question-text { font-size: 1.05rem; margin-bottom: 18px; }
+
+    /* Opsi Jawaban */
+    .options-list { display: flex; flex-direction: column; gap: 10px; }
+    .option-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 15px;
+      border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; transition: 0.15s;
+    }
+    .option-left { display: flex; align-items: center; gap: 12px; }
+    .option-item:hover:not(.locked) { background: #f8fafc; border-color: var(--primary); }
+    .option-item.selected { background: #eff6ff; border-color: var(--primary); font-weight: 600; }
+    .option-item.locked { cursor: default; }
+
+    /* Status Visual Setelah Cek Jawaban */
+    .option-item.opt-correct {
+      background: var(--success-bg); border-color: var(--success); color: #14532d; font-weight: 600;
+    }
+    .option-item.opt-wrong {
+      background: var(--danger-bg); border-color: var(--danger); color: #7f1d1d; font-weight: 600;
+    }
+
+    .option-letter {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+    }
+    .option-item.selected .option-letter { background: var(--primary); color: white; }
+    .option-item.opt-correct .option-letter { background: var(--success); color: white; }
+    .option-item.opt-wrong .option-letter { background: var(--danger); color: white; }
+
+    .opt-tag {
+      font-size: 0.78rem; font-weight: 700; padding: 3px 9px; border-radius: 12px; flex-shrink: 0;
+    }
+    .tag-correct { background: var(--success); color: white; }
+    .tag-wrong { background: var(--danger); color: white; }
+
+    /* Kotak Feedback & Pembahasan Langsung */
+    .instant-feedback {
+      margin-top: 20px; padding: 18px; border-radius: 10px; border-left: 5px solid var(--primary);
+      background: #f8fafc; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .instant-feedback.fb-correct { border-left-color: var(--success); background: #f0fdf4; }
+    .instant-feedback.fb-wrong { border-left-color: var(--danger); background: #fef2f2; }
+
+    .fb-header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+      margin-bottom: 10px; font-weight: 700; font-size: 1.02rem;
+    }
+    .fb-body { font-size: 0.95rem; color: var(--text); white-space: pre-line; }
+
+    /* Navigasi Bawah Soal */
+    .nav-actions {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 25px;
+      padding-top: 15px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;
+    }
+    .center-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-nav { background: #e2e8f0; color: var(--text); }
+    .btn-nav:hover:not(:disabled) { background: #cbd5e1; }
+    .btn-check { background: #0284c7; color: white; }
+    .btn-check:hover:not(:disabled) { background: #0369a1; }
+    .btn-ragu { background: var(--warning); color: #000; }
+    .btn-finish { background: var(--success); color: white; width: 100%; margin-top: 15px; }
+    .btn-finish:hover { background: #15803d; }
+
+    /* Grid Nomor Soal */
+    .grid-numbers {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px;
+      max-height: 360px; overflow-y: auto; padding-right: 4px;
+    }
+    .num-btn {
+      padding: 8px 0; border: 1px solid var(--border); border-radius: 6px;
+      background: white; font-weight: 600; cursor: pointer; text-align: center;
+    }
+    .num-btn.active { outline: 2.5px solid var(--primary); outline-offset: -2px; }
+    .num-btn.selected-only { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
+    .num-btn.checked-correct { background: var(--success); color: white; border-color: var(--success); }
+    .num-btn.checked-wrong { background: var(--danger); color: white; border-color: var(--danger); }
+    .num-btn.doubt { background: #f59e0b; color: white; border-color: #d97706; }
+
+    .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.78rem; margin-top: 15px; }
+    .legend span { display: flex; align-items: center; gap: 6px; }
+    .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; flex-shrink: 0; }
+
+    /* Result & Pembahasan */
+    .score-banner {
+      text-align: center; padding: 30px; background: linear-gradient(135deg, #1e40af, #3b82f6);
+      color: white; border-radius: 12px; margin-bottom: 25px;
+    }
+    .score-big { font-size: 3rem; font-weight: bold; margin: 10px 0; }
+    .subtes-score-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; text-align: center;
+    }
+    @media (max-width: 700px) { .subtes-score-grid { grid-template-columns: 1fr; } }
+    .subtes-box {
+      background: rgba(255, 255, 255, 0.14); padding: 15px; border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .subtes-box h4 { font-size: 0.9rem; margin-bottom: 5px; opacity: 0.95; }
+    .subtes-box .sub-val { font-size: 1.8rem; font-weight: 800; }
+    .subtes-box .sub-detail { font-size: 0.82rem; opacity: 0.9; margin-top: 4px; }
+
+    .result-actions {
+      display: flex; justify-content: center; gap: 12px; margin-top: 20px; flex-wrap: wrap;
+    }
+    .filter-bar {
+      display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 7px 14px; border-radius: 20px; border: 1px solid var(--border);
+      background: white; font-weight: 600; font-size: 0.88rem; cursor: pointer;
+    }
+    .filter-btn.active {
+      background: var(--primary); color: white; border-color: var(--primary);
+    }
+
+    .review-card { margin-bottom: 20px; border-left: 5px solid var(--border); }
+    .review-card.correct { border-left-color: var(--success); }
+    .review-card.wrong { border-left-color: var(--danger); }
+    .pembahasan-box {
+      background: #f8fafc; padding: 15px; border-radius: 8px; margin-top: 12px;
+      border: 1px dashed #94a3b8; font-size: 0.95rem;
+    }
+
+    /* Custom Modal Dialog */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6); display: none; align-items: center;
+      justify-content: center; z-index: 999; padding: 20px;
+    }
+    .modal-card {
+      background: white; padding: 25px; border-radius: 12px; max-width: 400px;
+      width: 100%; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .modal-card h3 { color: var(--primary); margin-bottom: 10px; }
+    .modal-card p { color: var(--text); font-size: 0.95rem; margin-bottom: 20px; }
+    .modal-btns { display: flex; gap: 10px; justify-content: center; }
+  </style>
+</head>
+<body>
+
+  <!-- HALAMAN LOGIN -->
+  <div id="login-screen">
+    <div class="login-box">
+      <h2>Portal Kuis Interaktif CAT</h2>
+      <p>Subtes TIU: Antonim (50 Soal + Cek Jawaban)</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Username/Email</label>
+          <input type="text" id="username" required placeholder="Masukkan username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="Masukkan password">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-login">Mulai Kuis</button>
+        <div class="error-msg" id="login-error"></div>
+        <div class="register-link-box">
+          Belum punya akun? <a href="http://lynk.id/seputar_guru/4g73189dndge/checkout" target="_blank" rel="noopener noreferrer">Daftar di sini</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- HALAMAN KUIS INTERAKTIF -->
+  <div id="exam-screen">
+    <header>
+      <div class="header-title">
+        <h1>KUIS TIU - ANTONIM (50 SOAL)</h1>
+        <small id="peserta-info">Peserta: -</small>
+      </div>
+      <div class="header-info">
+        <div class="live-score-pill" id="live-score-pill">Skor Terkumpul: 0</div>
+        <button type="button" class="btn btn-logout" onclick="confirmLogout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="exam-layout" style="margin-top: 20px;">
+      <!-- Kolom Kiri: Soal & Cek Jawaban -->
+      <div class="card">
+        <div class="question-header">
+          <div class="badge-group">
+            <span class="badge-no" id="q-number">Soal No. 1</span>
+            <span class="badge-subtes">TIU - Antonim</span>
+          </div>
+          <span id="q-status" style="font-size: 0.85rem; font-weight: 600; color: var(--muted);">Belum dijawab</span>
+        </div>
+
+        <div class="question-text" id="q-text"></div>
+        <div class="options-list" id="q-options"></div>
+
+        <!-- Area Hasil Cek Jawaban & Pembahasan Langsung -->
+        <div id="instant-feedback-container"></div>
+
+        <div class="nav-actions">
+          <button class="btn btn-nav" id="btn-prev" onclick="prevQuestion()">&laquo; Sebelumnya</button>
+          <div class="center-actions">
+            <button class="btn btn-check" id="btn-check" onclick="checkCurrentAnswer()" disabled>✔ Cek Jawaban</button>
+            <button class="btn btn-ragu" id="btn-doubt" onclick="toggleDoubt()">Ragu-Ragu</button>
+          </div>
+          <button class="btn btn-nav" id="btn-next" onclick="nextQuestion()">Selanjutnya &raquo;</button>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Navigasi Nomor -->
+      <div class="card">
+        <h3>Navigasi Kuis</h3>
+        <p style="font-size: 0.78rem; color: var(--muted); margin-top: 4px;">1-50: TIU Antonim (+5 Poin/Soal)</p>
+        <div class="grid-numbers" id="number-grid"></div>
+        <div class="legend">
+          <span><i class="dot" style="background: var(--success);"></i> Benar (+5 Poin)</span>
+          <span><i class="dot" style="background: var(--danger);"></i> Salah (0 Poin)</span>
+          <span><i class="dot" style="background: #dbeafe; border: 1px solid #93c5fd;"></i> Belum Dicek</span>
+          <span><i class="dot" style="background: #f59e0b;"></i> Ragu-Ragu</span>
+          <span><i class="dot" style="background: #fff; border: 1px solid #cbd5e1;"></i> Kosong</span>
+        </div>
+        <button class="btn btn-finish" onclick="confirmFinish()">Selesai & Rekap Nilai</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN HASIL & PEMBAHASAN -->
+  <div id="result-screen">
+    <div class="score-banner">
+      <h2>Rekap Hasil Kuis TIU - Antonim</h2>
+      <p id="res-peserta"></p>
+      <div class="score-big" id="res-total-score">Total Skor: 0 / 250</div>
+      <p id="res-detail">Benar: 0 | Salah: 0 | Kosong: 0</p>
+
+      <!-- Statistik Ringkas -->
+      <div class="subtes-score-grid">
+        <div class="subtes-box">
+          <h4>Jawaban Benar</h4>
+          <div class="sub-val" id="stat-benar">0</div>
+          <div class="sub-detail">Poin diperoleh: <span id="stat-poin">0</span></div>
+        </div>
+        <div class="subtes-box">
+          <h4>Jawaban Salah</h4>
+          <div class="sub-val" id="stat-salah">0</div>
+          <div class="sub-detail">Perlu diperdalam kembali</div>
+        </div>
+        <div class="subtes-box">
+          <h4>Tidak Dijawab</h4>
+          <div class="sub-val" id="stat-kosong">0</div>
+          <div class="sub-detail">Persentase Akurasi: <span id="stat-akurasi">0%</span></div>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn" style="background: white; color: var(--primary);" onclick="retryExam()">Ulangi Kuis</button>
+        <button class="btn btn-logout" onclick="logoutUser()">Logout</button>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
+      <h3>Kunci Jawaban & Pembahasan Lengkap</h3>
+      <div class="filter-bar" id="filter-bar">
+        <button class="filter-btn active" onclick="filterReview('ALL', this)">Semua (50)</button>
+        <button class="filter-btn" onclick="filterReview('CORRECT', this)">Benar</button>
+        <button class="filter-btn" onclick="filterReview('WRONG', this)">Salah</button>
+        <button class="filter-btn" onclick="filterReview('EMPTY', this)">Kosong</button>
+      </div>
+    </div>
+    <div id="review-container"></div>
+  </div>
+
+  <!-- CUSTOM MODAL -->
+  <div class="modal-overlay" id="custom-modal">
+    <div class="modal-card">
+      <h3 id="modal-title">Konfirmasi</h3>
+      <p id="modal-message">Pesan konfirmasi</p>
+      <div class="modal-btns" id="modal-buttons"></div>
+    </div>
+  </div>
+
+<script>
+  // =========================================================================
+  // URL GOOGLE APPS SCRIPT ANDA YANG AKTIF
+  // =========================================================================
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxB6Th7GHlD9o8ABbYcK2mdV7mv4ufy2i-SYXUg3jVqS0Q1bkXa_pkseMhqmIzgCTx7/exec";
+
+  // =========================================================================
+  // BANK SOAL, KUNCI JAWABAN & PEMBAHASAN (50 SOAL ANTONIM - TETAP UTUH)
+  // =========================================================================
+  const questions = [
+    {
+      no: 1,
+      text: "Carilah lawan katanya! <strong>OJA</strong>",
+      options: {
+        A: "Takut",
+        B: "Galak",
+        C: "Berani",
+        D: "Jangan",
+        E: "Kecil"
+      },
+      answer: "A",
+      explanation: "Persamaan kata dari OJA adalah galak, berani. Jadi, lawan kata dari berani adalah TAKUT."
+    },
+    {
+      no: 2,
+      text: "Carilah lawan katanya! <strong>ASKETISME</strong>",
+      options: {
+        A: "Bertapa",
+        B: "Tirakat",
+        C: "Hedonisme",
+        D: "Jasmani",
+        E: "Meditasi"
+      },
+      answer: "C",
+      explanation: "Persamaan kata dari ASKETISME adalah bertapa, tirakat, mendekatkan diri pada Tuhan. Jadi, lawan kata dari asketisme adalah HEDONISME, yaitu aliran yang mengagungkan kesenangan duniawi."
+    },
+    {
+      no: 3,
+      text: "Carilah lawan katanya! <strong>CUAI</strong>",
+      options: {
+        A: "Berharga",
+        B: "Kecil",
+        C: "Hina",
+        D: "Tinggi",
+        E: "Remeh"
+      },
+      answer: "A",
+      explanation: "Persamaan kata dari CUAI adalah kecil, nista, hina, remeh. Jadi, lawan kata dari remeh adalah BERHARGA."
+    },
+    {
+      no: 4,
+      text: "Carilah lawan katanya! <strong>LANGSUNG</strong>",
+      options: {
+        A: "Melantas",
+        B: "Berhenti",
+        C: "Telak",
+        D: "Terus",
+        E: "Spontan"
+      },
+      answer: "B",
+      explanation: "Persamaan kata dari LANGSUNG adalah melantas, terus, telak, spontan. Jadi, lawan katanya adalah BERHENTI."
+    },
+    {
+      no: 5,
+      text: "Carilah lawan katanya! <strong>EMIGRASI</strong>",
+      options: {
+        A: "Migrasi",
+        B: "Transmigrasi",
+        C: "Imigrasi",
+        D: "Urbanisasi",
+        E: "Kulminasi"
+      },
+      answer: "C",
+      explanation: "EMIGRASI adalah perpindahan penduduk dari dalam negeri ke luar negeri. Jadi, lawan katanya adalah IMIGRASI, yaitu perpindahan penduduk dari luar negeri ke dalam negeri."
+    },
+    {
+      no: 6,
+      text: "Carilah lawan katanya! <strong>DIKTATORIAL</strong>",
+      options: {
+        A: "Absolut",
+        B: "Otoriter",
+        C: "Sewenang-wenang",
+        D: "Komunis",
+        E: "Demokrasi"
+      },
+      answer: "E",
+      explanation: "Persamaan kata dari DIKTATORIAL antara lain absolut, otoriter, sewenang-wenang. Jadi, lawan kata dari sewenang-wenang adalah DEMOKRASI."
+    },
+    {
+      no: 7,
+      text: "Carilah lawan katanya! <strong>PRAWACANA</strong>",
+      options: {
+        A: "Daftar Pustaka",
+        B: "Introduksi",
+        C: "Halaman",
+        D: "Kata Pengantar",
+        E: "Pendahuluan"
+      },
+      answer: "A",
+      explanation: "Persamaan kata dari PRAWACANA antara lain introduksi, pendahuluan, kata pengantar, prakata, pembukaan. Jadi, lawan katanya, yaitu DAFTAR PUSTAKA yang berada di akhir karya tulis."
+    },
+    {
+      no: 8,
+      text: "Carilah lawan katanya! <strong>DAHINA</strong>",
+      options: {
+        A: "Siang",
+        B: "Sore",
+        C: "Pagi",
+        D: "Hari",
+        E: "Lailah"
+      },
+      answer: "E",
+      explanation: "DAHINA sama dengan siang hari. Jadi, lawan kata dari siang adalah malam hari atau LAILAH."
+    },
+    {
+      no: 9,
+      text: "Carilah lawan katanya! <strong>ESOTERIK</strong>",
+      options: {
+        A: "Khusus",
+        B: "Rahasia",
+        C: "Generalis",
+        D: "Terbatas",
+        E: "Eksklusif"
+      },
+      answer: "C",
+      explanation: "Persamaan kata dari ESOTERIK adalah secara khusus, rahasia, terbatas. Jadi, lawan kata dari khusus adalah GENERALIS atau secara umum."
+    },
+    {
+      no: 10,
+      text: "Carilah lawan katanya! <strong>HIBAT</strong>",
+      options: {
+        A: "Cinta",
+        B: "Kasih",
+        C: "Sayang",
+        D: "Benci",
+        E: "Buruk"
+      },
+      answer: "D",
+      explanation: "Persamaan kata dari HIBAT adalah cinta kasih, kasih sayang. Jadi, lawan kata dari kasih adalah BENCI."
+    },
+    {
+      no: 11,
+      text: "Carilah lawan katanya! <strong>EJAWANTAH</strong>",
+      options: {
+        A: "Wujud",
+        B: "Nasihat",
+        C: "Rangkuman",
+        D: "Nyata",
+        E: "Abstrak"
+      },
+      answer: "E",
+      explanation: "Persamaan kata dari EJAWANTAH adalah wujud, kenyataan. Jadi, lawan kata dari nyata adalah ABSTRAK."
+    },
+    {
+      no: 12,
+      text: "Carilah lawan katanya! <strong>STAGNASI</strong>",
+      options: {
+        A: "Terhenti",
+        B: "Macet",
+        C: "Kecepatan",
+        D: "Lambat",
+        E: "Ketinggian"
+      },
+      answer: "C",
+      explanation: "Persamaan kata dari STAGNASI antara lain terhenti, macet, sangat lambat. Jadi, lawan kata dari lambat adalah KECEPATAN."
+    },
+    {
+      no: 13,
+      text: "Carilah lawan katanya! <strong>KASUISTIK</strong>",
+      options: {
+        A: "Sebab",
+        B: "Akibat",
+        C: "Masalah",
+        D: "Kasus",
+        E: "Populasi"
+      },
+      answer: "B",
+      explanation: "Persamaan kata dari KASUISTIK adalah sebab-sebab timbulnya sesuatu. Jadi, lawan kata dari sebab adalah AKIBAT."
+    },
+    {
+      no: 14,
+      text: "Carilah lawan katanya! <strong>PRAYITNA</strong>",
+      options: {
+        A: "Ceroboh",
+        B: "Awas",
+        C: "Hati-hati",
+        D: "Peringatan",
+        E: "Waspada"
+      },
+      answer: "A",
+      explanation: "Persamaan kata dari PRAYITNA adalah awas, hati-hati, siaga, waspada. Jadi, lawan kata dari waspada adalah CEROBOH."
+    },
+    {
+      no: 15,
+      text: "Carilah lawan katanya! <strong>ZALIM</strong>",
+      options: {
+        A: "Aniaya",
+        B: "Baik",
+        C: "Kejam",
+        D: "Lalim",
+        E: "Sabar"
+      },
+      answer: "B",
+      explanation: "Persamaan kata dari ZALIM antara lain aniaya, kejam, sewenang-wenang. Jadi, lawan kata dari kejam adalah BAIK."
+    },
+    {
+      no: 16,
+      text: "Carilah lawan katanya! <strong>RANDA</strong>",
+      options: {
+        A: "Janda",
+        B: "Jajanan",
+        C: "Duda",
+        D: "Laki-laki",
+        E: "Perempuan"
+      },
+      answer: "C",
+      explanation: "Persamaan kata dari RANDA adalah janda. Jadi, lawan kata dari janda adalah DUDA."
+    },
+    {
+      no: 17,
+      text: "Carilah lawan katanya! <strong>OFENSIF</strong>",
+      options: {
+        A: "Bertahan",
+        B: "Serangan",
+        C: "Agresi",
+        D: "Terjangan",
+        E: "Hantaman"
+      },
+      answer: "A",
+      explanation: "Persamaan kata dari OFENSIF antara lain menyerang, agresi, terjangan. Jadi, lawan kata dari menyerang adalah BERTAHAN."
+    },
+    {
+      no: 18,
+      text: "Carilah lawan katanya! <strong>INTIHA</strong>",
+      options: {
+        A: "Penutup",
+        B: "Pengunci",
+        C: "Penghabisan",
+        D: "Awal",
+        E: "Kepala"
+      },
+      answer: "D",
+      explanation: "Persamaan kata dari INTIHA adalah akhir, penghabisan, penutup, pengunci. Jadi, lawan kata dari akhir adalah AWAL."
+    },
+    {
+      no: 19,
+      text: "Carilah lawan katanya! <strong>PREAMBUL</strong>",
+      options: {
+        A: "Mukadimah",
+        B: "Penutupan",
+        C: "Pertimbangan",
+        D: "Introduksi",
+        E: "Prakata"
+      },
+      answer: "B",
+      explanation: "Persamaan kata dari PREAMBUL antara lain pembukaan, mukadimah, introduksi. Jadi, lawan kata dari pembukaan adalah PENUTUPAN."
+    },
+    {
+      no: 20,
+      text: "Carilah lawan katanya! <strong>EKSISTENSI</strong>",
+      options: {
+        A: "Absensi",
+        B: "Presensi",
+        C: "Keberadaan",
+        D: "Kehadiran",
+        E: "Kesiapan"
+      },
+      answer: "A",
+      explanation: "Persamaan kata dari EKSISTENSI adalah presensi, keberadaan, atau kehadiran. Jadi, lawan kata dari presensi adalah ABSENSI."
+    },
+    {
+      no: 21,
+      text: "Carilah lawan katanya! <strong>CUAK</strong>",
+      options: {
+        A: "Gamang",
+        B: "Acuh",
+        C: "Kecil Hati",
+        D: "Tak Gentar",
+        E: "Sombong"
+      },
+      answer: "D",
+      explanation: "Persamaan kata dari CUAK antara lain gamang, gentar, kecil hati. Jadi, lawan kata dari gentar adalah TAK GENTAR."
+    },
+    {
+      no: 22,
+      text: "Carilah lawan katanya! <strong>PANCAMUKA</strong>",
+      options: {
+        A: "Multidimensi",
+        B: "Segi Empat",
+        C: "Monofaset",
+        D: "Lingkaran",
+        E: "Bangun Ruang"
+      },
+      answer: "C",
+      explanation: "Persamaan kata dari PANCAMUKA adalah multifaset, multidimensi, bersegi banyak. Jadi, lawan kata dari multifaset adalah MONOFASET."
+    },
+    {
+      no: 23,
+      text: "Carilah lawan katanya! <strong>DEFERTILISASI</strong>",
+      options: {
+        A: "Pengurangan",
+        B: "Kekeringan",
+        C: "Peningkatan",
+        D: "Pemberian",
+        E: "Pemupukan"
+      },
+      answer: "E",
+      explanation: "Persamaan kata dari DEFERTILISASI adalah kurangnya pemupukan. Jadi, lawan katanya adalah PEMUPUKAN."
+    },
+    {
+      no: 24,
+      text: "Carilah lawan katanya! <strong>PRIBUMI</strong>",
+      options: {
+        A: "Keturunan/Ras",
+        B: "Anak Negeri",
+        C: "Asli",
+        D: "Oriental",
+        E: "Bumiputera"
+      },
+      answer: "A",
+      explanation: "Persamaan kata dari PRIBUMI adalah anak negeri, asli, bumiputera. Jadi, lawan kata dari bumiputera adalah KETURUNAN/RAS."
+    },
+    {
+      no: 25,
+      text: "Carilah lawan katanya! <strong>RESESI</strong>",
+      options: {
+        A: "Peningkatan",
+        B: "Lesu",
+        C: "Kemunduran",
+        D: "Berkurang",
+        E: "Ketinggian"
+      },
+      answer: "A",
+      explanation: "Persamaan kata dari RESESI adalah lesu, kemunduran, berkurang. Jadi, lawan kata dari kemunduran adalah PENINGKATAN."
+    },
+    {
+      no: 26,
+      text: "Carilah lawan katanya! <strong>OGEL</strong>",
+      options: {
+        A: "Goyah",
+        B: "Oleng",
+        C: "Stabil",
+        D: "Siaga",
+        E: "Siap"
+      },
+      answer: "C",
+      explanation: "Persamaan kata dari OGEL adalah goyah atau oleng. Jadi, lawan kata dari goyah adalah STABIL."
+    },
+    {
+      no: 27,
+      text: "Carilah lawan katanya! <strong>RANGAH</strong>",
+      options: {
+        A: "Angkuh",
+        B: "Rendah Hati",
+        C: "Congkak",
+        D: "Sombong",
+        E: "Dermawan"
+      },
+      answer: "B",
+      explanation: "Persamaan kata dari RANGAH antara lain angkuh, congkak, sombong. Jadi, lawan kata dari sombong adalah RENDAH HATI."
+    },
+    {
+      no: 28,
+      text: "Carilah lawan katanya! <strong>ITIFAK</strong>",
+      options: {
+        A: "Perbedaan",
+        B: "Persesuain",
+        C: "Persetujuan",
+        D: "Kesepakatan",
+        E: "Demonstrasi"
+      },
+      answer: "A",
+      explanation: "Persamaan kata dari ITIFAK adalah persamaan, persesuaian, persetujuan. Jadi, lawan kata dari persamaan adalah PERBEDAAN."
+    },
+    {
+      no: 29,
+      text: "Carilah lawan katanya! <strong>PRASETIA</strong>",
+      options: {
+        A: "Janji",
+        B: "Niat",
+        C: "Ingkar",
+        D: "Sumpah",
+        E: "Curang"
+      },
+      answer: "C",
+      explanation: "Persamaan kata dari PRASETIA adalah janji, niat, sumpah. Jadi, lawan kata dari janji adalah INGKAR."
+    },
+    {
+      no: 30,
+      text: "Carilah lawan katanya! <strong>YAKIN</strong>",
+      options: {
+        A: "Percaya",
+        B: "Sungguh-sungguh",
+        C: "Pasti",
+        D: "Ingkar",
+        E: "Ragu"
+      },
+      answer: "E",
+      explanation: "Persamaan kata dari YAKIN adalah percaya, sungguh-sungguh, pasti, serius, tentu, tetap. Jadi, lawan kata dari pasti adalah RAGU."
+    },
+    {
+      no: 31,
+      text: "Carilah lawan katanya! <strong>SURPLUS</strong>",
+      options: {
+        A: "Sisa",
+        B: "Eliminasi",
+        C: "Laba",
+        D: "Kelebihan",
+        E: "Profit"
+      },
+      answer: "B",
+      explanation: "Persamaan kata dari SURPLUS adalah kelebihan, laba, sisa. Jadi, lawan katanya adalah ELIMINASI atau penghilangan."
+    },
+    {
+      no: 32,
+      text: "Carilah lawan katanya! <strong>RIPUK</strong>",
+      options: {
+        A: "Ramai",
+        B: "Utuh",
+        C: "Kapuk",
+        D: "Pecah",
+        E: "Berantakan"
+      },
+      answer: "B",
+      explanation: "Persamaan kata dari RIPUK antara lain pecah, berantakan. Jadi, lawan kata dari pecah adalah UTUH."
+    },
+    {
+      no: 33,
+      text: "Carilah lawan katanya! <strong>PRETENSI</strong>",
+      options: {
+        A: "Jujur",
+        B: "Pura-pura",
+        C: "Tegangan",
+        D: "Substansi",
+        E: "Hubungan"
+      },
+      answer: "A",
+      explanation: "Persamaan kata dari PRETENSI adalah pura-pura, tidak jujur, tidak apa adanya. Jadi, lawan kata dari pura-pura adalah JUJUR."
+    },
+    {
+      no: 34,
+      text: "Carilah lawan katanya! <strong>OFISIAL</strong>",
+      options: {
+        A: "Resmi",
+        B: "Absah",
+        C: "Konkrit",
+        D: "Perkantoran",
+        E: "Ilegal"
+      },
+      answer: "E",
+      explanation: "Persamaan kata dari OFISIAL adalah resmi. Jadi, lawan kata dari resmi adalah ILEGAL."
+    },
+    {
+      no: 35,
+      text: "Carilah lawan katanya! <strong>VIA</strong>",
+      options: {
+        A: "Melalui",
+        B: "Dengan",
+        C: "Listrik",
+        D: "Tanpa",
+        E: "Koneksi"
+      },
+      answer: "D",
+      explanation: "Persamaan kata dari VIA adalah dengan, melalui. Jadi, lawan kata dari dengan adalah TANPA."
+    },
+    {
+      no: 36,
+      text: "Carilah lawan katanya! <strong>PRIYAYI</strong>",
+      options: {
+        A: "Rakyat",
+        B: "Bangsawan",
+        C: "Ningrat",
+        D: "Kyai",
+        E: "Pemimpin"
+      },
+      answer: "A",
+      explanation: "Persamaan kata dari PRIYAYI adalah bangsawan, ningrat, aristokrat, darah biru. Jadi, lawan kata dari bangsawan adalah RAKYAT jelata."
+    },
+    {
+      no: 37,
+      text: "Carilah lawan katanya! <strong>MOJANG</strong>",
+      options: {
+        A: "Perempuan",
+        B: "Gadis",
+        C: "Janda",
+        D: "Jaka",
+        E: "Duda"
+      },
+      answer: "D",
+      explanation: "Persamaan kata dari MOJANG adalah perawan, gadis. Jadi, lawan kata dari gadis adalah JAKA."
+    },
+    {
+      no: 38,
+      text: "Carilah lawan katanya! <strong>DIDAKTIS</strong>",
+      options: {
+        A: "Mendidik",
+        B: "Terlatih",
+        C: "Sendiri",
+        D: "Serta Merta",
+        E: "Destruktif"
+      },
+      answer: "E",
+      explanation: "Persamaan kata dari DIDAKTIS bersifat mendidik. Jadi, lawan katanya adalah DESTRUKTIF, yaitu bersifat merusak."
+    },
+    {
+      no: 39,
+      text: "Carilah lawan katanya! <strong>PRIGEL</strong>",
+      options: {
+        A: "Ceroboh",
+        B: "Bijak",
+        C: "Mahir",
+        D: "Bodoh",
+        E: "Pandai"
+      },
+      answer: "A",
+      explanation: "Persamaan kata dari PRIGEL adalah bijak, cakap, pandai, mahir. Jadi, lawan kata dari bijak adalah CEROBOH."
+    },
+    {
+      no: 40,
+      text: "Carilah lawan katanya! <strong>EKSPONEN</strong>",
+      options: {
+        A: "Sanggah",
+        B: "Tafsir",
+        C: "Lawan",
+        D: "Orasi",
+        E: "Keluar"
+      },
+      answer: "C",
+      explanation: "Persamaan kata dari EKSPONEN adalah orang yang menyanggah, menafsirkan, menerangkan. Jadi, lawan katanya adalah oponen atau pihak LAWAN."
+    },
+    {
+      no: 41,
+      text: "Carilah lawan katanya! <strong>KOLABORASI</strong>",
+      options: {
+        A: "Kerjasama",
+        B: "Dualisme",
+        C: "Ganda",
+        D: "Tingkatan",
+        E: "Solo"
+      },
+      answer: "E",
+      explanation: "Persamaan kata dari KOLABORASI adalah kerja sama. Jadi, lawan kata dari kerja sama adalah SOLO atau sendiri."
+    },
+    {
+      no: 42,
+      text: "Carilah lawan katanya! <strong>BONAFIDE</strong>",
+      options: {
+        A: "Marginal",
+        B: "Umum",
+        C: "Jujur",
+        D: "Terpercaya",
+        E: "Mukhlis"
+      },
+      answer: "A",
+      explanation: "Persamaan kata dari BONAFIDE adalah jujur, terpercaya, kredibel. Jadi, lawan katanya adalah remeh, minor, MARGINAL."
+    },
+    {
+      no: 43,
+      text: "Carilah lawan katanya! <strong>PRASAJA</strong>",
+      options: {
+        A: "Wajar",
+        B: "Parlente",
+        C: "Bersahaja",
+        D: "Sederhana",
+        E: "Terang"
+      },
+      answer: "B",
+      explanation: "Persamaan kata dari PRASAJA adalah bersahaja, sederhana, wajar. Jadi, lawan kata dari sederhana adalah PARLENTE."
+    },
+    {
+      no: 44,
+      text: "Carilah lawan katanya! <strong>KEBAT</strong>",
+      options: {
+        A: "Lepas",
+        B: "Balut",
+        C: "Ikat",
+        D: "Tutup",
+        E: "Bebas"
+      },
+      answer: "A",
+      explanation: "Persamaan kata dari KEBAT antara lain adalah ikat, balut. Jadi, lawan kata dari ikat adalah LEPAS."
+    },
+    {
+      no: 45,
+      text: "Carilah lawan katanya! <strong>INTIM</strong>",
+      options: {
+        A: "Erat",
+        B: "Dekat",
+        C: "Akrab",
+        D: "Renggang",
+        E: "Rapat"
+      },
+      answer: "D",
+      explanation: "Persamaan kata dari INTIM antara lain akrab, dekat, erat. Jadi, lawan kata dari dekat adalah RENGGANG."
+    },
+    {
+      no: 46,
+      text: "Carilah lawan katanya! <strong>INTIKAD</strong>",
+      options: {
+        A: "Kritik",
+        B: "Dukungan",
+        C: "Niat",
+        D: "Sangkalan",
+        E: "Tantangan"
+      },
+      answer: "B",
+      explanation: "Persamaan kata dari INTIKAD adalah bantahan, kritik, tantangan. Jadi, lawan kata dari tantangan adalah DUKUNGAN."
+    },
+    {
+      no: 47,
+      text: "Carilah lawan katanya! <strong>KOMPETENSI</strong>",
+      options: {
+        A: "Ketidakmampuan",
+        B: "Daya",
+        C: "Kebiasaan",
+        D: "Keahlian",
+        E: "Kecerobohan"
+      },
+      answer: "A",
+      explanation: "Persamaan kata dari KOMPETENSI antara lain daya, kemampuan, kebiasaan. Jadi, lawan kata dari kemampuan adalah KETIDAKMAMPUAN."
+    },
+    {
+      no: 48,
+      text: "Carilah lawan katanya! <strong>KONTRADIKSI</strong>",
+      options: {
+        A: "Konflik",
+        B: "Konsisten",
+        C: "Paradoks",
+        D: "Kesenjangan",
+        E: "Penyangkalan"
+      },
+      answer: "B",
+      explanation: "Persamaan kata dari KONTRADIKSI adalah konflik, kesenjangan, penyangkalan. Jadi, lawan kata dari kesenjangan adalah harmonis, KONSISTEN."
+    },
+    {
+      no: 49,
+      text: "Carilah lawan katanya! <strong>RANCUNG</strong>",
+      options: {
+        A: "Lancip",
+        B: "Runcing",
+        C: "Rancap",
+        D: "Bahaya",
+        E: "Tumpul"
+      },
+      answer: "E",
+      explanation: "Persamaan kata dari RANCUNG adalah tajam, lancip, runcing, rancap. Jadi, lawan kata dari tajam adalah TUMPUL."
+    },
+    {
+      no: 50,
+      text: "Carilah lawan katanya! <strong>CUA</strong>",
+      options: {
+        A: "Senang",
+        B: "Kecewa",
+        C: "Khawatir",
+        D: "Bertemu",
+        E: "Kasih"
+      },
+      answer: "A",
+      explanation: "Persamaan kata dari CUA adalah kecewa, tidak senang. Jadi, lawan kata dari tidak senang adalah SENANG."
+    }
+  ];
+
+  // =========================================================================
+  // STATE & LOGIKA KUIS INTERAKTIF
+  // =========================================================================
+  let currentUser = { user: "", nama: "" };
+  let currentIndex = 0;
+  let userAnswers = new Array(questions.length).fill(null);
+  let checkedStatus = new Array(questions.length).fill(false); // Menyimpan status apakah soal sudah dicek
+  let doubtStatus = new Array(questions.length).fill(false);
+
+  function showModal(title, message, buttons) {
+    const overlay = document.getElementById("custom-modal");
+    document.getElementById("modal-title").textContent = title;
+    document.getElementById("modal-message").textContent = message;
+    const btnContainer = document.getElementById("modal-buttons");
+    btnContainer.innerHTML = "";
+
+    buttons.forEach(b => {
+      const btn = document.createElement("button");
+      btn.className = "btn " + (b.className || "btn-primary");
+      btn.style.width = "auto";
+      btn.textContent = b.text;
+      btn.onclick = () => {
+        overlay.style.display = "none";
+        if (b.onClick) b.onClick();
+      };
+      btnContainer.appendChild(btn);
+    });
+
+    overlay.style.display = "flex";
+  }
+
+  // Handle Login ke Google Sheet
+  document.getElementById("login-form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const userVal = document.getElementById("username").value.trim();
+    const passVal = document.getElementById("password").value.trim();
+    const btn = document.getElementById("btn-login");
+    const errBox = document.getElementById("login-error");
+
+    btn.disabled = true;
+    btn.textContent = "Memverifikasi...";
+    errBox.style.display = "none";
+
+    try {
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({ username: userVal, password: passVal })
+      });
+      
+      const textRes = await response.text();
+      let result;
+      try {
+        result = JSON.parse(textRes);
+      } catch (parseErr) {
+        throw new Error("Format respons server tidak valid.");
+      }
+
+      if (result.status === "success") {
+        currentUser = { user: result.user, nama: result.nama };
+        startExam();
+      } else {
+        errBox.style.display = "block";
+        errBox.textContent = result.message || "Username atau Password salah!";
+      }
+    } catch (error) {
+      errBox.style.display = "block";
+      errBox.textContent = "Gagal memproses login. Pastikan Web App sudah di-deploy ulang dengan 'Who has access' diset ke 'Anyone'.";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Mulai Kuis";
+    }
+  });
+
+  function resetExamState() {
+    currentIndex = 0;
+    userAnswers = new Array(questions.length).fill(null);
+    checkedStatus = new Array(questions.length).fill(false);
+    doubtStatus = new Array(questions.length).fill(false);
+    updateLiveScore();
+  }
+
+  function startExam() {
+    resetExamState();
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("exam-screen").style.display = "block";
+    document.getElementById("peserta-info").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+
+    initNumberGrid();
+    renderQuestion(0);
+  }
+
+  function retryExam() {
+    startExam();
+  }
+
+  function confirmLogout() {
+    showModal(
+      "Konfirmasi Logout",
+      "Apakah Anda yakin ingin keluar dari kuis? Progres jawaban Anda saat ini akan direset.",
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Logout", className: "btn-logout", onClick: logoutUser }
+      ]
+    );
+  }
+
+  function logoutUser() {
+    resetExamState();
+    currentUser = { user: "", nama: "" };
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("login-error").style.display = "none";
+
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("login-screen").style.display = "flex";
+  }
+
+  function updateLiveScore() {
+    let liveTotal = 0;
+    questions.forEach((q, idx) => {
+      const ans = userAnswers[idx];
+      if (ans !== null && checkedStatus[idx]) {
+        if (ans === q.answer) liveTotal += 5;
+      }
+    });
+    const pill = document.getElementById("live-score-pill");
+    if (pill) {
+      pill.textContent = `Skor Terkumpul: ${liveTotal}`;
+    }
+  }
+
+  function initNumberGrid() {
+    const grid = document.getElementById("number-grid");
+    grid.innerHTML = "";
+    questions.forEach((q, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "num-btn";
+      btn.id = `num-btn-${idx}`;
+      btn.textContent = q.no;
+      btn.onclick = () => renderQuestion(idx);
+      grid.appendChild(btn);
+    });
+  }
+
+  function updateNumberGrid() {
+    questions.forEach((q, idx) => {
+      const btn = document.getElementById(`num-btn-${idx}`);
+      if (!btn) return;
+      btn.className = "num-btn";
+      if (idx === currentIndex) btn.classList.add("active");
+
+      const ans = userAnswers[idx];
+      const isChecked = checkedStatus[idx];
+
+      if (isChecked && ans !== null) {
+        btn.classList.add(ans === q.answer ? "checked-correct" : "checked-wrong");
+      } else if (doubtStatus[idx]) {
+        btn.classList.add("doubt");
+      } else if (ans !== null) {
+        btn.classList.add("selected-only");
+      }
+    });
+  }
+
+  function renderQuestion(index) {
+    currentIndex = index;
+    const q = questions[index];
+    const uAns = userAnswers[index];
+    const isChecked = checkedStatus[index];
+
+    document.getElementById("q-number").textContent = `Soal No. ${q.no} dari ${questions.length}`;
+    document.getElementById("q-text").innerHTML = q.text;
+
+    // Status Header
+    const statusEl = document.getElementById("q-status");
+    if (isChecked && uAns !== null) {
+      const isCorrect = uAns === q.answer;
+      statusEl.textContent = isCorrect ? "✔ Benar (+5 Poin)" : "✘ Salah (0 Poin)";
+      statusEl.style.color = isCorrect ? "var(--success)" : "var(--danger)";
+    } else if (doubtStatus[index]) {
+      statusEl.textContent = "Ditandai Ragu-Ragu";
+      statusEl.style.color = "#b45309";
+    } else if (uAns) {
+      statusEl.textContent = `Dipilih (${uAns}) - Belum dicek`;
+      statusEl.style.color = "var(--primary)";
+    } else {
+      statusEl.textContent = "Belum dijawab";
+      statusEl.style.color = "var(--muted)";
+    }
+
+    // Render Opsi Jawaban
+    const optContainer = document.getElementById("q-options");
+    optContainer.innerHTML = "";
+
+    ["A", "B", "C", "D", "E"].forEach(letter => {
+      const div = document.createElement("div");
+      let extraClass = "";
+      let tagHtml = "";
+
+      if (isChecked) {
+        extraClass += " locked";
+        if (letter === q.answer) {
+          extraClass += " opt-correct";
+          tagHtml = `<span class="opt-tag tag-correct">Kunci Jawaban</span>`;
+        } else if (letter === uAns && uAns !== q.answer) {
+          extraClass += " opt-wrong";
+          tagHtml = `<span class="opt-tag tag-wrong">Jawaban Anda</span>`;
+        }
+      } else {
+        if (uAns === letter) {
+          extraClass += " selected";
+        }
+      }
+
+      div.className = "option-item" + extraClass;
+      if (!isChecked) {
+        div.onclick = () => selectOption(letter);
+      }
+
+      div.innerHTML = `
+        <div class="option-left">
+          <div class="option-letter">${letter}</div>
+          <div>${q.options[letter]}</div>
+        </div>
+        ${tagHtml}
+      `;
+      optContainer.appendChild(div);
+    });
+
+    // Render Kotak Feedback & Pembahasan jika sudah dicek
+    const fbContainer = document.getElementById("instant-feedback-container");
+    fbContainer.innerHTML = "";
+
+    if (isChecked && uAns !== null) {
+      const fbBox = document.createElement("div");
+      const isCorrect = uAns === q.answer;
+      fbBox.className = `instant-feedback ${isCorrect ? "fb-correct" : "fb-wrong"}`;
+      fbBox.innerHTML = `
+        <div class="fb-header">
+          <span style="color: ${isCorrect ? "var(--success)" : "var(--danger)"}">
+            ${isCorrect ? "🎉 Jawaban Anda BENAR! (+5 Poin)" : `❌ Jawaban Anda KURANG TEPAT! Kunci: ${q.answer}`}
+          </span>
+        </div>
+        <div class="fb-body"><strong>Pembahasan:</strong>\n${q.explanation}</div>
+      `;
+      fbContainer.appendChild(fbBox);
+    }
+
+    // Atur tombol Cek Jawaban & Navigasi
+    const btnCheck = document.getElementById("btn-check");
+    if (isChecked) {
+      btnCheck.disabled = true;
+      btnCheck.textContent = "✔ Sudah Dicek";
+    } else {
+      btnCheck.disabled = (uAns === null);
+      btnCheck.textContent = "✔ Cek Jawaban";
+    }
+
+    document.getElementById("btn-doubt").disabled = isChecked;
+    document.getElementById("btn-prev").disabled = (index === 0);
+    document.getElementById("btn-next").disabled = (index === questions.length - 1);
+    updateNumberGrid();
+  }
+
+  function selectOption(letter) {
+    if (checkedStatus[currentIndex]) return; // Kunci perubahan setelah jawaban dicek
+    userAnswers[currentIndex] = letter;
+    renderQuestion(currentIndex);
+  }
+
+  function checkCurrentAnswer() {
+    if (userAnswers[currentIndex] === null) return;
+    checkedStatus[currentIndex] = true;
+    doubtStatus[currentIndex] = false;
+    updateLiveScore();
+    renderQuestion(currentIndex);
+  }
+
+  function toggleDoubt() {
+    if (checkedStatus[currentIndex]) return;
+    doubtStatus[currentIndex] = !doubtStatus[currentIndex];
+    renderQuestion(currentIndex);
+  }
+
+  function prevQuestion() {
+    if (currentIndex > 0) renderQuestion(currentIndex - 1);
+  }
+
+  function nextQuestion() {
+    if (currentIndex < questions.length - 1) renderQuestion(currentIndex + 1);
+  }
+
+  function confirmFinish() {
+    const unanswered = userAnswers.filter(a => a === null).length;
+    const msg = unanswered > 0 
+      ? `Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin mengakhiri kuis dan melihat rekap nilai?`
+      : "Apakah Anda yakin ingin mengakhiri kuis dan melihat rekap nilai lengkap?";
+    
+    showModal(
+      "Selesai & Rekap Nilai",
+      msg,
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Lihat Rekap", className: "btn-finish", onClick: finishExam }
+      ]
+    );
+  }
+
+  function filterReview(statusFilter, btnEl) {
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    if (btnEl) btnEl.classList.add("active");
+
+    document.querySelectorAll(".review-card").forEach(card => {
+      if (statusFilter === "ALL" || card.dataset.status === statusFilter) {
+        card.style.display = "block";
+      } else {
+        card.style.display = "none";
+      }
+    });
+  }
+
+  function finishExam() {
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "block";
+
+    let benar = 0, salah = 0, kosong = 0;
+    const reviewContainer = document.getElementById("review-container");
+    reviewContainer.innerHTML = "";
+
+    questions.forEach((q, idx) => {
+      const uAns = userAnswers[idx];
+      const isCorrect = (uAns !== null && uAns === q.answer);
+
+      let statusKey = "EMPTY";
+      if (uAns === null) {
+        kosong++;
+        statusKey = "EMPTY";
+      } else if (isCorrect) {
+        benar++;
+        statusKey = "CORRECT";
+      } else {
+        salah++;
+        statusKey = "WRONG";
+      }
+
+      const card = document.createElement("div");
+      card.dataset.status = statusKey;
+      card.className = `card review-card ${isCorrect ? 'correct' : 'wrong'}`;
+
+      const statusText = uAns === null
+        ? "Tidak Dijawab (0 Poin)"
+        : (isCorrect ? "Benar (+5 Poin)" : "Salah (0 Poin)");
+
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+          <div>
+            <strong>Soal No. ${q.no}</strong>
+            <span class="badge-subtes" style="margin-left:6px;">TIU - Antonim</span>
+          </div>
+          <span style="font-weight:bold; color:${isCorrect ? 'var(--success)' : 'var(--danger)'}">
+            ${statusText}
+          </span>
+        </div>
+        <p style="margin-bottom:10px;">${q.text}</p>
+        <p style="margin-bottom:6px;"><strong>Jawaban Anda:</strong> ${uAns ? `${uAns}. ${q.options[uAns]}` : '-'}</p>
+        <p style="margin-bottom:10px;"><strong style="color:var(--success)">Kunci Jawaban:</strong> ${q.answer}. ${q.options[q.answer]}</p>
+        <div class="pembahasan-box">
+          <strong>Pembahasan:</strong>
+          <div style="margin-top:6px;">${q.explanation}</div>
+        </div>
+      `;
+      reviewContainer.appendChild(card);
+    });
+
+    const totalPoin = benar * 5;
+    const maxPoin = questions.length * 5;
+    const akurasi = Math.round((benar / questions.length) * 100);
+
+    document.getElementById("res-peserta").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+    document.getElementById("res-total-score").textContent = `Total Skor: ${totalPoin} / ${maxPoin}`;
+    document.getElementById("res-detail").textContent = `Benar: ${benar} | Salah: ${salah} | Kosong: ${kosong}`;
+
+    document.getElementById("stat-benar").textContent = benar;
+    document.getElementById("stat-poin").textContent = `${totalPoin} Poin`;
+    document.getElementById("stat-salah").textContent = salah;
+    document.getElementById("stat-kosong").textContent = kosong;
+    document.getElementById("stat-akurasi").textContent = `${akurasi}%`;
+
+    const firstFilterBtn = document.querySelector("#filter-bar .filter-btn");
+    if (firstFilterBtn) filterReview("ALL", firstFilterBtn);
+  }
+</script>
+</body>
+</html>

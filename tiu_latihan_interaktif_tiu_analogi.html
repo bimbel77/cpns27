@@ -1,0 +1,1433 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KUIS INTERAKTIF - TIU ANALOGI (50 SOAL)</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+      --success-bg: #dcfce7;
+      --warning: #eab308;
+      --warning-bg: #fef9c3;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --danger-bg: #fee2e2;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); line-height: 1.6; }
+
+    /* Login Screen */
+    #login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .login-box {
+      background: var(--card); padding: 35px; border-radius: 12px; width: 100%; max-width: 420px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+    .login-box h2 { text-align: center; color: var(--primary); margin-bottom: 5px; }
+    .login-box p { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 25px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+    .form-group input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;
+    }
+    .btn {
+      display: inline-block; padding: 10px 18px; border: none; border-radius: 6px; font-size: 0.95rem;
+      font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; text-decoration: none;
+    }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-primary { background: var(--primary); color: white; width: 100%; }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+    .btn-logout {
+      background: var(--danger); color: white; padding: 7px 14px; font-size: 0.85rem;
+    }
+    .btn-logout:hover { background: var(--danger-hover); }
+    .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 10px; text-align: center; display: none; }
+
+    .register-link-box {
+      margin-top: 18px; padding-top: 15px; border-top: 1px solid #e2e8f0;
+      text-align: center; font-size: 0.9rem; color: var(--muted);
+    }
+    .register-link-box a {
+      color: var(--primary); font-weight: 700; text-decoration: none;
+    }
+    .register-link-box a:hover {
+      text-decoration: underline; color: var(--primary-hover);
+    }
+
+    /* Header Kuis */
+    header {
+      background: var(--primary); color: white; padding: 15px 25px; display: flex;
+      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header-title h1 { font-size: 1.2rem; }
+    .header-info { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .live-score-pill {
+      background: rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 6px;
+      font-weight: 700; font-size: 0.95rem;
+    }
+
+    /* Main Container */
+    #exam-screen, #result-screen { display: none; max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+    .exam-layout { display: grid; grid-template-columns: 1fr 310px; gap: 20px; }
+    @media (max-width: 850px) { .exam-layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card); border-radius: 10px; padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
+    }
+
+    /* Soal Area */
+    .question-header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+      border-bottom: 2px solid var(--bg); padding-bottom: 12px; margin-bottom: 18px;
+    }
+    .badge-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .badge-no { background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
+    .badge-subtes { background: #e0e7ff; color: #1e40af; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 0.82rem; }
+    .question-text { font-size: 1.05rem; margin-bottom: 18px; }
+
+    /* Opsi Jawaban */
+    .options-list { display: flex; flex-direction: column; gap: 10px; }
+    .option-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 15px;
+      border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; transition: 0.15s;
+    }
+    .option-left { display: flex; align-items: center; gap: 12px; }
+    .option-item:hover:not(.locked) { background: #f8fafc; border-color: var(--primary); }
+    .option-item.selected { background: #eff6ff; border-color: var(--primary); font-weight: 600; }
+    .option-item.locked { cursor: default; }
+
+    /* Status Visual Setelah Cek Jawaban */
+    .option-item.opt-correct {
+      background: var(--success-bg); border-color: var(--success); color: #14532d; font-weight: 600;
+    }
+    .option-item.opt-wrong {
+      background: var(--danger-bg); border-color: var(--danger); color: #7f1d1d; font-weight: 600;
+    }
+
+    .option-letter {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+    }
+    .option-item.selected .option-letter { background: var(--primary); color: white; }
+    .option-item.opt-correct .option-letter { background: var(--success); color: white; }
+    .option-item.opt-wrong .option-letter { background: var(--danger); color: white; }
+
+    .opt-tag {
+      font-size: 0.78rem; font-weight: 700; padding: 3px 9px; border-radius: 12px; flex-shrink: 0;
+    }
+    .tag-correct { background: var(--success); color: white; }
+    .tag-wrong { background: var(--danger); color: white; }
+
+    /* Kotak Feedback & Pembahasan Langsung */
+    .instant-feedback {
+      margin-top: 20px; padding: 18px; border-radius: 10px; border-left: 5px solid var(--primary);
+      background: #f8fafc; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .instant-feedback.fb-correct { border-left-color: var(--success); background: #f0fdf4; }
+    .instant-feedback.fb-wrong { border-left-color: var(--danger); background: #fef2f2; }
+
+    .fb-header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+      margin-bottom: 10px; font-weight: 700; font-size: 1.02rem;
+    }
+    .fb-body { font-size: 0.95rem; color: var(--text); white-space: pre-line; }
+
+    /* Navigasi Bawah Soal */
+    .nav-actions {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 25px;
+      padding-top: 15px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;
+    }
+    .center-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-nav { background: #e2e8f0; color: var(--text); }
+    .btn-nav:hover:not(:disabled) { background: #cbd5e1; }
+    .btn-check { background: #0284c7; color: white; }
+    .btn-check:hover:not(:disabled) { background: #0369a1; }
+    .btn-ragu { background: var(--warning); color: #000; }
+    .btn-finish { background: var(--success); color: white; width: 100%; margin-top: 15px; }
+    .btn-finish:hover { background: #15803d; }
+
+    /* Grid Nomor Soal */
+    .grid-numbers {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px;
+      max-height: 360px; overflow-y: auto; padding-right: 4px;
+    }
+    .num-btn {
+      padding: 8px 0; border: 1px solid var(--border); border-radius: 6px;
+      background: white; font-weight: 600; cursor: pointer; text-align: center;
+    }
+    .num-btn.active { outline: 2.5px solid var(--primary); outline-offset: -2px; }
+    .num-btn.selected-only { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
+    .num-btn.checked-correct { background: var(--success); color: white; border-color: var(--success); }
+    .num-btn.checked-wrong { background: var(--danger); color: white; border-color: var(--danger); }
+    .num-btn.doubt { background: #f59e0b; color: white; border-color: #d97706; }
+
+    .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.78rem; margin-top: 15px; }
+    .legend span { display: flex; align-items: center; gap: 6px; }
+    .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; flex-shrink: 0; }
+
+    /* Result & Pembahasan */
+    .score-banner {
+      text-align: center; padding: 30px; background: linear-gradient(135deg, #1e40af, #3b82f6);
+      color: white; border-radius: 12px; margin-bottom: 25px;
+    }
+    .score-big { font-size: 3rem; font-weight: bold; margin: 10px 0; }
+    .subtes-score-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; text-align: center;
+    }
+    @media (max-width: 700px) { .subtes-score-grid { grid-template-columns: 1fr; } }
+    .subtes-box {
+      background: rgba(255, 255, 255, 0.14); padding: 15px; border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .subtes-box h4 { font-size: 0.9rem; margin-bottom: 5px; opacity: 0.95; }
+    .subtes-box .sub-val { font-size: 1.8rem; font-weight: 800; }
+    .subtes-box .sub-detail { font-size: 0.82rem; opacity: 0.9; margin-top: 4px; }
+
+    .result-actions {
+      display: flex; justify-content: center; gap: 12px; margin-top: 20px; flex-wrap: wrap;
+    }
+    .filter-bar {
+      display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 7px 14px; border-radius: 20px; border: 1px solid var(--border);
+      background: white; font-weight: 600; font-size: 0.88rem; cursor: pointer;
+    }
+    .filter-btn.active {
+      background: var(--primary); color: white; border-color: var(--primary);
+    }
+
+    .review-card { margin-bottom: 20px; border-left: 5px solid var(--border); }
+    .review-card.correct { border-left-color: var(--success); }
+    .review-card.wrong { border-left-color: var(--danger); }
+    .pembahasan-box {
+      background: #f8fafc; padding: 15px; border-radius: 8px; margin-top: 12px;
+      border: 1px dashed #94a3b8; font-size: 0.95rem;
+    }
+
+    /* Custom Modal Dialog */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6); display: none; align-items: center;
+      justify-content: center; z-index: 999; padding: 20px;
+    }
+    .modal-card {
+      background: white; padding: 25px; border-radius: 12px; max-width: 400px;
+      width: 100%; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .modal-card h3 { color: var(--primary); margin-bottom: 10px; }
+    .modal-card p { color: var(--text); font-size: 0.95rem; margin-bottom: 20px; }
+    .modal-btns { display: flex; gap: 10px; justify-content: center; }
+  </style>
+</head>
+<body>
+
+  <!-- HALAMAN LOGIN -->
+  <div id="login-screen">
+    <div class="login-box">
+      <h2>Portal Kuis Interaktif CAT</h2>
+      <p>Subtes TIU: Analogi (50 Soal + Cek Jawaban)</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Username/Email</label>
+          <input type="text" id="username" required placeholder="Masukkan username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="Masukkan password">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-login">Mulai Kuis</button>
+        <div class="error-msg" id="login-error"></div>
+        <div class="register-link-box">
+          Belum punya akun? <a href="http://lynk.id/seputar_guru/4g73189dndge/checkout" target="_blank" rel="noopener noreferrer">Daftar di sini</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- HALAMAN KUIS INTERAKTIF -->
+  <div id="exam-screen">
+    <header>
+      <div class="header-title">
+        <h1>KUIS TIU - ANALOGI (50 SOAL)</h1>
+        <small id="peserta-info">Peserta: -</small>
+      </div>
+      <div class="header-info">
+        <div class="live-score-pill" id="live-score-pill">Skor Terkumpul: 0</div>
+        <button type="button" class="btn btn-logout" onclick="confirmLogout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="exam-layout" style="margin-top: 20px;">
+      <!-- Kolom Kiri: Soal & Cek Jawaban -->
+      <div class="card">
+        <div class="question-header">
+          <div class="badge-group">
+            <span class="badge-no" id="q-number">Soal No. 1</span>
+            <span class="badge-subtes">TIU - Analogi</span>
+          </div>
+          <span id="q-status" style="font-size: 0.85rem; font-weight: 600; color: var(--muted);">Belum dijawab</span>
+        </div>
+
+        <div class="question-text" id="q-text"></div>
+        <div class="options-list" id="q-options"></div>
+
+        <!-- Area Hasil Cek Jawaban & Pembahasan Langsung -->
+        <div id="instant-feedback-container"></div>
+
+        <div class="nav-actions">
+          <button class="btn btn-nav" id="btn-prev" onclick="prevQuestion()">&laquo; Sebelumnya</button>
+          <div class="center-actions">
+            <button class="btn btn-check" id="btn-check" onclick="checkCurrentAnswer()" disabled>✔ Cek Jawaban</button>
+            <button class="btn btn-ragu" id="btn-doubt" onclick="toggleDoubt()">Ragu-Ragu</button>
+          </div>
+          <button class="btn btn-nav" id="btn-next" onclick="nextQuestion()">Selanjutnya &raquo;</button>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Navigasi Nomor -->
+      <div class="card">
+        <h3>Navigasi Kuis</h3>
+        <p style="font-size: 0.78rem; color: var(--muted); margin-top: 4px;">1-50: TIU Analogi (+5 Poin/Soal)</p>
+        <div class="grid-numbers" id="number-grid"></div>
+        <div class="legend">
+          <span><i class="dot" style="background: var(--success);"></i> Benar (+5 Poin)</span>
+          <span><i class="dot" style="background: var(--danger);"></i> Salah (0 Poin)</span>
+          <span><i class="dot" style="background: #dbeafe; border: 1px solid #93c5fd;"></i> Belum Dicek</span>
+          <span><i class="dot" style="background: #f59e0b;"></i> Ragu-Ragu</span>
+          <span><i class="dot" style="background: #fff; border: 1px solid #cbd5e1;"></i> Kosong</span>
+        </div>
+        <button class="btn btn-finish" onclick="confirmFinish()">Selesai & Rekap Nilai</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN HASIL & PEMBAHASAN -->
+  <div id="result-screen">
+    <div class="score-banner">
+      <h2>Rekap Hasil Kuis TIU - Analogi</h2>
+      <p id="res-peserta"></p>
+      <div class="score-big" id="res-total-score">Total Skor: 0 / 250</div>
+      <p id="res-detail">Benar: 0 | Salah: 0 | Kosong: 0</p>
+
+      <!-- Statistik Ringkas -->
+      <div class="subtes-score-grid">
+        <div class="subtes-box">
+          <h4>Jawaban Benar</h4>
+          <div class="sub-val" id="stat-benar">0</div>
+          <div class="sub-detail">Poin diperoleh: <span id="stat-poin">0</span></div>
+        </div>
+        <div class="subtes-box">
+          <h4>Jawaban Salah</h4>
+          <div class="sub-val" id="stat-salah">0</div>
+          <div class="sub-detail">Perlu diperdalam kembali</div>
+        </div>
+        <div class="subtes-box">
+          <h4>Tidak Dijawab</h4>
+          <div class="sub-val" id="stat-kosong">0</div>
+          <div class="sub-detail">Persentase Akurasi: <span id="stat-akurasi">0%</span></div>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn" style="background: white; color: var(--primary);" onclick="retryExam()">Ulangi Kuis</button>
+        <button class="btn btn-logout" onclick="logoutUser()">Logout</button>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
+      <h3>Kunci Jawaban & Pembahasan Lengkap</h3>
+      <div class="filter-bar" id="filter-bar">
+        <button class="filter-btn active" onclick="filterReview('ALL', this)">Semua (50)</button>
+        <button class="filter-btn" onclick="filterReview('CORRECT', this)">Benar</button>
+        <button class="filter-btn" onclick="filterReview('WRONG', this)">Salah</button>
+        <button class="filter-btn" onclick="filterReview('EMPTY', this)">Kosong</button>
+      </div>
+    </div>
+    <div id="review-container"></div>
+  </div>
+
+  <!-- CUSTOM MODAL -->
+  <div class="modal-overlay" id="custom-modal">
+    <div class="modal-card">
+      <h3 id="modal-title">Konfirmasi</h3>
+      <p id="modal-message">Pesan konfirmasi</p>
+      <div class="modal-btns" id="modal-buttons"></div>
+    </div>
+  </div>
+
+<script>
+  // =========================================================================
+  // URL GOOGLE APPS SCRIPT ANDA YANG AKTIF
+  // =========================================================================
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxB6Th7GHlD9o8ABbYcK2mdV7mv4ufy2i-SYXUg3jVqS0Q1bkXa_pkseMhqmIzgCTx7/exec";
+
+  // =========================================================================
+  // BANK SOAL, KUNCI JAWABAN & PEMBAHASAN (50 SOAL ANALOGI - TETAP UTUH)
+  // =========================================================================
+  const questions = [
+    {
+      no: 1,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>AFRIKA SELATAN : RAND</strong>",
+      options: {
+        A: "Pakistan : Rupee",
+        B: "Rupiah : Indonesia",
+        C: "Bangladesh : Lev",
+        D: "Canada : Franc",
+        E: "Peso : Chili"
+      },
+      answer: "A",
+      explanation: "Mata uang AFRIKA SELATAN adalah RAND. Mata uang PAKISTAN adalah RUPEE."
+    },
+    {
+      no: 2,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>ABISAL : ENDAPAN TANAH</strong>",
+      options: {
+        A: "Abstrak : Nyata",
+        B: "Gambar : Garis",
+        C: "Genjah : Bibit",
+        D: "Bulsak : Kasur",
+        E: "Remisi : Penahanan"
+      },
+      answer: "D",
+      explanation: "ABISAL berarti ENDAPAN TANAH. BULSAK sama dengan KASUR."
+    },
+    {
+      no: 3,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>UANG MAKAN : UPAH KHUSUS UNTUK MAKAN</strong>",
+      options: {
+        A: "Kecil Hati : Sabar",
+        B: "Ringan Tangan : Suka Mencuri",
+        C: "Sakit Hati : Kecewa",
+        D: "Tinggi Cakap : Merayu",
+        E: "Kutu Buku : Penyakit Kulit"
+      },
+      answer: "C",
+      explanation: "Kiasan UANG MAKAN artinya UPAH KHUSUS UNTUK MAKAN. SAKIT HATI berarti KECEWA."
+    },
+    {
+      no: 4,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>BULI-BULI : BOTOL KECIL</strong>",
+      options: {
+        A: "Odem : Sehat",
+        B: "Abau : Kura-kura Rawa",
+        C: "Seremoni : Pengakuan",
+        D: "Langka : Usang",
+        E: "Obsolet : Inovasi"
+      },
+      answer: "B",
+      explanation: "BULI-BULI adalah BOTOL KECIL atau guci kecil. ABAU sama dengan KURA-KURA."
+    },
+    {
+      no: 5,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>CHILI : SANTIAGO</strong>",
+      options: {
+        A: "Indonesia : Denpasar",
+        B: "Srilanka : Colombo",
+        C: "Nairobi : Kenya",
+        D: "Mesir : Tripoli",
+        E: "Maroko : Tunis"
+      },
+      answer: "B",
+      explanation: "Ibu kota CHILI adalah SANTIAGO. Ibu kota SRILANKA adalah COLOMBO."
+    },
+    {
+      no: 6,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>DEHIDRASI : KURANG CAIRAN</strong>",
+      options: {
+        A: "Observasi : Penglihatan",
+        B: "Operasi : Imbauan",
+        C: "Dekan : Pemimpin Fakultas",
+        D: "Korupsi : Jasa",
+        E: "Manipulasi : Jujur"
+      },
+      answer: "C",
+      explanation: "DEHIDRASI adalah keadaan KEKURANGAN CAIRAN dalam tubuh. DEKAN adalah PEMIMPIN FAKULTAS."
+    },
+    {
+      no: 7,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>TUTUP MULUT : TIDAK MAU BICARA</strong>",
+      options: {
+        A: "Raut Muka : Ekspresi Wajah",
+        B: "Ambil Hati : Melirik",
+        C: "Naik Haji : Naik Gaji",
+        D: "Usil : Ringan Mulut",
+        E: "Tebal Muka : Jujur"
+      },
+      answer: "A",
+      explanation: "Kiasan TUTUP MULUT artinya TIDAK MAU BICARA. RAUT MUKA berarti EKSPRESI WAJAH."
+    },
+    {
+      no: 8,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>HIENA : ANJING HUTAN</strong>",
+      options: {
+        A: "Anoa : Macan",
+        B: "Luwak : Burung",
+        C: "Kuwuk : Kambing",
+        D: "Bajing : Kucing",
+        E: "Keluai : Musang"
+      },
+      answer: "E",
+      explanation: "Nama lain dari HIENA adalah ANJING HUTAN. Nama lain dari KELUAI adalah MUSANG."
+    },
+    {
+      no: 9,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>KENYA : REPUBLIK</strong>",
+      options: {
+        A: "Islandia : Monarki",
+        B: "Kanada : Republik",
+        C: "Irak : Republik",
+        D: "Belgia : Persemakmuran",
+        E: "Denmark : Republik"
+      },
+      answer: "C",
+      explanation: "Bentuk Negara KENYA adalah REPUBLIK. Bentuk Negara IRAK juga REPUBLIK."
+    },
+    {
+      no: 10,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>MAJUH : LAHAP</strong>",
+      options: {
+        A: "Frontal : Terbuka",
+        B: "Ajudan : Obros",
+        C: "Oknum : Kelompok",
+        D: "Netra : Telinga",
+        E: "Kaki : Kepala"
+      },
+      answer: "A",
+      explanation: "MAJUH sama dengan LAHAP. FRONTAL sama dengan TERBUKA."
+    },
+    {
+      no: 11,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>TEBAL MUKA : TIDAK PUNYA MALU</strong>",
+      options: {
+        A: "Mata Hari : Mata Hati",
+        B: "Keras Kepala : Congkak",
+        C: "Buah Tangan : Bahan Pembicaraan",
+        D: "Tinggi Hati : Ramah",
+        E: "Naik Darah : Marah"
+      },
+      answer: "E",
+      explanation: "Kiasan TEBAL MUKA artinya TIDAK PUNYA MALU. NAIK DARAH artinya MARAH."
+    },
+    {
+      no: 12,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>PENCURI : PANCALONGOK</strong>",
+      options: {
+        A: "Belajar Sendiri : Autodidak",
+        B: "Gobar : Gembira",
+        C: "Bangga : Sombong",
+        D: "Malam : Tinggi Hari",
+        E: "Kreditor : Debitor"
+      },
+      answer: "A",
+      explanation: "PANCALONGOK sama dengan PENCURI. BELAJAR SENDIRI disebut juga AUTODIDAK."
+    },
+    {
+      no: 13,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>LEK : ALBANIA</strong>",
+      options: {
+        A: "Australia : Dollar",
+        B: "Escudo : Portugal",
+        C: "Peso : Perancis",
+        D: "Korea Selatan : Yen",
+        E: "Peso : India"
+      },
+      answer: "B",
+      explanation: "LEK adalah mata uang Negara ALBANIA. ESCUDO adalah mata uang Negara PORTUGAL."
+    },
+    {
+      no: 14,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>KONVENSI : KONFERENSI</strong>",
+      options: {
+        A: "Pengacara : Penuntut Umum",
+        B: "Pendidikan : Siswa",
+        C: "Elaborasi : Penggarapan",
+        D: "Mobilitas : Dinamika",
+        E: "Binatang : Tumbuhan"
+      },
+      answer: "C",
+      explanation: "KONVENSI disebut juga KONFERENSI. ELABORASI sama dengan PENGGARAPAN."
+    },
+    {
+      no: 15,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>TANGAN BESI : BERPERILAKU KERAS</strong>",
+      options: {
+        A: "Panjang Usus : Kecewa",
+        B: "Buah Bibir : Kehormatan",
+        C: "Kepala Batu : Supel",
+        D: "Panas Hati : Marah",
+        E: "Mata-mata : Tangan Kaki"
+      },
+      answer: "D",
+      explanation: "Kiasan TANGAN BESI berarti BERPERILAKU KERAS. PANAS HATI artinya MARAH."
+    },
+    {
+      no: 16,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>ELAN : SEMANGAT</strong>",
+      options: {
+        A: "Labut : Beda",
+        B: "Pamor : Gengsi",
+        C: "Mata : Melihat",
+        D: "Kapal : Labuh",
+        E: "Televisi : Radio"
+      },
+      answer: "B",
+      explanation: "ELAN sama dengan SEMANGAT. PAMOR sama dengan GENGSI."
+    },
+    {
+      no: 17,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>SAN JOSE : COSTARICA</strong>",
+      options: {
+        A: "Riga : Ukraina",
+        B: "Rusia : Moskow",
+        C: "Tel Aviv : Israel",
+        D: "Kiev : Moldova",
+        E: "London : Irlandia"
+      },
+      answer: "C",
+      explanation: "SAN JOSE adalah ibu kota Negara COSTARICA. TEL AVIV adalah ibu kota Negara ISRAEL."
+    },
+    {
+      no: 18,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>ABILAH : CACAR</strong>",
+      options: {
+        A: "Parfum : Wangi",
+        B: "Makan : Minum",
+        C: "Pegunungan : Gunung",
+        D: "Bonafide : Terpercaya",
+        E: "Kalah : Berani"
+      },
+      answer: "D",
+      explanation: "ABILAH sama dengan CACAR. BONAFIDE sama dengan TERPERCAYA."
+    },
+    {
+      no: 19,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>RINGAN TANGAN : SUKA MEMBANTU</strong>",
+      options: {
+        A: "Tinggi Badan : Berat Badan",
+        B: "Orang Asing : Tidak Dikenal",
+        C: "Besar Hati : Iri",
+        D: "Sarapan : Makan Malam",
+        E: "Angkuh : Tinggi Hati"
+      },
+      answer: "B",
+      explanation: "Kiasan: RINGAN TANGAN berarti SUKA BEKERJA/MEMBANTU. ORANG ASING maksudnya TIDAK DIKENAL."
+    },
+    {
+      no: 20,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>KLEPTOFOBIA : FOBIA MENCURI</strong>",
+      options: {
+        A: "Blus : Busana",
+        B: "Pakaian : Celana",
+        C: "Pasir : Debu",
+        D: "Friksi : Fiktif",
+        E: "Influenza : THT"
+      },
+      answer: "A",
+      explanation: "KLEPTOFOBIA sama dengan FOBIA MENCURI. BLUS sama dengan BUSANA."
+    },
+    {
+      no: 21,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>ALJAZAIR : DINAR</strong>",
+      options: {
+        A: "Afghanistan : Pound",
+        B: "Italia : Peso",
+        C: "Suriname : Guilder",
+        D: "Chad : Cedi",
+        E: "Rupee : India"
+      },
+      answer: "C",
+      explanation: "Mata uang Negara ALJAZAIR adalah DINAR. Mata uang Negara SURINAME adalah GUILDER."
+    },
+    {
+      no: 22,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>LATIF : INDAH</strong>",
+      options: {
+        A: "Zenit : Titik Puncak",
+        B: "Paragraf : Kalimat",
+        C: "Ofisial : Ilegal",
+        D: "Lingkaran : Bangun Datar",
+        E: "Langit : Bintang"
+      },
+      answer: "A",
+      explanation: "LATIF berarti INDAH. ZENIT sama dengan TITIK PUNCAK."
+    },
+    {
+      no: 23,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>ORANG SEBELAH : TETANGGA</strong>",
+      options: {
+        A: "Naik Haji : Menunaikan Ibadah Haji",
+        B: "Sombong : Besar Kepala",
+        C: "Tinggi Hari : Malam",
+        D: "Mandi Darah : Sehat",
+        E: "Kecil Hati : Bangga"
+      },
+      answer: "A",
+      explanation: "Kiasan ORANG SEBELAH artinya TETANGGA. NAIK HAJI berarti MENUNAIKAN IBADAH HAJI."
+    },
+    {
+      no: 24,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>BAHADUR : PAHLAWAN</strong>",
+      options: {
+        A: "Eklips : Oval",
+        B: "Guru : Murid",
+        C: "Ablepsia : Kebutaan",
+        D: "Sekolah : Universitas",
+        E: "Mekanik : Sopir"
+      },
+      answer: "C",
+      explanation: "BAHADUR disebut juga dengan PAHLAWAN. ABLEPSIA sama dengan KEBUTAAN."
+    },
+    {
+      no: 25,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>PORTUGAL : LISABON = NEPAL : ...</strong>",
+      options: {
+        A: "New Delhi",
+        B: "Mala",
+        C: "Dacca",
+        D: "Khatmandu",
+        E: "Tel Aviv"
+      },
+      answer: "D",
+      explanation: "Ibu kota PORTUGAL adalah LISABON. Ibu kota NEPAL adalah KHATMANDU."
+    },
+    {
+      no: 26,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>ABLUSI : PEMBERSIHAN</strong>",
+      options: {
+        A: "Eklektis : Penyelenggaraan",
+        B: "Interpelasi : Permintaan Keterangan",
+        C: "Permanen : Sementara",
+        D: "Presiden : Menteri",
+        E: "Awal : Akhir"
+      },
+      answer: "B",
+      explanation: "ABLUSI sama dengan PEMBERSIHAN. INTERPELASI adalah PERMINTAAN KETERANGAN."
+    },
+    {
+      no: 27,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>BANTING STIR : BERUSAHA LAIN</strong>",
+      options: {
+        A: "Banting Tulang : Bekerja Keras",
+        B: "Besar Cakap : Jujur",
+        C: "Ringan Kepala : Penyakit",
+        D: "Tinggi Badan : Cantik",
+        E: "Penakut : Besar Kalang"
+      },
+      answer: "A",
+      explanation: "Kiasan BANTING STIR berarti BERUSAHA LAIN. BANTING TULANG artinya BEKERJA KERAS."
+    },
+    {
+      no: 28,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>BAIN : NYATA</strong>",
+      options: {
+        A: "Violis : Biola",
+        B: "Panjang : Pendek",
+        C: "Parlente : Picisan",
+        D: "Perpustakaan : Buku",
+        E: "Interpretasi : Tafsiran"
+      },
+      answer: "E",
+      explanation: "BAIN sama dengan NYATA. INTERPRETASI sama dengan TAFSIRAN."
+    },
+    {
+      no: 29,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>DOLLAR : TAIWAN = ... : AUSTRIA</strong>",
+      options: {
+        A: "Guarani",
+        B: "Dollar",
+        C: "Pound",
+        D: "Shilling",
+        E: "Peso"
+      },
+      answer: "D",
+      explanation: "DOLLAR adalah mata uang Negara TAIWAN. SHILLING adalah mata uang Negara AUSTRIA."
+    },
+    {
+      no: 30,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>BAJAU : MEMUKUL</strong>",
+      options: {
+        A: "Provokasi : Gangguan",
+        B: "Marka : Garis",
+        C: "Kaki : Sepatu",
+        D: "Berangkat : Tiba",
+        E: "Baju : Kain"
+      },
+      answer: "A",
+      explanation: "BAJAU sama dengan MEMUKUL. PROVOKASI sama dengan GANGGUAN."
+    },
+    {
+      no: 31,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>MAKAN HATI : MENJADI BEBAN PIKIRAN</strong>",
+      options: {
+        A: "Kepala Batu : Menghargai",
+        B: "Lurus Hati : Iri",
+        C: "Mata Angin : Arah",
+        D: "Buah Tangan : Banyak Bicara",
+        E: "Muka Dua : Dermawan"
+      },
+      answer: "C",
+      explanation: "Kiasan MAKAN HATI berarti MENJADI BEBAN PIKIRAN. MATA ANGIN artinya ARAH."
+    },
+    {
+      no: 32,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>PASAK : BAJI</strong>",
+      options: {
+        A: "Galat : Keliru",
+        B: "Derai : Ombak",
+        C: "Mangkus : Obat",
+        D: "Kadaluwarsa : Tepat",
+        E: "Pemerintah : Eksekutif"
+      },
+      answer: "A",
+      explanation: "PASAK sama dengan BAJI. GALAT sama dengan KELIRU."
+    },
+    {
+      no: 33,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>OTTAWA : CANADA</strong>",
+      options: {
+        A: "Damaskus : Suriah",
+        B: "Italia : Roma",
+        C: "Brussel : Monaco",
+        D: "Lome : Ghana",
+        E: "Manila : Vietnam"
+      },
+      answer: "A",
+      explanation: "OTTAWA adalah ibu kota Negara Canada. DAMASKUS adalah ibu kota negara SURIAH."
+    },
+    {
+      no: 34,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>GUNDU : KELERENG</strong>",
+      options: {
+        A: "Iterasi : Ulangan",
+        B: "Komputer : Teknologi",
+        C: "Angin : Udara",
+        D: "Laut : Ombak",
+        E: "Pertimbangan : Awalan"
+      },
+      answer: "A",
+      explanation: "GUNDU sama dengan KELERENG. ITERASI sama dengan ULANGAN."
+    },
+    {
+      no: 35,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>MATA RANTAI : HUBUNGAN</strong>",
+      options: {
+        A: "Sombong : Besar Kepala",
+        B: "Besar Mulut : Oleh-oleh",
+        C: "Kaki Tangan : Pemimpin",
+        D: "Main Mata : Melirik",
+        E: "Tinggi Hati : Ramah"
+      },
+      answer: "D",
+      explanation: "Kiasan MATA RANTAI artinya sebuah HUBUNGAN. MAIN MATA berarti MELIRIK."
+    },
+    {
+      no: 36,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>ROMANTIKA : LIKA-LIKU</strong>",
+      options: {
+        A: "Buldan : Perumahan",
+        B: "Melik : Ingin Memiliki",
+        C: "Polos : Garis",
+        D: "Markas : Tujuan",
+        E: "Laki-laki : Perempuan"
+      },
+      answer: "B",
+      explanation: "ROMANTIKA adalah LIKA-LIKU. MELIK berarti INGIN MEMILIKI."
+    },
+    {
+      no: 37,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>BELANDA : GULDEN</strong>",
+      options: {
+        A: "Dollar : Amerika Serikat",
+        B: "Argentina : Dollar",
+        C: "Australia : Poundsterling",
+        D: "Angola : Taha",
+        E: "Swiss : France"
+      },
+      answer: "E",
+      explanation: "Mata uang Negara BELANDA adalah GULDEN. Mata uang Negara Swiss adalah FRANCE."
+    },
+    {
+      no: 38,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>FUNGI : CENDAWAN</strong>",
+      options: {
+        A: "Adagium : Pantun",
+        B: "Marka : Larangan",
+        C: "Desa : Kota",
+        D: "Langguk : Sombong",
+        E: "Puisi : Roman"
+      },
+      answer: "D",
+      explanation: "FUNGI disebut juga dengan CENDAWAN. LANGGUK sama dengan SOMBONG."
+    },
+    {
+      no: 39,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>PISAU : SEBILAH</strong>",
+      options: {
+        A: "Jala : Seikat",
+        B: "Semata : Jarum",
+        C: "Cahaya : Seberkas",
+        D: "Sekaki : Payung",
+        E: "Pasir : Segumpal"
+      },
+      answer: "C",
+      explanation: "Kata Bantu untuk PISAU adalah SEBILAH. Kata Bantu untuk CAHAYA adalah SEBERKAS."
+    },
+    {
+      no: 40,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>MAJAS : KIASAN</strong>",
+      options: {
+        A: "Oblak : Sempit",
+        B: "Panjang : Lebar",
+        C: "Nahi : Boleh",
+        D: "Perintah : Larangan",
+        E: "Epik : Kisah Pahlawan"
+      },
+      answer: "E",
+      explanation: "MAJAS sama dengan KIASAN. EPIK adalah KISAH KEPAHLAWANAN."
+    },
+    {
+      no: 41,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>KOMPOR : API</strong>",
+      options: {
+        A: "Lemari : Es",
+        B: "Kipas : Angin",
+        C: "Palung : Gua",
+        D: "Pohon : Buah",
+        E: "Jalan : Macet"
+      },
+      answer: "B",
+      explanation: "KOMPOR berfungsi menghasilkan API. KIPAS juga dikatakan berfungsi apabila menghasilkan ANGIN."
+    },
+    {
+      no: 42,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>IRAN : TEHERAN = REPUBLIK CEKO : ...</strong>",
+      options: {
+        A: "Praha",
+        B: "Roma",
+        C: "Brussel",
+        D: "Madrid",
+        E: "Athena"
+      },
+      answer: "A",
+      explanation: "Ibu kota IRAN adalah TEHERAN. Ibu kota REPUBLIK CEKO adalah PRAHA."
+    },
+    {
+      no: 43,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>INSINUASI : SINDIRAN</strong>",
+      options: {
+        A: "Lagu : Irama",
+        B: "Allegro : Lambat",
+        C: "Sinis : Mengejek",
+        D: "Gitar : Piano",
+        E: "Tinggi : Berat"
+      },
+      answer: "C",
+      explanation: "INSINUASI sama dengan SINDIRAN. SINIS sama dengan MENGEJEK."
+    },
+    {
+      no: 44,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>LEGA : DISELESAIKAN</strong>",
+      options: {
+        A: "Tamu : Dimasukkan",
+        B: "Pencalonan : Diumumkan",
+        C: "Ide : Disarankan",
+        D: "Mengakhiri : Memulai",
+        E: "Ragu : Dikonfirmasi"
+      },
+      answer: "E",
+      explanation: "DISELESAIKAN supaya LEGA. DIKONFIRMASI supaya tidak RAGU."
+    },
+    {
+      no: 45,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>SEKOLAH : SISWA : BELAJAR</strong>",
+      options: {
+        A: "Laboratorium : Ilmuwan : Meneliti",
+        B: "Sekolah : Guru : Rapat",
+        C: "Kanton : Makan : Siswa",
+        D: "Dokter : Pasien : Periksa",
+        E: "Rumah : Ayah : Ibu"
+      },
+      answer: "A",
+      explanation: "SEKOLAH adalah tempat SISWA untuk BELAJAR. LABORATORIUM adalah tempat ILMUWAN untuk MENELITI."
+    },
+    {
+      no: 46,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>SEBIDANG : TANAH</strong>",
+      options: {
+        A: "Benang : Seikal",
+        B: "Sesayat : Manusia",
+        C: "Sekodi : Wayang",
+        D: "Sebongkah : Batu",
+        E: "Pasir : Segenggam"
+      },
+      answer: "D",
+      explanation: "SEBIDANG adalah kata bantu untuk TANAH. SEBONGKAH adalah kata bantu untuk BATU."
+    },
+    {
+      no: 47,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>BAJUL : PENJAHAT</strong>",
+      options: {
+        A: "Loba : Kikir",
+        B: "Rendah Hati : Angkuh",
+        C: "Akselerasi : Terlambat",
+        D: "Laba : Rugi",
+        E: "Ekskavasi : Penggalian"
+      },
+      answer: "E",
+      explanation: "BAJUL sama dengan PENJAHAT. EKSKAVASI sama dengan PENGGALIAN."
+    },
+    {
+      no: 48,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>FRANCE : BELGIA</strong>",
+      options: {
+        A: "Nairo : Liberia",
+        B: "Lira : Vatikan",
+        C: "Real : Irak",
+        D: "Dinar : Iran",
+        E: "Irlandia : Pound"
+      },
+      answer: "B",
+      explanation: "FRANCE adalah mata uang negara BELGIA. LIRA adalah mata uang Negara VATIKAN."
+    },
+    {
+      no: 49,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>MEMASAK : PANAS</strong>",
+      options: {
+        A: "Abrasi : Hempasan",
+        B: "Reruntuhan : Penghancuran",
+        C: "Matahari : Hujan",
+        D: "Rayuan : Pujian",
+        E: "Serpihan : Potongan"
+      },
+      answer: "A",
+      explanation: "MEMASAK membutuhkan PANAS. Terjadinya ABRASI karena HEMPASAN air."
+    },
+    {
+      no: 50,
+      text: "Carilah kata yang tepat sehingga membentuk padanan hubungan (analogi) yang tepat!<br><strong>EKSHIBISI : PERTUNJUKKAN</strong>",
+      options: {
+        A: "Adagio : Cepat",
+        B: "Panas : Kering",
+        C: "Bonanza : Sumber Keuntungan",
+        D: "Hujan : Dingin",
+        E: "Musim : Salju"
+      },
+      answer: "C",
+      explanation: "EKSHIBISI sama dengan PERTUNJUKAN. BONANZA sama dengan SUMBER KEUNTUNGAN."
+    }
+  ];
+
+  // =========================================================================
+  // STATE & LOGIKA KUIS INTERAKTIF
+  // =========================================================================
+  let currentUser = { user: "", nama: "" };
+  let currentIndex = 0;
+  let userAnswers = new Array(questions.length).fill(null);
+  let checkedStatus = new Array(questions.length).fill(false); // Menyimpan status apakah soal sudah dicek
+  let doubtStatus = new Array(questions.length).fill(false);
+
+  function showModal(title, message, buttons) {
+    const overlay = document.getElementById("custom-modal");
+    document.getElementById("modal-title").textContent = title;
+    document.getElementById("modal-message").textContent = message;
+    const btnContainer = document.getElementById("modal-buttons");
+    btnContainer.innerHTML = "";
+
+    buttons.forEach(b => {
+      const btn = document.createElement("button");
+      btn.className = "btn " + (b.className || "btn-primary");
+      btn.style.width = "auto";
+      btn.textContent = b.text;
+      btn.onclick = () => {
+        overlay.style.display = "none";
+        if (b.onClick) b.onClick();
+      };
+      btnContainer.appendChild(btn);
+    });
+
+    overlay.style.display = "flex";
+  }
+
+  // Handle Login ke Google Sheet
+  document.getElementById("login-form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const userVal = document.getElementById("username").value.trim();
+    const passVal = document.getElementById("password").value.trim();
+    const btn = document.getElementById("btn-login");
+    const errBox = document.getElementById("login-error");
+
+    btn.disabled = true;
+    btn.textContent = "Memverifikasi...";
+    errBox.style.display = "none";
+
+    try {
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({ username: userVal, password: passVal })
+      });
+      
+      const textRes = await response.text();
+      let result;
+      try {
+        result = JSON.parse(textRes);
+      } catch (parseErr) {
+        throw new Error("Format respons server tidak valid.");
+      }
+
+      if (result.status === "success") {
+        currentUser = { user: result.user, nama: result.nama };
+        startExam();
+      } else {
+        errBox.style.display = "block";
+        errBox.textContent = result.message || "Username atau Password salah!";
+      }
+    } catch (error) {
+      errBox.style.display = "block";
+      errBox.textContent = "Gagal memproses login. Pastikan Web App sudah di-deploy ulang dengan 'Who has access' diset ke 'Anyone'.";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Mulai Kuis";
+    }
+  });
+
+  function resetExamState() {
+    currentIndex = 0;
+    userAnswers = new Array(questions.length).fill(null);
+    checkedStatus = new Array(questions.length).fill(false);
+    doubtStatus = new Array(questions.length).fill(false);
+    updateLiveScore();
+  }
+
+  function startExam() {
+    resetExamState();
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("exam-screen").style.display = "block";
+    document.getElementById("peserta-info").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+
+    initNumberGrid();
+    renderQuestion(0);
+  }
+
+  function retryExam() {
+    startExam();
+  }
+
+  function confirmLogout() {
+    showModal(
+      "Konfirmasi Logout",
+      "Apakah Anda yakin ingin keluar dari kuis? Progres jawaban Anda saat ini akan direset.",
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Logout", className: "btn-logout", onClick: logoutUser }
+      ]
+    );
+  }
+
+  function logoutUser() {
+    resetExamState();
+    currentUser = { user: "", nama: "" };
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("login-error").style.display = "none";
+
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("login-screen").style.display = "flex";
+  }
+
+  function updateLiveScore() {
+    let liveTotal = 0;
+    questions.forEach((q, idx) => {
+      const ans = userAnswers[idx];
+      if (ans !== null && checkedStatus[idx]) {
+        if (ans === q.answer) liveTotal += 5;
+      }
+    });
+    const pill = document.getElementById("live-score-pill");
+    if (pill) {
+      pill.textContent = `Skor Terkumpul: ${liveTotal}`;
+    }
+  }
+
+  function initNumberGrid() {
+    const grid = document.getElementById("number-grid");
+    grid.innerHTML = "";
+    questions.forEach((q, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "num-btn";
+      btn.id = `num-btn-${idx}`;
+      btn.textContent = q.no;
+      btn.onclick = () => renderQuestion(idx);
+      grid.appendChild(btn);
+    });
+  }
+
+  function updateNumberGrid() {
+    questions.forEach((q, idx) => {
+      const btn = document.getElementById(`num-btn-${idx}`);
+      if (!btn) return;
+      btn.className = "num-btn";
+      if (idx === currentIndex) btn.classList.add("active");
+
+      const ans = userAnswers[idx];
+      const isChecked = checkedStatus[idx];
+
+      if (isChecked && ans !== null) {
+        btn.classList.add(ans === q.answer ? "checked-correct" : "checked-wrong");
+      } else if (doubtStatus[idx]) {
+        btn.classList.add("doubt");
+      } else if (ans !== null) {
+        btn.classList.add("selected-only");
+      }
+    });
+  }
+
+  function renderQuestion(index) {
+    currentIndex = index;
+    const q = questions[index];
+    const uAns = userAnswers[index];
+    const isChecked = checkedStatus[index];
+
+    document.getElementById("q-number").textContent = `Soal No. ${q.no} dari ${questions.length}`;
+    document.getElementById("q-text").innerHTML = q.text;
+
+    // Status Header
+    const statusEl = document.getElementById("q-status");
+    if (isChecked && uAns !== null) {
+      const isCorrect = uAns === q.answer;
+      statusEl.textContent = isCorrect ? "✔ Benar (+5 Poin)" : "✘ Salah (0 Poin)";
+      statusEl.style.color = isCorrect ? "var(--success)" : "var(--danger)";
+    } else if (doubtStatus[index]) {
+      statusEl.textContent = "Ditandai Ragu-Ragu";
+      statusEl.style.color = "#b45309";
+    } else if (uAns) {
+      statusEl.textContent = `Dipilih (${uAns}) - Belum dicek`;
+      statusEl.style.color = "var(--primary)";
+    } else {
+      statusEl.textContent = "Belum dijawab";
+      statusEl.style.color = "var(--muted)";
+    }
+
+    // Render Opsi Jawaban
+    const optContainer = document.getElementById("q-options");
+    optContainer.innerHTML = "";
+
+    ["A", "B", "C", "D", "E"].forEach(letter => {
+      const div = document.createElement("div");
+      let extraClass = "";
+      let tagHtml = "";
+
+      if (isChecked) {
+        extraClass += " locked";
+        if (letter === q.answer) {
+          extraClass += " opt-correct";
+          tagHtml = `<span class="opt-tag tag-correct">Kunci Jawaban</span>`;
+        } else if (letter === uAns && uAns !== q.answer) {
+          extraClass += " opt-wrong";
+          tagHtml = `<span class="opt-tag tag-wrong">Jawaban Anda</span>`;
+        }
+      } else {
+        if (uAns === letter) {
+          extraClass += " selected";
+        }
+      }
+
+      div.className = "option-item" + extraClass;
+      if (!isChecked) {
+        div.onclick = () => selectOption(letter);
+      }
+
+      div.innerHTML = `
+        <div class="option-left">
+          <div class="option-letter">${letter}</div>
+          <div>${q.options[letter]}</div>
+        </div>
+        ${tagHtml}
+      `;
+      optContainer.appendChild(div);
+    });
+
+    // Render Kotak Feedback & Pembahasan jika sudah dicek
+    const fbContainer = document.getElementById("instant-feedback-container");
+    fbContainer.innerHTML = "";
+
+    if (isChecked && uAns !== null) {
+      const fbBox = document.createElement("div");
+      const isCorrect = uAns === q.answer;
+      fbBox.className = `instant-feedback ${isCorrect ? "fb-correct" : "fb-wrong"}`;
+      fbBox.innerHTML = `
+        <div class="fb-header">
+          <span style="color: ${isCorrect ? "var(--success)" : "var(--danger)"}">
+            ${isCorrect ? "🎉 Jawaban Anda BENAR! (+5 Poin)" : `❌ Jawaban Anda KURANG TEPAT! Kunci: ${q.answer}`}
+          </span>
+        </div>
+        <div class="fb-body"><strong>Pembahasan:</strong>\n${q.explanation}</div>
+      `;
+      fbContainer.appendChild(fbBox);
+    }
+
+    // Atur tombol Cek Jawaban & Navigasi
+    const btnCheck = document.getElementById("btn-check");
+    if (isChecked) {
+      btnCheck.disabled = true;
+      btnCheck.textContent = "✔ Sudah Dicek";
+    } else {
+      btnCheck.disabled = (uAns === null);
+      btnCheck.textContent = "✔ Cek Jawaban";
+    }
+
+    document.getElementById("btn-doubt").disabled = isChecked;
+    document.getElementById("btn-prev").disabled = (index === 0);
+    document.getElementById("btn-next").disabled = (index === questions.length - 1);
+    updateNumberGrid();
+  }
+
+  function selectOption(letter) {
+    if (checkedStatus[currentIndex]) return; // Kunci perubahan setelah jawaban dicek
+    userAnswers[currentIndex] = letter;
+    renderQuestion(currentIndex);
+  }
+
+  function checkCurrentAnswer() {
+    if (userAnswers[currentIndex] === null) return;
+    checkedStatus[currentIndex] = true;
+    doubtStatus[currentIndex] = false;
+    updateLiveScore();
+    renderQuestion(currentIndex);
+  }
+
+  function toggleDoubt() {
+    if (checkedStatus[currentIndex]) return;
+    doubtStatus[currentIndex] = !doubtStatus[currentIndex];
+    renderQuestion(currentIndex);
+  }
+
+  function prevQuestion() {
+    if (currentIndex > 0) renderQuestion(currentIndex - 1);
+  }
+
+  function nextQuestion() {
+    if (currentIndex < questions.length - 1) renderQuestion(currentIndex + 1);
+  }
+
+  function confirmFinish() {
+    const unanswered = userAnswers.filter(a => a === null).length;
+    const msg = unanswered > 0 
+      ? `Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin mengakhiri kuis dan melihat rekap nilai?`
+      : "Apakah Anda yakin ingin mengakhiri kuis dan melihat rekap nilai lengkap?";
+    
+    showModal(
+      "Selesai & Rekap Nilai",
+      msg,
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Lihat Rekap", className: "btn-finish", onClick: finishExam }
+      ]
+    );
+  }
+
+  function filterReview(statusFilter, btnEl) {
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    if (btnEl) btnEl.classList.add("active");
+
+    document.querySelectorAll(".review-card").forEach(card => {
+      if (statusFilter === "ALL" || card.dataset.status === statusFilter) {
+        card.style.display = "block";
+      } else {
+        card.style.display = "none";
+      }
+    });
+  }
+
+  function finishExam() {
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "block";
+
+    let benar = 0, salah = 0, kosong = 0;
+    const reviewContainer = document.getElementById("review-container");
+    reviewContainer.innerHTML = "";
+
+    questions.forEach((q, idx) => {
+      const uAns = userAnswers[idx];
+      const isCorrect = (uAns !== null && uAns === q.answer);
+
+      let statusKey = "EMPTY";
+      if (uAns === null) {
+        kosong++;
+        statusKey = "EMPTY";
+      } else if (isCorrect) {
+        benar++;
+        statusKey = "CORRECT";
+      } else {
+        salah++;
+        statusKey = "WRONG";
+      }
+
+      const card = document.createElement("div");
+      card.dataset.status = statusKey;
+      card.className = `card review-card ${isCorrect ? 'correct' : 'wrong'}`;
+
+      const statusText = uAns === null
+        ? "Tidak Dijawab (0 Poin)"
+        : (isCorrect ? "Benar (+5 Poin)" : "Salah (0 Poin)");
+
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+          <div>
+            <strong>Soal No. ${q.no}</strong>
+            <span class="badge-subtes" style="margin-left:6px;">TIU - Analogi</span>
+          </div>
+          <span style="font-weight:bold; color:${isCorrect ? 'var(--success)' : 'var(--danger)'}">
+            ${statusText}
+          </span>
+        </div>
+        <p style="margin-bottom:10px;">${q.text}</p>
+        <p style="margin-bottom:6px;"><strong>Jawaban Anda:</strong> ${uAns ? `${uAns}. ${q.options[uAns]}` : '-'}</p>
+        <p style="margin-bottom:10px;"><strong style="color:var(--success)">Kunci Jawaban:</strong> ${q.answer}. ${q.options[q.answer]}</p>
+        <div class="pembahasan-box">
+          <strong>Pembahasan:</strong>
+          <div style="margin-top:6px;">${q.explanation}</div>
+        </div>
+      `;
+      reviewContainer.appendChild(card);
+    });
+
+    const totalPoin = benar * 5;
+    const maxPoin = questions.length * 5;
+    const akurasi = Math.round((benar / questions.length) * 100);
+
+    document.getElementById("res-peserta").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+    document.getElementById("res-total-score").textContent = `Total Skor: ${totalPoin} / ${maxPoin}`;
+    document.getElementById("res-detail").textContent = `Benar: ${benar} | Salah: ${salah} | Kosong: ${kosong}`;
+
+    document.getElementById("stat-benar").textContent = benar;
+    document.getElementById("stat-poin").textContent = `${totalPoin} Poin`;
+    document.getElementById("stat-salah").textContent = salah;
+    document.getElementById("stat-kosong").textContent = kosong;
+    document.getElementById("stat-akurasi").textContent = `${akurasi}%`;
+
+    const firstFilterBtn = document.querySelector("#filter-bar .filter-btn");
+    if (firstFilterBtn) filterReview("ALL", firstFilterBtn);
+  }
+</script>
+</body>
+</html>

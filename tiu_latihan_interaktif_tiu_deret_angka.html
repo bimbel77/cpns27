@@ -1,0 +1,2298 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KUIS INTERAKTIF - TIU DERET ANGKA (50 SOAL)</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+      --success-bg: #dcfce7;
+      --warning: #eab308;
+      --warning-bg: #fef9c3;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --danger-bg: #fee2e2;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); line-height: 1.6; }
+
+    /* Login Screen */
+    #login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .login-box {
+      background: var(--card); padding: 35px; border-radius: 12px; width: 100%; max-width: 420px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+    .login-box h2 { text-align: center; color: var(--primary); margin-bottom: 5px; }
+    .login-box p { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 25px; }
+    .form-group { margin-bottom: 15px; }
+    .form-group label { display: block; font-weight: 600; margin-bottom: 5px; font-size: 0.9rem; }
+    .form-group input {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--border); border-radius: 6px; font-size: 1rem;
+    }
+    .btn {
+      display: inline-block; padding: 10px 18px; border: none; border-radius: 6px; font-size: 0.95rem;
+      font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; text-decoration: none;
+    }
+    .btn:disabled { opacity: 0.55; cursor: not-allowed; }
+    .btn-primary { background: var(--primary); color: white; width: 100%; }
+    .btn-primary:hover:not(:disabled) { background: var(--primary-hover); }
+    .btn-logout {
+      background: var(--danger); color: white; padding: 7px 14px; font-size: 0.85rem;
+    }
+    .btn-logout:hover { background: var(--danger-hover); }
+    .error-msg { color: var(--danger); font-size: 0.85rem; margin-top: 10px; text-align: center; display: none; }
+
+    .register-link-box {
+      margin-top: 18px; padding-top: 15px; border-top: 1px solid #e2e8f0;
+      text-align: center; font-size: 0.9rem; color: var(--muted);
+    }
+    .register-link-box a {
+      color: var(--primary); font-weight: 700; text-decoration: none;
+    }
+    .register-link-box a:hover {
+      text-decoration: underline; color: var(--primary-hover);
+    }
+
+    /* Header Kuis */
+    header {
+      background: var(--primary); color: white; padding: 15px 25px; display: flex;
+      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header-title h1 { font-size: 1.2rem; }
+    .header-info { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+    .live-score-pill {
+      background: rgba(255,255,255,0.18); padding: 6px 14px; border-radius: 6px;
+      font-weight: 700; font-size: 0.95rem;
+    }
+
+    /* Main Container */
+    #exam-screen, #result-screen { display: none; max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+    .exam-layout { display: grid; grid-template-columns: 1fr 310px; gap: 20px; }
+    @media (max-width: 850px) { .exam-layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card); border-radius: 10px; padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
+    }
+
+    /* Soal Area */
+    .question-header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+      border-bottom: 2px solid var(--bg); padding-bottom: 12px; margin-bottom: 18px;
+    }
+    .badge-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .badge-no { background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
+    .badge-subtes { background: #e0e7ff; color: #1e40af; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 0.82rem; }
+    .question-text { font-size: 1.05rem; margin-bottom: 18px; }
+
+    /* Opsi Jawaban */
+    .options-list { display: flex; flex-direction: column; gap: 10px; }
+    .option-item {
+      display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 15px;
+      border: 1.5px solid var(--border); border-radius: 8px; cursor: pointer; transition: 0.15s;
+    }
+    .option-left { display: flex; align-items: center; gap: 12px; }
+    .option-item:hover:not(.locked) { background: #f8fafc; border-color: var(--primary); }
+    .option-item.selected { background: #eff6ff; border-color: var(--primary); font-weight: 600; }
+    .option-item.locked { cursor: default; }
+
+    /* Status Visual Setelah Cek Jawaban */
+    .option-item.opt-correct {
+      background: var(--success-bg); border-color: var(--success); color: #14532d; font-weight: 600;
+    }
+    .option-item.opt-wrong {
+      background: var(--danger-bg); border-color: var(--danger); color: #7f1d1d; font-weight: 600;
+    }
+
+    .option-letter {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+    }
+    .option-item.selected .option-letter { background: var(--primary); color: white; }
+    .option-item.opt-correct .option-letter { background: var(--success); color: white; }
+    .option-item.opt-wrong .option-letter { background: var(--danger); color: white; }
+
+    .opt-tag {
+      font-size: 0.78rem; font-weight: 700; padding: 3px 9px; border-radius: 12px; flex-shrink: 0;
+    }
+    .tag-correct { background: var(--success); color: white; }
+    .tag-wrong { background: var(--danger); color: white; }
+
+    /* Kotak Feedback & Pembahasan Langsung */
+    .instant-feedback {
+      margin-top: 20px; padding: 18px; border-radius: 10px; border-left: 5px solid var(--primary);
+      background: #f8fafc; border-top: 1px solid #e2e8f0; border-right: 1px solid #e2e8f0; border-bottom: 1px solid #e2e8f0;
+      animation: fadeIn 0.25s ease-in-out;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(6px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    .instant-feedback.fb-correct { border-left-color: var(--success); background: #f0fdf4; }
+    .instant-feedback.fb-wrong { border-left-color: var(--danger); background: #fef2f2; }
+
+    .fb-header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+      margin-bottom: 10px; font-weight: 700; font-size: 1.02rem;
+    }
+    .fb-body { font-size: 0.95rem; color: var(--text); }
+
+    /* Navigasi Bawah Soal */
+    .nav-actions {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 25px;
+      padding-top: 15px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;
+    }
+    .center-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+    .btn-nav { background: #e2e8f0; color: var(--text); }
+    .btn-nav:hover:not(:disabled) { background: #cbd5e1; }
+    .btn-check { background: #0284c7; color: white; }
+    .btn-check:hover:not(:disabled) { background: #0369a1; }
+    .btn-ragu { background: var(--warning); color: #000; }
+    .btn-finish { background: var(--success); color: white; width: 100%; margin-top: 15px; }
+    .btn-finish:hover { background: #15803d; }
+
+    /* Grid Nomor Soal */
+    .grid-numbers {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px;
+      max-height: 360px; overflow-y: auto; padding-right: 4px;
+    }
+    .num-btn {
+      padding: 8px 0; border: 1px solid var(--border); border-radius: 6px;
+      background: white; font-weight: 600; cursor: pointer; text-align: center;
+    }
+    .num-btn.active { outline: 2.5px solid var(--primary); outline-offset: -2px; }
+    .num-btn.selected-only { background: #dbeafe; color: #1e40af; border-color: #93c5fd; }
+    .num-btn.checked-correct { background: var(--success); color: white; border-color: var(--success); }
+    .num-btn.checked-wrong { background: var(--danger); color: white; border-color: var(--danger); }
+    .num-btn.doubt { background: #f59e0b; color: white; border-color: #d97706; }
+
+    .legend { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; font-size: 0.78rem; margin-top: 15px; }
+    .legend span { display: flex; align-items: center; gap: 6px; }
+    .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; flex-shrink: 0; }
+
+    /* Result & Pembahasan */
+    .score-banner {
+      text-align: center; padding: 30px; background: linear-gradient(135deg, #1e40af, #3b82f6);
+      color: white; border-radius: 12px; margin-bottom: 25px;
+    }
+    .score-big { font-size: 3rem; font-weight: bold; margin: 10px 0; }
+    .subtes-score-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; text-align: center;
+    }
+    @media (max-width: 700px) { .subtes-score-grid { grid-template-columns: 1fr; } }
+    .subtes-box {
+      background: rgba(255, 255, 255, 0.14); padding: 15px; border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .subtes-box h4 { font-size: 0.9rem; margin-bottom: 5px; opacity: 0.95; }
+    .subtes-box .sub-val { font-size: 1.8rem; font-weight: 800; }
+    .subtes-box .sub-detail { font-size: 0.82rem; opacity: 0.9; margin-top: 4px; }
+
+    .result-actions {
+      display: flex; justify-content: center; gap: 12px; margin-top: 20px; flex-wrap: wrap;
+    }
+    .filter-bar {
+      display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 7px 14px; border-radius: 20px; border: 1px solid var(--border);
+      background: white; font-weight: 600; font-size: 0.88rem; cursor: pointer;
+    }
+    .filter-btn.active {
+      background: var(--primary); color: white; border-color: var(--primary);
+    }
+
+    .review-card { margin-bottom: 20px; border-left: 5px solid var(--border); }
+    .review-card.correct { border-left-color: var(--success); }
+    .review-card.wrong { border-left-color: var(--danger); }
+    .pembahasan-box {
+      background: #f8fafc; padding: 15px; border-radius: 8px; margin-top: 12px;
+      border: 1px dashed #94a3b8; font-size: 0.95rem;
+    }
+    .diagram-scroll {
+      overflow-x: auto;
+      margin: 10px 0 8px 0;
+      padding: 8px 4px;
+      background: #ffffff;
+      border-radius: 6px;
+      border: 1px solid #e2e8f0;
+    }
+    .diagram-scroll svg {
+      display: block;
+      max-width: none;
+    }
+
+    /* Custom Modal Dialog */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6); display: none; align-items: center;
+      justify-content: center; z-index: 999; padding: 20px;
+    }
+    .modal-card {
+      background: white; padding: 25px; border-radius: 12px; max-width: 400px;
+      width: 100%; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .modal-card h3 { color: var(--primary); margin-bottom: 10px; }
+    .modal-card p { color: var(--text); font-size: 0.95rem; margin-bottom: 20px; }
+    .modal-btns { display: flex; gap: 10px; justify-content: center; }
+  </style>
+</head>
+<body>
+
+  <!-- HALAMAN LOGIN -->
+  <div id="login-screen">
+    <div class="login-box">
+      <h2>Portal Kuis Interaktif CAT</h2>
+      <p>Subtes TIU: Deret Angka (50 Soal + Cek Jawaban)</p>
+      <form id="login-form">
+        <div class="form-group">
+          <label for="username">Username/Email</label>
+          <input type="text" id="username" required placeholder="Masukkan username">
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required placeholder="Masukkan password">
+        </div>
+        <button type="submit" class="btn btn-primary" id="btn-login">Mulai Kuis</button>
+        <div class="error-msg" id="login-error"></div>
+        <div class="register-link-box">
+          Belum punya akun? <a href="http://lynk.id/seputar_guru/4g73189dndge/checkout" target="_blank" rel="noopener noreferrer">Daftar di sini</a>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- HALAMAN KUIS INTERAKTIF -->
+  <div id="exam-screen">
+    <header>
+      <div class="header-title">
+        <h1>KUIS TIU - DERET ANGKA (50 SOAL)</h1>
+        <small id="peserta-info">Peserta: -</small>
+      </div>
+      <div class="header-info">
+        <div class="live-score-pill" id="live-score-pill">Skor Terkumpul: 0</div>
+        <button type="button" class="btn btn-logout" onclick="confirmLogout()">Logout</button>
+      </div>
+    </header>
+
+    <div class="exam-layout" style="margin-top: 20px;">
+      <!-- Kolom Kiri: Soal & Cek Jawaban -->
+      <div class="card">
+        <div class="question-header">
+          <div class="badge-group">
+            <span class="badge-no" id="q-number">Soal No. 1</span>
+            <span class="badge-subtes">TIU - Deret Angka</span>
+          </div>
+          <span id="q-status" style="font-size: 0.85rem; font-weight: 600; color: var(--muted);">Belum dijawab</span>
+        </div>
+
+        <div class="question-text" id="q-text"></div>
+        <div class="options-list" id="q-options"></div>
+
+        <!-- Area Hasil Cek Jawaban & Pembahasan Langsung -->
+        <div id="instant-feedback-container"></div>
+
+        <div class="nav-actions">
+          <button class="btn btn-nav" id="btn-prev" onclick="prevQuestion()">&laquo; Sebelumnya</button>
+          <div class="center-actions">
+            <button class="btn btn-check" id="btn-check" onclick="checkCurrentAnswer()" disabled>✔ Cek Jawaban</button>
+            <button class="btn btn-ragu" id="btn-doubt" onclick="toggleDoubt()">Ragu-Ragu</button>
+          </div>
+          <button class="btn btn-nav" id="btn-next" onclick="nextQuestion()">Selanjutnya &raquo;</button>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Navigasi Nomor -->
+      <div class="card">
+        <h3>Navigasi Kuis</h3>
+        <p style="font-size: 0.78rem; color: var(--muted); margin-top: 4px;">1-50: TIU Deret Angka (+5 Poin/Soal)</p>
+        <div class="grid-numbers" id="number-grid"></div>
+        <div class="legend">
+          <span><i class="dot" style="background: var(--success);"></i> Benar (+5 Poin)</span>
+          <span><i class="dot" style="background: var(--danger);"></i> Salah (0 Poin)</span>
+          <span><i class="dot" style="background: #dbeafe; border: 1px solid #93c5fd;"></i> Belum Dicek</span>
+          <span><i class="dot" style="background: #f59e0b;"></i> Ragu-Ragu</span>
+          <span><i class="dot" style="background: #fff; border: 1px solid #cbd5e1;"></i> Kosong</span>
+        </div>
+        <button class="btn btn-finish" onclick="confirmFinish()">Selesai & Rekap Nilai</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN HASIL & PEMBAHASAN -->
+  <div id="result-screen">
+    <div class="score-banner">
+      <h2>Rekap Hasil Kuis TIU - Deret Angka</h2>
+      <p id="res-peserta"></p>
+      <div class="score-big" id="res-total-score">Total Skor: 0 / 250</div>
+      <p id="res-detail">Benar: 0 | Salah: 0 | Kosong: 0</p>
+
+      <!-- Statistik Ringkas -->
+      <div class="subtes-score-grid">
+        <div class="subtes-box">
+          <h4>Jawaban Benar</h4>
+          <div class="sub-val" id="stat-benar">0</div>
+          <div class="sub-detail">Poin diperoleh: <span id="stat-poin">0</span></div>
+        </div>
+        <div class="subtes-box">
+          <h4>Jawaban Salah</h4>
+          <div class="sub-val" id="stat-salah">0</div>
+          <div class="sub-detail">Perlu diperdalam kembali</div>
+        </div>
+        <div class="subtes-box">
+          <h4>Tidak Dijawab</h4>
+          <div class="sub-val" id="stat-kosong">0</div>
+          <div class="sub-detail">Persentase Akurasi: <span id="stat-akurasi">0%</span></div>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn" style="background: white; color: var(--primary);" onclick="retryExam()">Ulangi Kuis</button>
+        <button class="btn btn-logout" onclick="logoutUser()">Logout</button>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
+      <h3>Kunci Jawaban & Pembahasan Lengkap</h3>
+      <div class="filter-bar" id="filter-bar">
+        <button class="filter-btn active" onclick="filterReview('ALL', this)">Semua (50)</button>
+        <button class="filter-btn" onclick="filterReview('CORRECT', this)">Benar</button>
+        <button class="filter-btn" onclick="filterReview('WRONG', this)">Salah</button>
+        <button class="filter-btn" onclick="filterReview('EMPTY', this)">Kosong</button>
+      </div>
+    </div>
+    <div id="review-container"></div>
+  </div>
+
+  <!-- CUSTOM MODAL -->
+  <div class="modal-overlay" id="custom-modal">
+    <div class="modal-card">
+      <h3 id="modal-title">Konfirmasi</h3>
+      <p id="modal-message">Pesan konfirmasi</p>
+      <div class="modal-btns" id="modal-buttons"></div>
+    </div>
+  </div>
+
+<script>
+  // =========================================================================
+  // URL GOOGLE APPS SCRIPT ANDA YANG AKTIF
+  // =========================================================================
+  const GAS_WEB_APP_URL = "https://script.google.com/macros/s/AKfycbxB6Th7GHlD9o8ABbYcK2mdV7mv4ufy2i-SYXUg3jVqS0Q1bkXa_pkseMhqmIzgCTx7/exec";
+
+  // =========================================================================
+  // BANK SOAL, KUNCI JAWABAN & PEMBAHASAN (50 SOAL DERET ANGKA - TETAP UTUH)
+  // =========================================================================
+  const questions = [
+    {
+      no: 1,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>1, 3, 5, 7, ....</strong>",
+      options: {
+        A: "6",
+        B: "8",
+        C: "9",
+        D: "10",
+        E: "11"
+      },
+      answer: "C",
+      diagram: {
+        nums: ["1", "3", "5", "7", "9"],
+        bold: [4],
+        arcs: [
+          { from: 0, to: 1, label: "+2", pos: "top", tier: 1 },
+          { from: 1, to: 2, label: "+2", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "+2", pos: "top", tier: 1 },
+          { from: 3, to: 4, label: "+2", pos: "top", tier: 1 }
+        ]
+      },
+      explanation: "Pola deret satu larik: setiap suku ditambah <strong>+2</strong> (1 + 2 = 3, 3 + 2 = 5, 5 + 2 = 7, 7 + 2 = <strong>9</strong>)."
+    },
+    {
+      no: 2,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>1, 3, 9, 27, ....</strong>",
+      options: {
+        A: "36",
+        B: "45",
+        C: "63",
+        D: "72",
+        E: "81"
+      },
+      answer: "E",
+      diagram: {
+        nums: ["1", "3", "9", "27", "81"],
+        bold: [4],
+        arcs: [
+          { from: 0, to: 1, label: "×3", pos: "top", tier: 1 },
+          { from: 1, to: 2, label: "×3", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "×3", pos: "top", tier: 1 },
+          { from: 3, to: 4, label: "×3", pos: "top", tier: 1 }
+        ]
+      },
+      explanation: "Pola deret satu larik: setiap suku dikali <strong>&times;3</strong> (1 &times; 3 = 3, 3 &times; 3 = 9, 9 &times; 3 = 27, 27 &times; 3 = <strong>81</strong>)."
+    },
+    {
+      no: 3,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>4, 9, 16, 25, ....</strong>",
+      options: {
+        A: "36",
+        B: "29",
+        C: "49",
+        D: "45",
+        E: "64"
+      },
+      answer: "A",
+      diagram: {
+        nums: ["4", "9", "16", "25", "36"],
+        bold: [4],
+        notes: [
+          { idx: 0, label: "2²", pos: "top" },
+          { idx: 1, label: "3²", pos: "top" },
+          { idx: 2, label: "4²", pos: "top" },
+          { idx: 3, label: "5²", pos: "top" },
+          { idx: 4, label: "6²", pos: "top" }
+        ]
+      },
+      explanation: "Pola deret bilangan kuadrat berurutan: 2&sup2;=4, 3&sup2;=9, 4&sup2;=16, 5&sup2;=25, 6&sup2;=<strong>36</strong>."
+    },
+    {
+      no: 4,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>1.024, 512, 256, ..., 64, 32</strong>",
+      options: {
+        A: "128",
+        B: "124",
+        C: "80",
+        D: "192",
+        E: "16"
+      },
+      answer: "A",
+      diagram: {
+        nums: ["1.024", "512", "256", "128", "64", "32"],
+        bold: [3],
+        arcs: [
+          { from: 0, to: 1, label: ":2", pos: "top", tier: 1 },
+          { from: 1, to: 2, label: ":2", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: ":2", pos: "top", tier: 1 },
+          { from: 3, to: 4, label: ":2", pos: "top", tier: 1 },
+          { from: 4, to: 5, label: ":2", pos: "top", tier: 1 }
+        ]
+      },
+      explanation: "Pola deret satu larik: setiap suku dibagi <strong>:2</strong> (256 : 2 = <strong>128</strong>)."
+    },
+    {
+      no: 5,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>1, 1, 2, 3, 5, 8, 13, ....</strong>",
+      options: {
+        A: "20",
+        B: "21",
+        C: "22",
+        D: "23",
+        E: "24"
+      },
+      answer: "B",
+      diagram: {
+        nums: ["1", "1", "2", "3", "5", "8", "13", "21"],
+        bold: [7],
+        notes: [
+          { idx: 2, label: "1+1", pos: "top" },
+          { idx: 3, label: "1+2", pos: "top" },
+          { idx: 4, label: "2+3", pos: "top" },
+          { idx: 5, label: "3+5", pos: "top" },
+          { idx: 6, label: "5+8", pos: "top" },
+          { idx: 7, label: "8+13", pos: "top" }
+        ]
+      },
+      explanation: "Deret Fibonacci (jumlah dua bilangan di depannya): 8 + 13 = <strong>21</strong>."
+    },
+    {
+      no: 6,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>3, 4, 7, 19, 13, 39, 21, 64, ....</strong>",
+      options: {
+        A: "26",
+        B: "28",
+        C: "30",
+        D: "31",
+        E: "40"
+      },
+      answer: "D",
+      diagram: {
+        nums: ["3", "4", "7", "19", "13", "39", "21", "64", "31"],
+        bold: [8],
+        arcs: [
+          { from: 0, to: 2, label: "+4", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+6", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+8", pos: "top", tier: 1 },
+          { from: 6, to: 8, label: "+10", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+2", pos: "top", tier: 2 },
+          { from: 3, to: 5, label: "+2", pos: "top", tier: 2 },
+          { from: 5, to: 7, label: "+2", pos: "top", tier: 2 },
+          { from: 1, to: 3, label: "+15", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+20", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "+25", pos: "bottom", tier: 1 },
+          { from: 2, to: 4, label: "+5", pos: "bottom", tier: 2 },
+          { from: 4, to: 6, label: "+5", pos: "bottom", tier: 2 }
+        ]
+      },
+      explanation: "Larik atas (ganjil): +4, +6, +8, +10 (selisih +2) &rarr; 21 + 10 = <strong>31</strong>. Larik bawah (genap): +15, +20, +25 (selisih +5)."
+    },
+    {
+      no: 7,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>32, 31, 30, 20, 19, 18, 17, ....</strong>",
+      options: {
+        A: "9",
+        B: "8",
+        C: "7",
+        D: "6",
+        E: "5"
+      },
+      answer: "C",
+      diagram: {
+        nums: ["32", "31", "30", "20", "19", "18", "17", "7"],
+        bold: [7],
+        arcs: [
+          { from: 0, to: 2, label: "-2", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "-11", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "-2", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "-11", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "-2", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "-11", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik atas & bawah berselang-seling (-2 dan -11). Suku terakhir: 18 - 11 = <strong>7</strong>."
+    },
+    {
+      no: 8,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>98, 80, 64, 50, ....</strong>",
+      options: {
+        A: "32",
+        B: "34",
+        C: "35",
+        D: "36",
+        E: "38"
+      },
+      answer: "E",
+      diagram: {
+        nums: ["98", "80", "64", "50", "38"],
+        bold: [4],
+        arcs: [
+          { from: 0, to: 1, label: "-18", pos: "bottom", tier: 1 },
+          { from: 1, to: 2, label: "-16", pos: "bottom", tier: 1 },
+          { from: 2, to: 3, label: "-14", pos: "bottom", tier: 1 },
+          { from: 3, to: 4, label: "-12", pos: "bottom", tier: 1 },
+          { from: 0.5, to: 1.5, label: "selisih 2", pos: "top", tier: 1 },
+          { from: 1.5, to: 2.5, label: "selisih 2", pos: "top", tier: 1 },
+          { from: 2.5, to: 3.5, label: "selisih 2", pos: "top", tier: 1 }
+        ]
+      },
+      explanation: "Pengurang berkurang 2 setiap langkah (-18, -16, -14, -12): 50 - 12 = <strong>38</strong>."
+    },
+    {
+      no: 9,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>3, 7, 6, 12, 11, 17, 18, 22, ....</strong>",
+      options: {
+        A: "25",
+        B: "26",
+        C: "27",
+        D: "28",
+        E: "29"
+      },
+      answer: "C",
+      diagram: {
+        nums: ["3", "7", "6", "12", "11", "17", "18", "22", "27"],
+        bold: [8],
+        notes: [
+          { idx: 0, label: "1²+2", pos: "top" },
+          { idx: 2, label: "2²+2", pos: "top" },
+          { idx: 4, label: "3²+2", pos: "top" },
+          { idx: 6, label: "4²+2", pos: "top" },
+          { idx: 8, label: "5²+2", pos: "top" }
+        ],
+        arcs: [
+          { from: 1, to: 3, label: "+5", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+5", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "+5", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik ganjil berpola n&sup2; + 2 (5&sup2; + 2 = <strong>27</strong>), larik genap selalu ditambah +5."
+    },
+    {
+      no: 10,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>0, 3, 9, 18, ....</strong>",
+      options: {
+        A: "27",
+        B: "28",
+        C: "29",
+        D: "30",
+        E: "31"
+      },
+      answer: "D",
+      diagram: {
+        nums: ["0", "3", "9", "18", "30"],
+        bold: [4],
+        arcs: [
+          { from: 0, to: 1, label: "+3", pos: "bottom", tier: 1 },
+          { from: 1, to: 2, label: "+6", pos: "bottom", tier: 1 },
+          { from: 2, to: 3, label: "+9", pos: "bottom", tier: 1 },
+          { from: 3, to: 4, label: "+12", pos: "bottom", tier: 1 },
+          { from: 0.5, to: 1.5, label: "+3", pos: "top", tier: 1 },
+          { from: 1.5, to: 2.5, label: "+3", pos: "top", tier: 1 },
+          { from: 2.5, to: 3.5, label: "+3", pos: "top", tier: 1 }
+        ]
+      },
+      explanation: "Pola bertingkat (penambah bertambah +3): 18 + 12 = <strong>30</strong>."
+    },
+    {
+      no: 11,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>3, 9, 12, 26, 29, 51, 54, ....</strong>",
+      options: {
+        A: "84",
+        B: "88",
+        C: "82",
+        D: "86",
+        E: "80"
+      },
+      answer: "A",
+      diagram: {
+        nums: ["3", "9", "12", "26", "29", "51", "54", "84"],
+        bold: [7],
+        arcs: [
+          { from: 0, to: 1, label: "+6", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "+14", pos: "top", tier: 1 },
+          { from: 4, to: 5, label: "+22", pos: "top", tier: 1 },
+          { from: 6, to: 7, label: "+30", pos: "top", tier: 1 },
+          { from: 0.5, to: 2.5, label: "+8", pos: "top", tier: 2 },
+          { from: 2.5, to: 4.5, label: "+8", pos: "top", tier: 2 },
+          { from: 4.5, to: 6.5, label: "+8", pos: "top", tier: 2 },
+          { from: 1, to: 2, label: "+3", pos: "bottom", tier: 1 },
+          { from: 3, to: 4, label: "+3", pos: "bottom", tier: 1 },
+          { from: 5, to: 6, label: "+3", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Lompatan atas (+6, +14, +22, +30 naik +8) dan lompatan bawah (+3 tetap): 54 + 30 = <strong>84</strong>."
+    },
+    {
+      no: 12,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>4, 6, 10, 16, 24, ....</strong>",
+      options: {
+        A: "30",
+        B: "32",
+        C: "34",
+        D: "36",
+        E: "38"
+      },
+      answer: "C",
+      diagram: {
+        nums: ["4", "6", "10", "16", "24", "34"],
+        bold: [5],
+        arcs: [
+          { from: 0, to: 1, label: "+2", pos: "top", tier: 1 },
+          { from: 1, to: 2, label: "+4", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "+6", pos: "top", tier: 1 },
+          { from: 3, to: 4, label: "+8", pos: "top", tier: 1 },
+          { from: 4, to: 5, label: "+10", pos: "top", tier: 1 },
+          { from: 0.5, to: 1.5, label: "+2", pos: "bottom", tier: 1 },
+          { from: 1.5, to: 2.5, label: "+2", pos: "bottom", tier: 1 },
+          { from: 2.5, to: 3.5, label: "+2", pos: "bottom", tier: 1 },
+          { from: 3.5, to: 4.5, label: "+2", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Penambah bertambah +2 tiap langkah (+2, +4, +6, +8, +10): 24 + 10 = <strong>34</strong>."
+    },
+    {
+      no: 13,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>30, 36, 24, 48, 0, ....</strong>",
+      options: {
+        A: "86",
+        B: "84",
+        C: "94",
+        D: "96",
+        E: "100"
+      },
+      answer: "D",
+      diagram: {
+        nums: ["30", "36", "24", "48", "0", "96"],
+        bold: [5],
+        arcs: [
+          { from: 0, to: 1, label: "+6", pos: "bottom", tier: 1 },
+          { from: 1, to: 2, label: "-12", pos: "bottom", tier: 1 },
+          { from: 2, to: 3, label: "+24", pos: "bottom", tier: 1 },
+          { from: 3, to: 4, label: "-48", pos: "bottom", tier: 1 },
+          { from: 4, to: 5, label: "+96", pos: "bottom", tier: 1 },
+          { from: 0.5, to: 1.5, label: "×(-2)", pos: "top", tier: 1 },
+          { from: 1.5, to: 2.5, label: "×(-2)", pos: "top", tier: 1 },
+          { from: 2.5, to: 3.5, label: "×(-2)", pos: "top", tier: 1 },
+          { from: 3.5, to: 4.5, label: "×(-2)", pos: "top", tier: 1 }
+        ]
+      },
+      explanation: "Selisih tiap suku dikalikan (-2): +6, -12, +24, -48, +96 &rarr; 0 + 96 = <strong>96</strong>."
+    },
+    {
+      no: 14,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>9, 25, 23, 57, 19, ....</strong>",
+      options: {
+        A: "132",
+        B: "124",
+        C: "126",
+        D: "127",
+        E: "125"
+      },
+      answer: "E",
+      diagram: {
+        nums: ["9", "25", "23", "57", "19", "125"],
+        bold: [5],
+        arcs: [
+          { from: 0, to: 1, label: "+16", pos: "top", tier: 1 },
+          { from: 1, to: 2, label: "-2", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "+34", pos: "top", tier: 1 },
+          { from: 3, to: 4, label: "-38", pos: "top", tier: 1 },
+          { from: 4, to: 5, label: "+106", pos: "top", tier: 1 },
+          { from: 0.5, to: 1.5, label: "-18", pos: "top", tier: 2 },
+          { from: 1.5, to: 2.5, label: "+36", pos: "top", tier: 2 },
+          { from: 2.5, to: 3.5, label: "-72", pos: "top", tier: 2 },
+          { from: 3.5, to: 4.5, label: "+144", pos: "top", tier: 2 },
+          { from: 1, to: 2, label: "×(-2)", pos: "top", tier: 3 },
+          { from: 2, to: 3, label: "×(-2)", pos: "top", tier: 3 },
+          { from: 3, to: 4, label: "×(-2)", pos: "top", tier: 3 }
+        ]
+      },
+      explanation: "Pola bertingkat tiga lapis: -38 + 144 = +106 &rarr; 19 + 106 = <strong>125</strong>."
+    },
+    {
+      no: 15,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>5, 12, 15, 22, 25, ....</strong>",
+      options: {
+        A: "41",
+        B: "33",
+        C: "39",
+        D: "40",
+        E: "32"
+      },
+      answer: "E",
+      diagram: {
+        nums: ["5", "12", "15", "22", "25", "32"],
+        bold: [5],
+        arcs: [
+          { from: 0, to: 1, label: "+7", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "+7", pos: "top", tier: 1 },
+          { from: 4, to: 5, label: "+7", pos: "top", tier: 1 },
+          { from: 0.5, to: 2.5, label: "tetap", pos: "top", tier: 2 },
+          { from: 2.5, to: 4.5, label: "tetap", pos: "top", tier: 2 },
+          { from: 1, to: 2, label: "+3", pos: "bottom", tier: 1 },
+          { from: 3, to: 4, label: "+3", pos: "bottom", tier: 1 },
+          { from: 1.5, to: 3.5, label: "tetap", pos: "bottom", tier: 2 }
+        ]
+      },
+      explanation: "Pola bergantian +7 dan +3 tetap: 25 + 7 = <strong>32</strong>."
+    },
+    {
+      no: 16,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>3, 2, 9, 13, 16, 25, 24, ....</strong>",
+      options: {
+        A: "46",
+        B: "41",
+        C: "23",
+        D: "32",
+        E: "35"
+      },
+      answer: "B",
+      diagram: {
+        nums: ["3", "2", "9", "13", "16", "25", "24", "41"],
+        bold: [7],
+        arcs: [
+          { from: 0, to: 2, label: "+6", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+7", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+8", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+1", pos: "top", tier: 2 },
+          { from: 3, to: 5, label: "+1", pos: "top", tier: 2 }
+        ],
+        notes: [
+          { idx: 1, label: "1²+2²", pos: "bottom" },
+          { idx: 3, label: "2²+3²", pos: "bottom" },
+          { idx: 5, label: "3²+4²", pos: "bottom" },
+          { idx: 7, label: "4²+5²", pos: "bottom" }
+        ]
+      },
+      explanation: "Larik ganjil (+6, +7, +8) dan larik genap penjumlahan kuadrat berurutan (4&sup2; + 5&sup2; = 16 + 25 = <strong>41</strong>)."
+    },
+    {
+      no: 17,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>14, 28, 42, 56, ....</strong>",
+      options: {
+        A: "74",
+        B: "66",
+        C: "70",
+        D: "64",
+        E: "56"
+      },
+      answer: "C",
+      diagram: {
+        nums: ["14", "28", "42", "56", "70"],
+        bold: [4],
+        arcs: [
+          { from: 0, to: 1, label: "+14", pos: "top", tier: 1 },
+          { from: 1, to: 2, label: "+14", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "+14", pos: "top", tier: 1 },
+          { from: 3, to: 4, label: "+14", pos: "top", tier: 1 }
+        ]
+      },
+      explanation: "Pola deret satu larik (+14): 56 + 14 = <strong>70</strong>."
+    },
+    {
+      no: 18,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>2, 2, 5, 6, 8, 10, 11, ....</strong>",
+      options: {
+        A: "12",
+        B: "13",
+        C: "14",
+        D: "15",
+        E: "16"
+      },
+      answer: "C",
+      diagram: {
+        nums: ["2", "2", "5", "6", "8", "10", "11", "14"],
+        bold: [7],
+        arcs: [
+          { from: 0, to: 2, label: "+3", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+3", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+3", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+4", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+4", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "+4", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik atas (+3) dan larik bawah (+4): 10 + 4 = <strong>14</strong>."
+    },
+    {
+      no: 19,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>8, 4, 16, 8, 24, 11, ....</strong>",
+      options: {
+        A: "32",
+        B: "30",
+        C: "29",
+        D: "27",
+        E: "24"
+      },
+      answer: "A",
+      diagram: {
+        nums: ["8", "4", "16", "8", "24", "11", "32"],
+        bold: [6],
+        arcs: [
+          { from: 0, to: 2, label: "+8", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+8", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+8", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+4", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+3", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik ganjil selalu ditambah +8: 24 + 8 = <strong>32</strong>."
+    },
+    {
+      no: 20,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>3, 4, 6, 7, 10, 10, 15, ....</strong>",
+      options: {
+        A: "9",
+        B: "10",
+        C: "11",
+        D: "12",
+        E: "13"
+      },
+      answer: "E",
+      diagram: {
+        nums: ["3", "4", "6", "7", "10", "10", "15", "13"],
+        bold: [7],
+        arcs: [
+          { from: 0, to: 2, label: "+3", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+4", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+5", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+1", pos: "top", tier: 2 },
+          { from: 3, to: 5, label: "+1", pos: "top", tier: 2 },
+          { from: 1, to: 3, label: "+3", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+3", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "+3", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik atas (+3, +4, +5) dan larik bawah tetap (+3): 10 + 3 = <strong>13</strong>."
+    },
+    {
+      no: 21,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>1, 2, 5, 10, 17, ....</strong>",
+      options: {
+        A: "25",
+        B: "26",
+        C: "27",
+        D: "28",
+        E: "29"
+      },
+      answer: "B",
+      diagram: {
+        nums: ["1", "2", "5", "10", "17", "26"],
+        bold: [5],
+        notes: [
+          { idx: 0, label: "0²+1", pos: "top" },
+          { idx: 1, label: "1²+1", pos: "top" },
+          { idx: 2, label: "2²+1", pos: "top" },
+          { idx: 3, label: "3²+1", pos: "top" },
+          { idx: 4, label: "4²+1", pos: "top" },
+          { idx: 5, label: "5²+1", pos: "top" }
+        ]
+      },
+      explanation: "Pola bilangan kuadrat ditambah 1 (n&sup2; + 1): 5&sup2; + 1 = <strong>26</strong>."
+    },
+    {
+      no: 22,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>1, 2, 5, 7, 9, 12, 13, 17, ....</strong>",
+      options: {
+        A: "16",
+        B: "15",
+        C: "13",
+        D: "17",
+        E: "18"
+      },
+      answer: "D",
+      diagram: {
+        nums: ["1", "2", "5", "7", "9", "12", "13", "17", "17"],
+        bold: [8],
+        arcs: [
+          { from: 0, to: 2, label: "+4", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+4", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+4", pos: "top", tier: 1 },
+          { from: 6, to: 8, label: "+4", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+5", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+5", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "+5", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik atas (+4) dan larik bawah (+5): 13 + 4 = <strong>17</strong>."
+    },
+    {
+      no: 23,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>1, 3, 4, 6, 9, ..., 16, 24, 25, 48</strong>",
+      options: {
+        A: "16",
+        B: "11",
+        C: "8",
+        D: "12",
+        E: "10"
+      },
+      answer: "D",
+      diagram: {
+        nums: ["1", "3", "4", "6", "9", "12", "16", "24", "25", "48"],
+        bold: [5],
+        arcs: [
+          { from: 0, to: 2, label: "+3", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+5", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+7", pos: "top", tier: 1 },
+          { from: 6, to: 8, label: "+9", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "×2", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "×2", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "×2", pos: "bottom", tier: 1 },
+          { from: 7, to: 9, label: "×2", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik atas (+3, +5, +7, +9) dan larik bawah (&times;2): 6 &times; 2 = <strong>12</strong>."
+    },
+    {
+      no: 24,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>2, 4, 6, 12, 14, ..., 30, 60, 62</strong>",
+      options: {
+        A: "10",
+        B: "24",
+        C: "26",
+        D: "28",
+        E: "16"
+      },
+      answer: "D",
+      diagram: {
+        nums: ["2", "4", "6", "12", "14", "28", "30", "60", "62"],
+        bold: [5],
+        arcs: [
+          { from: 0, to: 2, label: "+4", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+8", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+16", pos: "top", tier: 1 },
+          { from: 6, to: 8, label: "+32", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "×2", pos: "top", tier: 2 },
+          { from: 3, to: 5, label: "×2", pos: "top", tier: 2 },
+          { from: 5, to: 7, label: "×2", pos: "top", tier: 2 },
+          { from: 1, to: 3, label: "+8", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+16", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "+32", pos: "bottom", tier: 1 },
+          { from: 2, to: 4, label: "×2", pos: "bottom", tier: 2 },
+          { from: 4, to: 6, label: "×2", pos: "bottom", tier: 2 }
+        ]
+      },
+      explanation: "Larik bawah (+8, +16, +32): 12 + 16 = <strong>28</strong>."
+    },
+    {
+      no: 25,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>101, 212, 344, ....</strong>",
+      options: {
+        A: "468",
+        B: "488",
+        C: "498",
+        D: "456",
+        E: "466"
+      },
+      answer: "C",
+      diagram: {
+        nums: ["101", "212", "344", "498"],
+        bold: [3],
+        arcs: [
+          { from: 0, to: 1, label: "+1 (ratusan)", pos: "top", tier: 1 },
+          { from: 1, to: 2, label: "+1 (ratusan)", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "+1 (ratusan)", pos: "top", tier: 1 },
+          { from: 0, to: 1, label: "×2 (satuan)", pos: "top", tier: 2 },
+          { from: 1, to: 2, label: "×2 (satuan)", pos: "top", tier: 2 },
+          { from: 2, to: 3, label: "×2 (satuan)", pos: "top", tier: 2 },
+          { from: 0, to: 1, label: "+1 (puluhan)", pos: "bottom", tier: 1 },
+          { from: 1, to: 2, label: "+3 (puluhan)", pos: "bottom", tier: 1 },
+          { from: 2, to: 3, label: "+5 (puluhan)", pos: "bottom", tier: 1 },
+          { from: 0.5, to: 1.5, label: "+2", pos: "bottom", tier: 2 },
+          { from: 1.5, to: 2.5, label: "+2", pos: "bottom", tier: 2 }
+        ]
+      },
+      explanation: "Pola per digit: ratusan (+1 &rarr; <strong>4</strong>), puluhan (+1, +3, +5 &rarr; <strong>9</strong>), satuan (&times;2 &rarr; <strong>8</strong>) = <strong>498</strong>."
+    },
+    {
+      no: 26,
+      text: "Tentukan dua angka yang tepat untuk melengkapi deret berikut:<br><strong>1, 2, 3, 6, 7, 8, ..., 17, 18, 36, 37, ....</strong>",
+      options: {
+        A: "11, 38",
+        B: "16, 39",
+        C: "16, 38",
+        D: "16, 36",
+        E: "11, 36"
+      },
+      answer: "C",
+      diagram: {
+        nums: ["1", "2", "3", "6", "7", "8", "16", "17", "18", "36", "37", "38"],
+        bold: [6, 11],
+        arcs: [
+          { from: 0, to: 1, label: "+1", pos: "top", tier: 1 },
+          { from: 1, to: 2, label: "+1", pos: "top", tier: 1 },
+          { from: 3, to: 4, label: "+1", pos: "top", tier: 1 },
+          { from: 4, to: 5, label: "+1", pos: "top", tier: 1 },
+          { from: 6, to: 7, label: "+1", pos: "top", tier: 1 },
+          { from: 7, to: 8, label: "+1", pos: "top", tier: 1 },
+          { from: 9, to: 10, label: "+1", pos: "top", tier: 1 },
+          { from: 10, to: 11, label: "+1", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "×2", pos: "bottom", tier: 1 },
+          { from: 5, to: 6, label: "×2", pos: "bottom", tier: 1 },
+          { from: 8, to: 9, label: "×2", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Setiap 3 bilangan berurutan (+1, +1) lalu dikali &times;2 untuk kelompok berikutnya: <strong>16, 38</strong>."
+    },
+    {
+      no: 27,
+      text: "Tentukan dua angka yang tepat untuk melengkapi deret berikut:<br><strong>7, 12, 14, 16, 28, ..., ..., 24, 168, 28</strong>",
+      options: {
+        A: "20, 48",
+        B: "20, 56",
+        C: "24, 48",
+        D: "32, 48",
+        E: "24, 56"
+      },
+      answer: "B",
+      diagram: {
+        nums: ["7", "12", "14", "16", "28", "20", "56", "24", "168", "28"],
+        bold: [5, 6],
+        arcs: [
+          { from: 0, to: 2, label: "+7", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+14", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+56", pos: "top", tier: 1 },
+          { from: 6, to: 8, label: "+112", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "×2", pos: "top", tier: 2 },
+          { from: 3, to: 5, label: "×2", pos: "top", tier: 2 },
+          { from: 5, to: 7, label: "×2", pos: "top", tier: 2 },
+          { from: 1, to: 3, label: "+4", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+4", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "+4", pos: "bottom", tier: 1 },
+          { from: 7, to: 9, label: "+4", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik bawah selalu ditambah +4 (16 + 4 = <strong>20</strong>) dan larik atas 28 &times; 2 = <strong>56</strong>."
+    },
+    {
+      no: 28,
+      text: "Tentukan dua angka yang tepat untuk melengkapi deret berikut:<br><strong>2, 9, 6, 12, ..., 18, 20, 27, 30, ....</strong>",
+      options: {
+        A: "11, 36",
+        B: "12, 39",
+        C: "15, 36",
+        D: "15, 39",
+        E: "12, 36"
+      },
+      answer: "B",
+      diagram: {
+        nums: ["2", "9", "6", "12", "12", "18", "20", "27", "30", "39"],
+        bold: [4, 9],
+        arcs: [
+          { from: 0, to: 2, label: "+4", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+6", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+8", pos: "top", tier: 1 },
+          { from: 6, to: 8, label: "+10", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+2", pos: "top", tier: 2 },
+          { from: 3, to: 5, label: "+2", pos: "top", tier: 2 },
+          { from: 5, to: 7, label: "+2", pos: "top", tier: 2 },
+          { from: 1, to: 3, label: "+3", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+6", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "+9", pos: "bottom", tier: 1 },
+          { from: 7, to: 9, label: "+12", pos: "bottom", tier: 1 },
+          { from: 2, to: 4, label: "+3", pos: "bottom", tier: 2 },
+          { from: 4, to: 6, label: "+3", pos: "bottom", tier: 2 },
+          { from: 6, to: 8, label: "+3", pos: "bottom", tier: 2 }
+        ]
+      },
+      explanation: "Larik atas (+4, +6, +8, +10 &rarr; 6 + 6 = <strong>12</strong>) dan larik bawah (+3, +6, +9, +12 &rarr; 27 + 12 = <strong>39</strong>)."
+    },
+    {
+      no: 29,
+      text: "Tentukan dua angka yang tepat untuk melengkapi deret berikut:<br><strong>..., ..., 9, 15, 23, 33, 45, 58, 75, 90</strong>",
+      options: {
+        A: "3, 4",
+        B: "1, 2",
+        C: "2, 5",
+        D: "1, 3",
+        E: "3, 5"
+      },
+      answer: "A",
+      diagram: {
+        nums: ["3", "4", "9", "15", "23", "33", "45", "58", "75", "90"],
+        bold: [0, 1],
+        arcs: [
+          { from: 1, to: 3, label: "+11", pos: "top", tier: 1 },
+          { from: 3, to: 5, label: "+18", pos: "top", tier: 1 },
+          { from: 5, to: 7, label: "+25", pos: "top", tier: 1 },
+          { from: 7, to: 9, label: "+32", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+7", pos: "top", tier: 2 },
+          { from: 4, to: 6, label: "+7", pos: "top", tier: 2 },
+          { from: 6, to: 8, label: "+7", pos: "top", tier: 2 },
+          { from: 0, to: 2, label: "+6", pos: "bottom", tier: 1 },
+          { from: 2, to: 4, label: "+14", pos: "bottom", tier: 1 },
+          { from: 4, to: 6, label: "+22", pos: "bottom", tier: 1 },
+          { from: 6, to: 8, label: "+30", pos: "bottom", tier: 1 },
+          { from: 1, to: 3, label: "+8", pos: "bottom", tier: 2 },
+          { from: 3, to: 5, label: "+8", pos: "bottom", tier: 2 },
+          { from: 5, to: 7, label: "+8", pos: "bottom", tier: 2 }
+        ]
+      },
+      explanation: "Menghitung mundur: larik bawah (9 - 6 = <strong>3</strong>) dan larik atas (15 - 11 = <strong>4</strong>)."
+    },
+    {
+      no: 30,
+      text: "Tentukan dua angka yang tepat untuk melengkapi deret berikut:<br><strong>1; ...; 0,5; 1,5; 0,25; 1,8; 0,125; 2,1; ...; 2,4</strong>",
+      options: {
+        A: "1,2; 0,525",
+        B: "1,3; 0,375",
+        C: "1,3; 0,0625",
+        D: "1,2; 0,375",
+        E: "1,2; 0,0625"
+      },
+      answer: "E",
+      diagram: {
+        nums: ["1", "1,2", "0,5", "1,5", "0,25", "1,8", "0,125", "2,1", "0,0625", "2,4"],
+        bold: [1, 8],
+        arcs: [
+          { from: 0, to: 2, label: ":2", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: ":2", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: ":2", pos: "top", tier: 1 },
+          { from: 6, to: 8, label: ":2", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+0,3", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+0,3", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "+0,3", pos: "bottom", tier: 1 },
+          { from: 7, to: 9, label: "+0,3", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik atas dibagi :2 (0,125 : 2 = <strong>0,0625</strong>) dan larik bawah ditambah +0,3 (1,5 - 0,3 = <strong>1,2</strong>)."
+    },
+    {
+      no: 31,
+      text: "Tentukan angka yang tepat untuk melengkapi deret berikut:<br><strong>0,70, 1,30, 1,90, 2,50, ..., 3,70, 4,30</strong>",
+      options: {
+        A: "2,60",
+        B: "2,80",
+        C: "3,10",
+        D: "3,20",
+        E: "3,50"
+      },
+      answer: "C",
+      diagram: {
+        nums: ["0,70", "1,30", "1,90", "2,50", "3,10", "3,70", "4,30"],
+        bold: [4],
+        arcs: [
+          { from: 0, to: 1, label: "+0,60", pos: "top", tier: 1 },
+          { from: 1, to: 2, label: "+0,60", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "+0,60", pos: "top", tier: 1 },
+          { from: 3, to: 4, label: "+0,60", pos: "top", tier: 1 },
+          { from: 4, to: 5, label: "+0,60", pos: "top", tier: 1 },
+          { from: 5, to: 6, label: "+0,60", pos: "top", tier: 1 }
+        ]
+      },
+      explanation: "Setiap suku bertambah tetap <strong>+0,60</strong>: 2,50 + 0,60 = <strong>3,10</strong>."
+    },
+    {
+      no: 32,
+      text: "Tentukan dua angka yang tepat untuk melengkapi deret berikut:<br><strong>..., ..., 14, 22, 21, 44, 42, 88, 84</strong>",
+      options: {
+        A: "7, 9",
+        B: "7, 11",
+        C: "8, 9",
+        D: "8, 11",
+        E: "10, 12"
+      },
+      answer: "B",
+      diagram: {
+        nums: ["7", "11", "14", "22", "21", "44", "42", "88", "84"],
+        bold: [0, 1],
+        arcs: [
+          { from: 0, to: 2, label: "+7", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+7", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "×2", pos: "top", tier: 1 },
+          { from: 6, to: 8, label: "×2", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "×2", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "×2", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "×2", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik atas (14 - 7 = <strong>7</strong>) dan larik bawah (22 : 2 = <strong>11</strong>)."
+    },
+    {
+      no: 33,
+      text: "Tentukan dua angka yang tepat untuk melengkapi deret berikut:<br><strong>1,5; 21,4; ...; 17,4; 4,5; 13,4; 7,5; ...; 11,5</strong>",
+      options: {
+        A: "5,4; 9,4",
+        B: "2,5; 9,4",
+        C: "5,4; 5,5",
+        D: "6,5; 7,4",
+        E: "7,4; 4,5"
+      },
+      answer: "B",
+      diagram: {
+        nums: ["1,5", "21,4", "2,5", "17,4", "4,5", "13,4", "7,5", "9,4", "11,5"],
+        bold: [2, 7],
+        arcs: [
+          { from: 0, to: 2, label: "+1", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+2", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+3", pos: "top", tier: 1 },
+          { from: 6, to: 8, label: "+4", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+1", pos: "top", tier: 2 },
+          { from: 3, to: 5, label: "+1", pos: "top", tier: 2 },
+          { from: 5, to: 7, label: "+1", pos: "top", tier: 2 },
+          { from: 1, to: 3, label: "-4", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "-4", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "-4", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik atas (+1, +2, +3, +4 &rarr; 1,5 + 1 = <strong>2,5</strong>) dan larik bawah tetap (-4 &rarr; 13,4 - 4 = <strong>9,4</strong>)."
+    },
+    {
+      no: 34,
+      text: "Tentukan dua angka yang tepat untuk melengkapi deret berikut:<br><strong>-3, ..., -8, -6, -12, -16, ..., -24, -32</strong>",
+      options: {
+        A: "-3, -12",
+        B: "-6, -16",
+        C: "-6, -12",
+        D: "-8, -16",
+        E: "-8, -12"
+      },
+      answer: "C",
+      diagram: {
+        nums: ["-3", "-6", "-8", "-6", "-12", "-16", "-12", "-24", "-32"],
+        bold: [1, 6],
+        arcs: [
+          { from: 0, to: 3, label: "×2", pos: "top", tier: 1 },
+          { from: 3, to: 6, label: "×2", pos: "top", tier: 1 },
+          { from: 2, to: 5, label: "×2", pos: "top", tier: 2 },
+          { from: 5, to: 8, label: "×2", pos: "top", tier: 2 },
+          { from: 1, to: 4, label: "×2", pos: "bottom", tier: 1 },
+          { from: 4, to: 7, label: "×2", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Tiga larik melompati dua suku, masing-masing dikali <strong>&times;2</strong>: <strong>-6, -12</strong>."
+    },
+    {
+      no: 35,
+      text: "Tentukan dua angka yang tepat untuk melengkapi deret berikut:<br><strong>24, 25, 26, 28, 29, 32, 33, 37, 38, ..., ....</strong>",
+      options: {
+        A: "43, 44",
+        B: "46, 49",
+        C: "46, 44",
+        D: "44, 46",
+        E: "43, 45"
+      },
+      answer: "A",
+      diagram: {
+        nums: ["24", "25", "26", "28", "29", "32", "33", "37", "38", "43", "44"],
+        bold: [9, 10],
+        arcs: [
+          { from: 0, to: 2, label: "+2", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+3", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+4", pos: "top", tier: 1 },
+          { from: 6, to: 8, label: "+5", pos: "top", tier: 1 },
+          { from: 8, to: 10, label: "+6", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+1", pos: "top", tier: 2 },
+          { from: 3, to: 5, label: "+1", pos: "top", tier: 2 },
+          { from: 5, to: 7, label: "+1", pos: "top", tier: 2 },
+          { from: 7, to: 9, label: "+1", pos: "top", tier: 2 },
+          { from: 1, to: 3, label: "+3", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+4", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "+5", pos: "bottom", tier: 1 },
+          { from: 7, to: 9, label: "+6", pos: "bottom", tier: 1 },
+          { from: 2, to: 4, label: "+1", pos: "bottom", tier: 2 },
+          { from: 4, to: 6, label: "+1", pos: "bottom", tier: 2 },
+          { from: 6, to: 8, label: "+1", pos: "bottom", tier: 2 }
+        ]
+      },
+      explanation: "Larik bawah (37 + 6 = <strong>43</strong>) dan larik atas (38 + 6 = <strong>44</strong>)."
+    },
+    {
+      no: 36,
+      text: "Tentukan dua angka yang tepat untuk melengkapi deret berikut:<br><strong>5, 5, 5, 8, 6, 5, 6, 9, 7, 5, ..., ....</strong>",
+      options: {
+        A: "5, 9",
+        B: "5, 10",
+        C: "6, 10",
+        D: "7, 9",
+        E: "7, 10"
+      },
+      answer: "E",
+      diagram: {
+        nums: ["5", "5", "5", "8", "6", "5", "6", "9", "7", "5", "7", "10"],
+        bold: [10, 11],
+        arcs: [
+          { from: 0, to: 4, label: "+1", pos: "top", tier: 1 },
+          { from: 4, to: 8, label: "+1", pos: "top", tier: 1 },
+          { from: 1, to: 5, label: "tetap", pos: "top", tier: 2 },
+          { from: 5, to: 9, label: "tetap", pos: "top", tier: 2 },
+          { from: 2, to: 6, label: "+1", pos: "bottom", tier: 1 },
+          { from: 6, to: 10, label: "+1", pos: "bottom", tier: 1 },
+          { from: 3, to: 7, label: "+1", pos: "bottom", tier: 2 },
+          { from: 7, to: 11, label: "+1", pos: "bottom", tier: 2 }
+        ]
+      },
+      explanation: "Pola melompati 3 angka: suku ke-3 tiap kelompok (+1 &rarr; <strong>7</strong>) dan suku ke-4 tiap kelompok (+1 &rarr; <strong>10</strong>)."
+    },
+    {
+      no: 37,
+      text: "Tentukan dua angka yang tepat untuk melengkapi deret berikut:<br><strong>2, 7, 5, 5, 8, 3, 11, 1, 14, -1, ..., ....</strong>",
+      options: {
+        A: "17, -1",
+        B: "15, -3",
+        C: "20, -1",
+        D: "17, -3",
+        E: "15, 1"
+      },
+      answer: "D",
+      diagram: {
+        nums: ["2", "7", "5", "5", "8", "3", "11", "1", "14", "-1", "17", "-3"],
+        bold: [10, 11],
+        arcs: [
+          { from: 0, to: 2, label: "+3", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+3", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+3", pos: "top", tier: 1 },
+          { from: 6, to: 8, label: "+3", pos: "top", tier: 1 },
+          { from: 8, to: 10, label: "+3", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "-2", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "-2", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "-2", pos: "bottom", tier: 1 },
+          { from: 7, to: 9, label: "-2", pos: "bottom", tier: 1 },
+          { from: 9, to: 11, label: "-2", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik atas (+3 &rarr; 14 + 3 = <strong>17</strong>) dan larik bawah (-2 &rarr; -1 - 2 = <strong>-3</strong>)."
+    },
+    {
+      no: 38,
+      text: "Tentukan dua angka yang tepat untuk melengkapi deret berikut:<br><strong>101, 803, 515, 101, 803, -515, -101, -803, ..., ....</strong>",
+      options: {
+        A: "-101, 515",
+        B: "101, -515",
+        C: "-515, 101",
+        D: "-515, -101",
+        E: "-515, -111"
+      },
+      answer: "C",
+      diagram: {
+        nums: ["101", "803", "515", "101", "803", "-515", "-101", "-803", "-515", "101"],
+        bold: [8, 9],
+        arcs: [
+          { from: 0, to: 3, label: "×1", pos: "top", tier: 1 },
+          { from: 3, to: 6, label: "×(-1)", pos: "top", tier: 1 },
+          { from: 6, to: 9, label: "×(-1)", pos: "top", tier: 1 },
+          { from: 1, to: 4, label: "×1", pos: "top", tier: 2 },
+          { from: 4, to: 7, label: "×(-1)", pos: "top", tier: 2 },
+          { from: 2, to: 5, label: "×(-1)", pos: "bottom", tier: 1 },
+          { from: 5, to: 8, label: "×1", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Pengulangan trio bilangan (101, 803, 515) dengan pergantian tanda positif/negatif: <strong>-515, 101</strong>."
+    },
+    {
+      no: 39,
+      text: "Tentukan dua angka yang tepat untuk melengkapi deret berikut:<br><strong>1, 8, 9, 20, 25, 40, 49, ..., ....</strong>",
+      options: {
+        A: "68, 81",
+        B: "59, 81",
+        C: "67, 72",
+        D: "63, 84",
+        E: "55, 84"
+      },
+      answer: "A",
+      diagram: {
+        nums: ["1", "8", "9", "20", "25", "40", "49", "68", "81"],
+        bold: [7, 8],
+        arcs: [
+          { from: 0, to: 2, label: "+8", pos: "top", tier: 1 },
+          { from: 2, to: 4, label: "+16", pos: "top", tier: 1 },
+          { from: 4, to: 6, label: "+24", pos: "top", tier: 1 },
+          { from: 6, to: 8, label: "+32", pos: "top", tier: 1 },
+          { from: 1, to: 3, label: "+8", pos: "top", tier: 2 },
+          { from: 3, to: 5, label: "+8", pos: "top", tier: 2 },
+          { from: 5, to: 7, label: "+8", pos: "top", tier: 2 },
+          { from: 1, to: 3, label: "+12", pos: "bottom", tier: 1 },
+          { from: 3, to: 5, label: "+20", pos: "bottom", tier: 1 },
+          { from: 5, to: 7, label: "+28", pos: "bottom", tier: 1 },
+          { from: 2, to: 4, label: "+8", pos: "bottom", tier: 2 },
+          { from: 4, to: 6, label: "+8", pos: "bottom", tier: 2 }
+        ]
+      },
+      explanation: "Larik bawah (40 + 28 = <strong>68</strong>) dan larik atas (49 + 32 = <strong>81</strong>)."
+    },
+    {
+      no: 40,
+      text: "Tentukan dua angka yang tepat untuk melengkapi deret berikut:<br><strong>11, 15, 15, 13, 16, 18, 15, 17, 21, 17, ..., ....</strong>",
+      options: {
+        A: "16, 21",
+        B: "15, 22",
+        C: "18, 21",
+        D: "17, 20",
+        E: "18, 24"
+      },
+      answer: "E",
+      diagram: {
+        nums: ["11", "15", "15", "13", "16", "18", "15", "17", "21", "17", "18", "24"],
+        bold: [10, 11],
+        arcs: [
+          { from: 0, to: 3, label: "+2", pos: "top", tier: 1 },
+          { from: 3, to: 6, label: "+2", pos: "top", tier: 1 },
+          { from: 6, to: 9, label: "+2", pos: "top", tier: 1 },
+          { from: 2, to: 5, label: "+3", pos: "top", tier: 2 },
+          { from: 5, to: 8, label: "+3", pos: "top", tier: 2 },
+          { from: 8, to: 11, label: "+3", pos: "top", tier: 2 },
+          { from: 1, to: 4, label: "+1", pos: "bottom", tier: 1 },
+          { from: 4, to: 7, label: "+1", pos: "bottom", tier: 1 },
+          { from: 7, to: 10, label: "+1", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik tengah (+1 &rarr; 17 + 1 = <strong>18</strong>) dan larik ketiga (+3 &rarr; 21 + 3 = <strong>24</strong>)."
+    },
+    {
+      no: 41,
+      text: "Tentukan tiga angka yang tepat untuk melengkapi deret berikut:<br><strong>6, 4, 1, 6, 7, 5, 6, 10, 9, 6, 13, 13, ..., ..., ....</strong>",
+      options: {
+        A: "6, 16, 15",
+        B: "6, 15, 14",
+        C: "6, 16, 17",
+        D: "6, 17, 16",
+        E: "6, 13, 12"
+      },
+      answer: "C",
+      diagram: {
+        nums: ["6", "4", "1", "6", "7", "5", "6", "10", "9", "6", "13", "13", "6", "16", "17"],
+        bold: [12, 13, 14],
+        arcs: [
+          { from: 0, to: 3, label: "tetap", pos: "top", tier: 1 },
+          { from: 3, to: 6, label: "tetap", pos: "top", tier: 1 },
+          { from: 6, to: 9, label: "tetap", pos: "top", tier: 1 },
+          { from: 9, to: 12, label: "tetap", pos: "top", tier: 1 },
+          { from: 2, to: 5, label: "+4", pos: "top", tier: 2 },
+          { from: 5, to: 8, label: "+4", pos: "top", tier: 2 },
+          { from: 8, to: 11, label: "+4", pos: "top", tier: 2 },
+          { from: 11, to: 14, label: "+4", pos: "top", tier: 2 },
+          { from: 1, to: 4, label: "+3", pos: "bottom", tier: 1 },
+          { from: 4, to: 7, label: "+3", pos: "bottom", tier: 1 },
+          { from: 7, to: 10, label: "+3", pos: "bottom", tier: 1 },
+          { from: 10, to: 13, label: "+3", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Tiga larik berselang dua angka: tetap <strong>6</strong>, larik bawah (+3 &rarr; <strong>16</strong>), dan larik atas (+4 &rarr; <strong>17</strong>)."
+    },
+    {
+      no: 42,
+      text: "Tentukan tiga angka yang tepat untuk melengkapi deret berikut:<br><strong>2, 5, 8, 11, 15, 19, 23, 27, ..., ..., ....</strong>",
+      options: {
+        A: "33, 38, 43",
+        B: "34, 39, 42",
+        C: "32, 36, 40",
+        D: "32, 37, 42",
+        E: "33, 36, 39"
+      },
+      answer: "D",
+      diagram: {
+        nums: ["2", "5", "8", "11", "15", "19", "23", "27", "32", "37", "42"],
+        bold: [8, 9, 10],
+        arcs: [
+          { from: 0, to: 1, label: "+3", pos: "top", tier: 1 },
+          { from: 1, to: 2, label: "+3", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "+3", pos: "top", tier: 1 },
+          { from: 3, to: 4, label: "+4", pos: "top", tier: 1 },
+          { from: 4, to: 5, label: "+4", pos: "top", tier: 1 },
+          { from: 5, to: 6, label: "+4", pos: "top", tier: 1 },
+          { from: 6, to: 7, label: "+4", pos: "top", tier: 1 },
+          { from: 7, to: 8, label: "+5", pos: "top", tier: 1 },
+          { from: 8, to: 9, label: "+5", pos: "top", tier: 1 },
+          { from: 9, to: 10, label: "+5", pos: "top", tier: 1 },
+          { from: 0, to: 3, label: "3 kali", pos: "top", tier: 2 },
+          { from: 3, to: 7, label: "4 kali", pos: "top", tier: 2 },
+          { from: 7, to: 10, label: "3 kali", pos: "top", tier: 2 }
+        ]
+      },
+      explanation: "Penambahan bertingkat: 3 kali (+3), 4 kali (+4), lalu 3 kali (+5): <strong>32, 37, 42</strong>."
+    },
+    {
+      no: 43,
+      text: "Tentukan tiga angka yang tepat untuk melengkapi deret berikut:<br><strong>2, 5, 8, 8, 11, 14, 14, 17, 20, 20, ..., ..., ....</strong>",
+      options: {
+        A: "22, 26, 28",
+        B: "23, 24, 26",
+        C: "23, 26, 26",
+        D: "22, 24, 26",
+        E: "24, 26, 29"
+      },
+      answer: "C",
+      diagram: {
+        nums: ["2", "5", "8", "8", "11", "14", "14", "17", "20", "20", "23", "26", "26"],
+        bold: [10, 11, 12],
+        arcs: [
+          { from: 0, to: 3, label: "+6", pos: "top", tier: 1 },
+          { from: 3, to: 6, label: "+6", pos: "top", tier: 1 },
+          { from: 6, to: 9, label: "+6", pos: "top", tier: 1 },
+          { from: 9, to: 12, label: "+6", pos: "top", tier: 1 },
+          { from: 2, to: 5, label: "+6", pos: "top", tier: 2 },
+          { from: 5, to: 8, label: "+6", pos: "top", tier: 2 },
+          { from: 8, to: 11, label: "+6", pos: "top", tier: 2 },
+          { from: 1, to: 4, label: "+6", pos: "bottom", tier: 1 },
+          { from: 4, to: 7, label: "+6", pos: "bottom", tier: 1 },
+          { from: 7, to: 10, label: "+6", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Ketiga larik masing-masing selalu ditambah <strong>+6</strong>: <strong>23, 26, 26</strong>."
+    },
+    {
+      no: 44,
+      text: "Tentukan tiga angka yang tepat untuk melengkapi deret berikut:<br><strong>15, 16, 15, 16, 13, 14, 13, 14, 17, 18, 17, 18, 15, ..., ..., ....</strong>",
+      options: {
+        A: "11, 15, 13",
+        B: "12, 16, 14",
+        C: "14, 13, 14",
+        D: "14, 15, 13",
+        E: "13, 14, 13"
+      },
+      answer: "E",
+      diagram: {
+        nums: ["15", "16", "15", "16", "13", "14", "13", "14", "17", "18", "17", "18", "15", "13", "14", "13"],
+        bold: [13, 14, 15],
+        arcs: [
+          { from: 0, to: 1, label: "+1", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "+1", pos: "top", tier: 1 },
+          { from: 4, to: 5, label: "+1", pos: "top", tier: 1 },
+          { from: 6, to: 7, label: "+1", pos: "top", tier: 1 },
+          { from: 8, to: 9, label: "+1", pos: "top", tier: 1 },
+          { from: 10, to: 11, label: "+1", pos: "top", tier: 1 },
+          { from: 12, to: 13, label: "-2", pos: "bottom", tier: 1 },
+          { from: 13, to: 14, label: "+1", pos: "top", tier: 1 },
+          { from: 14, to: 15, label: "-1", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Mengacu pada kunci jawaban PDF: <strong>13, 14, 13</strong> (Pilihan <strong>E</strong>)."
+    },
+    {
+      no: 45,
+      text: "Tentukan tiga angka yang tepat untuk melengkapi deret berikut:<br><strong>2, 3, 7, 4, 5, 9, 8, 9, 13, 16, 17, 21, ..., ..., ....</strong>",
+      options: {
+        A: "32, 33, 35",
+        B: "32, 33, 37",
+        C: "16, 31, 35",
+        D: "23, 32, 37",
+        E: "24, 35, 17"
+      },
+      answer: "B",
+      diagram: {
+        nums: ["2", "3", "7", "4", "5", "9", "8", "9", "13", "16", "17", "21", "32", "33", "37"],
+        bold: [12, 13, 14],
+        arcs: [
+          { from: 0, to: 3, label: "×2", pos: "top", tier: 1 },
+          { from: 3, to: 6, label: "×2", pos: "top", tier: 1 },
+          { from: 6, to: 9, label: "×2", pos: "top", tier: 1 },
+          { from: 9, to: 12, label: "×2", pos: "top", tier: 1 },
+          { from: 2, to: 5, label: "+2", pos: "top", tier: 2 },
+          { from: 5, to: 8, label: "+4", pos: "top", tier: 2 },
+          { from: 8, to: 11, label: "+8", pos: "top", tier: 2 },
+          { from: 11, to: 14, label: "+16", pos: "top", tier: 2 },
+          { from: 3.5, to: 6.5, label: "×2", pos: "top", tier: 3 },
+          { from: 6.5, to: 9.5, label: "×2", pos: "top", tier: 3 },
+          { from: 9.5, to: 12.5, label: "×2", pos: "top", tier: 3 },
+          { from: 1, to: 4, label: "+2", pos: "bottom", tier: 1 },
+          { from: 4, to: 7, label: "+4", pos: "bottom", tier: 1 },
+          { from: 7, to: 10, label: "+8", pos: "bottom", tier: 1 },
+          { from: 10, to: 13, label: "+16", pos: "bottom", tier: 1 },
+          { from: 2.5, to: 5.5, label: "×2", pos: "bottom", tier: 2 },
+          { from: 5.5, to: 8.5, label: "×2", pos: "bottom", tier: 2 },
+          { from: 8.5, to: 11.5, label: "×2", pos: "bottom", tier: 2 }
+        ]
+      },
+      explanation: "Larik 1 (&times;2 &rarr; <strong>32</strong>), larik 2 (+16 &rarr; <strong>33</strong>), larik 3 (+16 &rarr; <strong>37</strong>)."
+    },
+    {
+      no: 46,
+      text: "Tentukan tiga angka yang tepat untuk melengkapi deret berikut:<br><strong>2, 1, 7, 4, 4, 6, 6, 7, 5, 8, 10, 4, 10, 13, 3, ..., ..., ....</strong>",
+      options: {
+        A: "11, 12, 1",
+        B: "12, 16, 2",
+        C: "12, 3, 7",
+        D: "13, 17, 1",
+        E: "12, 13, 2"
+      },
+      answer: "B",
+      diagram: {
+        nums: ["2", "1", "7", "4", "4", "6", "6", "7", "5", "8", "10", "4", "10", "13", "3", "12", "16", "2"],
+        bold: [15, 16, 17],
+        arcs: [
+          { from: 0, to: 3, label: "+2", pos: "top", tier: 1 },
+          { from: 3, to: 6, label: "+2", pos: "top", tier: 1 },
+          { from: 6, to: 9, label: "+2", pos: "top", tier: 1 },
+          { from: 9, to: 12, label: "+2", pos: "top", tier: 1 },
+          { from: 12, to: 15, label: "+2", pos: "top", tier: 1 },
+          { from: 2, to: 5, label: "-1", pos: "top", tier: 2 },
+          { from: 5, to: 8, label: "-1", pos: "top", tier: 2 },
+          { from: 8, to: 11, label: "-1", pos: "top", tier: 2 },
+          { from: 11, to: 14, label: "-1", pos: "top", tier: 2 },
+          { from: 14, to: 17, label: "-1", pos: "top", tier: 2 },
+          { from: 1, to: 4, label: "+3", pos: "bottom", tier: 1 },
+          { from: 4, to: 7, label: "+3", pos: "bottom", tier: 1 },
+          { from: 7, to: 10, label: "+3", pos: "bottom", tier: 1 },
+          { from: 10, to: 13, label: "+3", pos: "bottom", tier: 1 },
+          { from: 13, to: 16, label: "+3", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik 1 (+2 &rarr; <strong>12</strong>), larik 2 (+3 &rarr; <strong>16</strong>), larik 3 (-1 &rarr; <strong>2</strong>)."
+    },
+    {
+      no: 47,
+      text: "Tentukan tiga angka yang tepat untuk melengkapi deret berikut:<br><strong>8, 9, 7, 6, 9, 5, 4, 9, 3, ..., ..., ....</strong>",
+      options: {
+        A: "2, 9, 1",
+        B: "5, 3, 5",
+        C: "1, 9, 5",
+        D: "3, 3, 5",
+        E: "2, 9, 1"
+      },
+      answer: "E",
+      diagram: {
+        nums: ["8", "9", "7", "6", "9", "5", "4", "9", "3", "2", "9", "1"],
+        bold: [9, 10, 11],
+        arcs: [
+          { from: 0, to: 2, label: "-1", pos: "top", tier: 1 },
+          { from: 2, to: 3, label: "-1", pos: "top", tier: 1 },
+          { from: 3, to: 5, label: "-1", pos: "top", tier: 1 },
+          { from: 5, to: 6, label: "-1", pos: "top", tier: 1 },
+          { from: 6, to: 8, label: "-1", pos: "top", tier: 1 },
+          { from: 8, to: 9, label: "-1", pos: "top", tier: 1 },
+          { from: 9, to: 11, label: "-1", pos: "top", tier: 1 },
+          { from: 1, to: 4, label: "tetap", pos: "bottom", tier: 1 },
+          { from: 4, to: 7, label: "tetap", pos: "bottom", tier: 1 },
+          { from: 7, to: 10, label: "tetap", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Angka menurun berurutan (8, 7, 6, 5, 4, 3, <strong>2</strong>, <strong>1</strong>) diselingi angka tetap <strong>9</strong>: <strong>2, 9, 1</strong> (Kunci PDF: <strong>E</strong>)."
+    },
+    {
+      no: 48,
+      text: "Tentukan tiga angka yang tepat untuk melengkapi deret berikut:<br><strong>90, 5, 10, 89, 6, 12, 88, 7, 14, ..., ..., ....</strong>",
+      options: {
+        A: "5, 8, 16",
+        B: "87, 8, 5",
+        C: "84, 27, 16",
+        D: "87, 8, 16",
+        E: "84, 8, 27"
+      },
+      answer: "D",
+      diagram: {
+        nums: ["90", "5", "10", "89", "6", "12", "88", "7", "14", "87", "8", "16"],
+        bold: [9, 10, 11],
+        arcs: [
+          { from: 0, to: 3, label: "-1", pos: "top", tier: 1 },
+          { from: 3, to: 6, label: "-1", pos: "top", tier: 1 },
+          { from: 6, to: 9, label: "-1", pos: "top", tier: 1 },
+          { from: 2, to: 5, label: "+2", pos: "top", tier: 2 },
+          { from: 5, to: 8, label: "+2", pos: "top", tier: 2 },
+          { from: 8, to: 11, label: "+2", pos: "top", tier: 2 },
+          { from: 1, to: 4, label: "+1", pos: "bottom", tier: 1 },
+          { from: 4, to: 7, label: "+1", pos: "bottom", tier: 1 },
+          { from: 7, to: 10, label: "+1", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik 1 (-1 &rarr; <strong>87</strong>), larik 2 (+1 &rarr; <strong>8</strong>), larik 3 (+2 &rarr; <strong>16</strong>)."
+    },
+    {
+      no: 49,
+      text: "Tentukan tiga angka yang tepat untuk melengkapi deret berikut:<br><strong>2, 3, 4, 5, 6, 7, 8, 11, 15, 11, 18, 24, ..., ..., ....</strong>",
+      options: {
+        A: "13, 27, 36",
+        B: "12, 28, 39",
+        C: "14, 26, 38",
+        D: "14, 27, 36",
+        E: "12, 26, 43"
+      },
+      answer: "D",
+      diagram: {
+        nums: ["2", "3", "4", "5", "6", "7", "8", "11", "15", "11", "18", "24", "14", "27", "36"],
+        bold: [12, 13, 14],
+        arcs: [
+          { from: 0, to: 3, label: "+3", pos: "top", tier: 1 },
+          { from: 3, to: 6, label: "+3", pos: "top", tier: 1 },
+          { from: 6, to: 9, label: "+3", pos: "top", tier: 1 },
+          { from: 9, to: 12, label: "+3", pos: "top", tier: 1 },
+          { from: 2, to: 5, label: "+3", pos: "top", tier: 2 },
+          { from: 5, to: 8, label: "+8", pos: "top", tier: 2 },
+          { from: 8, to: 11, label: "+9", pos: "top", tier: 2 },
+          { from: 11, to: 14, label: "+12", pos: "top", tier: 2 },
+          { from: 3.5, to: 6.5, label: "+3", pos: "top", tier: 3 },
+          { from: 6.5, to: 9.5, label: "+3", pos: "top", tier: 3 },
+          { from: 9.5, to: 12.5, label: "+3", pos: "top", tier: 3 },
+          { from: 1, to: 4, label: "+3", pos: "bottom", tier: 1 },
+          { from: 4, to: 7, label: "+5", pos: "bottom", tier: 1 },
+          { from: 7, to: 10, label: "+7", pos: "bottom", tier: 1 },
+          { from: 10, to: 13, label: "+9", pos: "bottom", tier: 1 },
+          { from: 2.5, to: 5.5, label: "+2", pos: "bottom", tier: 2 },
+          { from: 5.5, to: 8.5, label: "+2", pos: "bottom", tier: 2 },
+          { from: 8.5, to: 11.5, label: "+2", pos: "bottom", tier: 2 }
+        ]
+      },
+      explanation: "Larik 1 (+3 &rarr; <strong>14</strong>), larik 2 (+3, +5, +7, +9 &rarr; <strong>27</strong>), larik 3 (+3, +6, +9, +12 &rarr; <strong>36</strong>)."
+    },
+    {
+      no: 50,
+      text: "Tentukan tiga angka yang tepat untuk melengkapi deret berikut:<br><strong>97, 2, 32, 93, 10, 16, 89, 50, 8, ..., ..., ....</strong>",
+      options: {
+        A: "81, 625, 0",
+        B: "85, 100, 8",
+        C: "81, 250, 8",
+        D: "81, 100, 0",
+        E: "85, 250, 4"
+      },
+      answer: "E",
+      diagram: {
+        nums: ["97", "2", "32", "93", "10", "16", "89", "50", "8", "85", "250", "4"],
+        bold: [9, 10, 11],
+        arcs: [
+          { from: 0, to: 3, label: "-4", pos: "top", tier: 1 },
+          { from: 3, to: 6, label: "-4", pos: "top", tier: 1 },
+          { from: 6, to: 9, label: "-4", pos: "top", tier: 1 },
+          { from: 2, to: 5, label: ":2", pos: "top", tier: 2 },
+          { from: 5, to: 8, label: ":2", pos: "top", tier: 2 },
+          { from: 8, to: 11, label: ":2", pos: "top", tier: 2 },
+          { from: 1, to: 4, label: "×5", pos: "bottom", tier: 1 },
+          { from: 4, to: 7, label: "×5", pos: "bottom", tier: 1 },
+          { from: 7, to: 10, label: "×5", pos: "bottom", tier: 1 }
+        ]
+      },
+      explanation: "Larik 1 (-4 &rarr; <strong>85</strong>), larik 2 (&times;5 &rarr; <strong>250</strong>), larik 3 (:2 &rarr; <strong>4</strong>)."
+    }
+  ];
+
+  // =========================================================================
+  // GENERATOR DIAGRAM POLA DERET SVG (VISUAL LENGKUNGAN ATAS/BAWAH & PANAH)
+  // =========================================================================
+  function renderPatternSVG(diagram) {
+    if (!diagram || !diagram.nums) return "";
+    const nums = diagram.nums;
+    const arcs = diagram.arcs || [];
+    const notes = diagram.notes || [];
+    const boldSet = new Set(diagram.bold || []);
+
+    const maxLen = Math.max(...nums.map(n => String(n).length));
+    const stepX = maxLen >= 5 ? 58 : (maxLen === 4 ? 50 : 42);
+    const padX = 28;
+    const width = padX * 2 + (nums.length - 1) * stepX;
+
+    let maxTopTier = 0;
+    let maxBotTier = 0;
+    arcs.forEach(a => {
+      if (a.pos === "top") maxTopTier = Math.max(maxTopTier, a.tier || 1);
+      if (a.pos === "bottom") maxBotTier = Math.max(maxBotTier, a.tier || 1);
+    });
+    const hasTopNotes = notes.some(n => n.pos === "top");
+    const hasBotNotes = notes.some(n => n.pos === "bottom");
+
+    const topSpace = Math.max(18, maxTopTier * 34 + (hasTopNotes ? 34 : 10));
+    const botSpace = Math.max(16, maxBotTier * 34 + (hasBotNotes ? 34 : 10));
+    const numY = topSpace + 14;
+    const height = numY + botSpace + 8;
+
+    const getX = idx => padX + idx * stepX;
+    let svgContent = "";
+
+    // Gambar lengkungan atas & bawah beserta label polanya
+    arcs.forEach(a => {
+      const x1 = getX(a.from);
+      const x2 = getX(a.to);
+      const midX = (x1 + x2) / 2;
+      const tier = a.tier || 1;
+      const span = Math.abs(x2 - x1);
+      const curveLift = Math.min(24, Math.max(14, span * 0.22));
+
+      if (a.pos === "top") {
+        const baseY = numY - 16 - (tier - 1) * 30;
+        const ctrlY = baseY - curveLift * 1.6;
+        const peakY = (baseY + ctrlY) / 2;
+        svgContent += `<path d="M ${x1} ${baseY} Q ${midX} ${ctrlY} ${x2} ${baseY}" fill="none" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round"/>`;
+        svgContent += `<text x="${midX}" y="${peakY - 4}" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">${a.label}</text>`;
+      } else {
+        const baseY = numY + 8 + (tier - 1) * 30;
+        const ctrlY = baseY + curveLift * 1.6;
+        const peakY = (baseY + ctrlY) / 2;
+        svgContent += `<path d="M ${x1} ${baseY} Q ${midX} ${ctrlY} ${x2} ${baseY}" fill="none" stroke="#0f172a" stroke-width="1.6" stroke-linecap="round"/>`;
+        svgContent += `<text x="${midX}" y="${peakY + 13}" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">${a.label}</text>`;
+      }
+    });
+
+    // Gambar panah vertikal & rumus kuadrat/fibonacci bila ada
+    notes.forEach(n => {
+      const x = getX(n.idx);
+      if (n.pos === "top") {
+        const yText = numY - 34;
+        svgContent += `<text x="${x}" y="${yText}" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">${n.label}</text>`;
+        svgContent += `<line x1="${x}" y1="${yText + 4}" x2="${x}" y2="${numY - 17}" stroke="#0f172a" stroke-width="1.4"/>`;
+        svgContent += `<polyline points="${x - 3},${numY - 21} ${x},${numY - 16} ${x + 3},${numY - 21}" fill="none" stroke="#0f172a" stroke-width="1.4"/>`;
+      } else {
+        const yText = numY + 34;
+        svgContent += `<line x1="${x}" y1="${numY + 6}" x2="${x}" y2="${yText - 13}" stroke="#0f172a" stroke-width="1.4"/>`;
+        svgContent += `<polyline points="${x - 3},${yText - 17} ${x},${yText - 12} ${x + 3},${yText - 17}" fill="none" stroke="#0f172a" stroke-width="1.4"/>`;
+        svgContent += `<text x="${x}" y="${yText}" text-anchor="middle" font-size="12" font-weight="600" fill="#0f172a">${n.label}</text>`;
+      }
+    });
+
+    // Gambar deretan angka (angka jawaban dicetak tebal & warna biru gelap)
+    nums.forEach((val, idx) => {
+      const x = getX(idx);
+      const isBold = boldSet.has(idx);
+      svgContent += `<text x="${x}" y="${numY}" text-anchor="middle" font-size="15.5" font-weight="${isBold ? '800' : '500'}" fill="${isBold ? '#1e40af' : '#0f172a'}">${val}</text>`;
+    });
+
+    return `<div class="diagram-scroll"><svg width="${width}" height="${height}" viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg">${svgContent}</svg></div>`;
+  }
+
+  // =========================================================================
+  // STATE & LOGIKA KUIS INTERAKTIF
+  // =========================================================================
+  let currentUser = { user: "", nama: "" };
+  let currentIndex = 0;
+  let userAnswers = new Array(questions.length).fill(null);
+  let checkedStatus = new Array(questions.length).fill(false); // Menyimpan status apakah soal sudah dicek
+  let doubtStatus = new Array(questions.length).fill(false);
+
+  function showModal(title, message, buttons) {
+    const overlay = document.getElementById("custom-modal");
+    document.getElementById("modal-title").textContent = title;
+    document.getElementById("modal-message").textContent = message;
+    const btnContainer = document.getElementById("modal-buttons");
+    btnContainer.innerHTML = "";
+
+    buttons.forEach(b => {
+      const btn = document.createElement("button");
+      btn.className = "btn " + (b.className || "btn-primary");
+      btn.style.width = "auto";
+      btn.textContent = b.text;
+      btn.onclick = () => {
+        overlay.style.display = "none";
+        if (b.onClick) b.onClick();
+      };
+      btnContainer.appendChild(btn);
+    });
+
+    overlay.style.display = "flex";
+  }
+
+  // Handle Login ke Google Sheet
+  document.getElementById("login-form").addEventListener("submit", async function(e) {
+    e.preventDefault();
+    const userVal = document.getElementById("username").value.trim();
+    const passVal = document.getElementById("password").value.trim();
+    const btn = document.getElementById("btn-login");
+    const errBox = document.getElementById("login-error");
+
+    btn.disabled = true;
+    btn.textContent = "Memverifikasi...";
+    errBox.style.display = "none";
+
+    try {
+      const response = await fetch(GAS_WEB_APP_URL, {
+        method: "POST",
+        body: JSON.stringify({ username: userVal, password: passVal })
+      });
+      
+      const textRes = await response.text();
+      let result;
+      try {
+        result = JSON.parse(textRes);
+      } catch (parseErr) {
+        throw new Error("Format respons server tidak valid.");
+      }
+
+      if (result.status === "success") {
+        currentUser = { user: result.user, nama: result.nama };
+        startExam();
+      } else {
+        errBox.style.display = "block";
+        errBox.textContent = result.message || "Username atau Password salah!";
+      }
+    } catch (error) {
+      errBox.style.display = "block";
+      errBox.textContent = "Gagal memproses login. Pastikan Web App sudah di-deploy ulang dengan 'Who has access' diset ke 'Anyone'.";
+    } finally {
+      btn.disabled = false;
+      btn.textContent = "Mulai Kuis";
+    }
+  });
+
+  function resetExamState() {
+    currentIndex = 0;
+    userAnswers = new Array(questions.length).fill(null);
+    checkedStatus = new Array(questions.length).fill(false);
+    doubtStatus = new Array(questions.length).fill(false);
+    updateLiveScore();
+  }
+
+  function startExam() {
+    resetExamState();
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("exam-screen").style.display = "block";
+    document.getElementById("peserta-info").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+
+    initNumberGrid();
+    renderQuestion(0);
+  }
+
+  function retryExam() {
+    startExam();
+  }
+
+  function confirmLogout() {
+    showModal(
+      "Konfirmasi Logout",
+      "Apakah Anda yakin ingin keluar dari kuis? Progres jawaban Anda saat ini akan direset.",
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Logout", className: "btn-logout", onClick: logoutUser }
+      ]
+    );
+  }
+
+  function logoutUser() {
+    resetExamState();
+    currentUser = { user: "", nama: "" };
+    document.getElementById("username").value = "";
+    document.getElementById("password").value = "";
+    document.getElementById("login-error").style.display = "none";
+
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("login-screen").style.display = "flex";
+  }
+
+  function updateLiveScore() {
+    let liveTotal = 0;
+    questions.forEach((q, idx) => {
+      const ans = userAnswers[idx];
+      if (ans !== null && checkedStatus[idx]) {
+        if (ans === q.answer) liveTotal += 5;
+      }
+    });
+    const pill = document.getElementById("live-score-pill");
+    if (pill) {
+      pill.textContent = `Skor Terkumpul: ${liveTotal}`;
+    }
+  }
+
+  function initNumberGrid() {
+    const grid = document.getElementById("number-grid");
+    grid.innerHTML = "";
+    questions.forEach((q, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "num-btn";
+      btn.id = `num-btn-${idx}`;
+      btn.textContent = q.no;
+      btn.onclick = () => renderQuestion(idx);
+      grid.appendChild(btn);
+    });
+  }
+
+  function updateNumberGrid() {
+    questions.forEach((q, idx) => {
+      const btn = document.getElementById(`num-btn-${idx}`);
+      if (!btn) return;
+      btn.className = "num-btn";
+      if (idx === currentIndex) btn.classList.add("active");
+
+      const ans = userAnswers[idx];
+      const isChecked = checkedStatus[idx];
+
+      if (isChecked && ans !== null) {
+        btn.classList.add(ans === q.answer ? "checked-correct" : "checked-wrong");
+      } else if (doubtStatus[idx]) {
+        btn.classList.add("doubt");
+      } else if (ans !== null) {
+        btn.classList.add("selected-only");
+      }
+    });
+  }
+
+  function renderQuestion(index) {
+    currentIndex = index;
+    const q = questions[index];
+    const uAns = userAnswers[index];
+    const isChecked = checkedStatus[index];
+
+    document.getElementById("q-number").textContent = `Soal No. ${q.no} dari ${questions.length}`;
+    document.getElementById("q-text").innerHTML = q.text;
+
+    // Status Header
+    const statusEl = document.getElementById("q-status");
+    if (isChecked && uAns !== null) {
+      const isCorrect = uAns === q.answer;
+      statusEl.textContent = isCorrect ? "✔ Benar (+5 Poin)" : "✘ Salah (0 Poin)";
+      statusEl.style.color = isCorrect ? "var(--success)" : "var(--danger)";
+    } else if (doubtStatus[index]) {
+      statusEl.textContent = "Ditandai Ragu-Ragu";
+      statusEl.style.color = "#b45309";
+    } else if (uAns) {
+      statusEl.textContent = `Dipilih (${uAns}) - Belum dicek`;
+      statusEl.style.color = "var(--primary)";
+    } else {
+      statusEl.textContent = "Belum dijawab";
+      statusEl.style.color = "var(--muted)";
+    }
+
+    // Render Opsi Jawaban
+    const optContainer = document.getElementById("q-options");
+    optContainer.innerHTML = "";
+
+    ["A", "B", "C", "D", "E"].forEach(letter => {
+      const div = document.createElement("div");
+      let extraClass = "";
+      let tagHtml = "";
+
+      if (isChecked) {
+        extraClass += " locked";
+        if (letter === q.answer) {
+          extraClass += " opt-correct";
+          tagHtml = `<span class="opt-tag tag-correct">Kunci Jawaban</span>`;
+        } else if (letter === uAns && uAns !== q.answer) {
+          extraClass += " opt-wrong";
+          tagHtml = `<span class="opt-tag tag-wrong">Jawaban Anda</span>`;
+        }
+      } else {
+        if (uAns === letter) {
+          extraClass += " selected";
+        }
+      }
+
+      div.className = "option-item" + extraClass;
+      if (!isChecked) {
+        div.onclick = () => selectOption(letter);
+      }
+
+      div.innerHTML = `
+        <div class="option-left">
+          <div class="option-letter">${letter}</div>
+          <div>${q.options[letter]}</div>
+        </div>
+        ${tagHtml}
+      `;
+      optContainer.appendChild(div);
+    });
+
+    // Render Kotak Feedback & Pembahasan jika sudah dicek
+    const fbContainer = document.getElementById("instant-feedback-container");
+    fbContainer.innerHTML = "";
+
+    if (isChecked && uAns !== null) {
+      const fbBox = document.createElement("div");
+      const isCorrect = uAns === q.answer;
+      fbBox.className = `instant-feedback ${isCorrect ? "fb-correct" : "fb-wrong"}`;
+      fbBox.innerHTML = `
+        <div class="fb-header">
+          <span style="color: ${isCorrect ? "var(--success)" : "var(--danger)"}">
+            ${isCorrect ? "🎉 Jawaban Anda BENAR! (+5 Poin)" : `❌ Jawaban Anda KURANG TEPAT! Kunci: ${q.answer}`}
+          </span>
+        </div>
+        <div class="fb-body">
+          <strong>Pola deret &amp; Pembahasan:</strong>
+          ${renderPatternSVG(q.diagram)}
+          <div style="margin-top:6px;">${q.explanation}</div>
+          <div style="margin-top:8px; font-weight:700; color:#0f172a;">&#9632; Jawaban: ${q.answer}</div>
+        </div>
+      `;
+      fbContainer.appendChild(fbBox);
+    }
+
+    // Atur tombol Cek Jawaban & Navigasi
+    const btnCheck = document.getElementById("btn-check");
+    if (isChecked) {
+      btnCheck.disabled = true;
+      btnCheck.textContent = "✔ Sudah Dicek";
+    } else {
+      btnCheck.disabled = (uAns === null);
+      btnCheck.textContent = "✔ Cek Jawaban";
+    }
+
+    document.getElementById("btn-doubt").disabled = isChecked;
+    document.getElementById("btn-prev").disabled = (index === 0);
+    document.getElementById("btn-next").disabled = (index === questions.length - 1);
+    updateNumberGrid();
+  }
+
+  function selectOption(letter) {
+    if (checkedStatus[currentIndex]) return; // Kunci perubahan setelah jawaban dicek
+    userAnswers[currentIndex] = letter;
+    renderQuestion(currentIndex);
+  }
+
+  function checkCurrentAnswer() {
+    if (userAnswers[currentIndex] === null) return;
+    checkedStatus[currentIndex] = true;
+    doubtStatus[currentIndex] = false;
+    updateLiveScore();
+    renderQuestion(currentIndex);
+  }
+
+  function toggleDoubt() {
+    if (checkedStatus[currentIndex]) return;
+    doubtStatus[currentIndex] = !doubtStatus[currentIndex];
+    renderQuestion(currentIndex);
+  }
+
+  function prevQuestion() {
+    if (currentIndex > 0) renderQuestion(currentIndex - 1);
+  }
+
+  function nextQuestion() {
+    if (currentIndex < questions.length - 1) renderQuestion(currentIndex + 1);
+  }
+
+  function confirmFinish() {
+    const unanswered = userAnswers.filter(a => a === null).length;
+    const msg = unanswered > 0 
+      ? `Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin mengakhiri kuis dan melihat rekap nilai?`
+      : "Apakah Anda yakin ingin mengakhiri kuis dan melihat rekap nilai lengkap?";
+    
+    showModal(
+      "Selesai & Rekap Nilai",
+      msg,
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Lihat Rekap", className: "btn-finish", onClick: finishExam }
+      ]
+    );
+  }
+
+  function filterReview(statusFilter, btnEl) {
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    if (btnEl) btnEl.classList.add("active");
+
+    document.querySelectorAll(".review-card").forEach(card => {
+      if (statusFilter === "ALL" || card.dataset.status === statusFilter) {
+        card.style.display = "block";
+      } else {
+        card.style.display = "none";
+      }
+    });
+  }
+
+  function finishExam() {
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "block";
+
+    let benar = 0, salah = 0, kosong = 0;
+    const reviewContainer = document.getElementById("review-container");
+    reviewContainer.innerHTML = "";
+
+    questions.forEach((q, idx) => {
+      const uAns = userAnswers[idx];
+      const isCorrect = (uAns !== null && uAns === q.answer);
+
+      let statusKey = "EMPTY";
+      if (uAns === null) {
+        kosong++;
+        statusKey = "EMPTY";
+      } else if (isCorrect) {
+        benar++;
+        statusKey = "CORRECT";
+      } else {
+        salah++;
+        statusKey = "WRONG";
+      }
+
+      const card = document.createElement("div");
+      card.dataset.status = statusKey;
+      card.className = `card review-card ${isCorrect ? 'correct' : 'wrong'}`;
+
+      const statusText = uAns === null
+        ? "Tidak Dijawab (0 Poin)"
+        : (isCorrect ? "Benar (+5 Poin)" : "Salah (0 Poin)");
+
+      card.innerHTML = `
+        <div style="display:flex; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+          <div>
+            <strong>Soal No. ${q.no}</strong>
+            <span class="badge-subtes" style="margin-left:6px;">TIU - Deret Angka</span>
+          </div>
+          <span style="font-weight:bold; color:${isCorrect ? 'var(--success)' : 'var(--danger)'}">
+            ${statusText}
+          </span>
+        </div>
+        <p style="margin-bottom:10px;">${q.text}</p>
+        <p style="margin-bottom:6px;"><strong>Jawaban Anda:</strong> ${uAns ? `${uAns}. ${q.options[uAns]}` : '-'}</p>
+        <p style="margin-bottom:10px;"><strong style="color:var(--success)">Kunci Jawaban:</strong> ${q.answer}. ${q.options[q.answer]}</p>
+        <div class="pembahasan-box">
+          <strong>Pola deret &amp; Pembahasan:</strong>
+          ${renderPatternSVG(q.diagram)}
+          <div style="margin-top:6px;">${q.explanation}</div>
+          <div style="margin-top:8px; font-weight:700; color:#0f172a;">&#9632; Jawaban: ${q.answer}</div>
+        </div>
+      `;
+      reviewContainer.appendChild(card);
+    });
+
+    const totalPoin = benar * 5;
+    const maxPoin = questions.length * 5;
+    const akurasi = Math.round((benar / questions.length) * 100);
+
+    document.getElementById("res-peserta").textContent = `Peserta: ${currentUser.nama} (${currentUser.user})`;
+    document.getElementById("res-total-score").textContent = `Total Skor: ${totalPoin} / ${maxPoin}`;
+    document.getElementById("res-detail").textContent = `Benar: ${benar} | Salah: ${salah} | Kosong: ${kosong}`;
+
+    document.getElementById("stat-benar").textContent = benar;
+    document.getElementById("stat-poin").textContent = `${totalPoin} Poin`;
+    document.getElementById("stat-salah").textContent = salah;
+    document.getElementById("stat-kosong").textContent = kosong;
+    document.getElementById("stat-akurasi").textContent = `${akurasi}%`;
+
+    const firstFilterBtn = document.querySelector("#filter-bar .filter-btn");
+    if (firstFilterBtn) filterReview("ALL", firstFilterBtn);
+  }
+</script>
+</body>
+</html>
