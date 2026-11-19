@@ -1,0 +1,2175 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CAT - TRYOUT 3 CPNS VERSI CAT (100 SOAL)</title>
+  <style>
+    :root {
+      --primary: #1e40af;
+      --primary-hover: #1d4ed8;
+      --success: #16a34a;
+      --warning: #eab308;
+      --danger: #dc2626;
+      --danger-hover: #b91c1c;
+      --bg: #f1f5f9;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #64748b;
+      --border: #cbd5e1;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+    body { background-color: var(--bg); color: var(--text); line-height: 1.6; }
+
+    /* Start Screen (Pengganti Login Screen) */
+    #login-screen {
+      min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px;
+    }
+    .login-box {
+      background: var(--card); padding: 35px; border-radius: 12px; width: 100%; max-width: 460px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+    }
+    .login-box h2 { text-align: center; color: var(--primary); margin-bottom: 5px; }
+    .login-box p { text-align: center; color: var(--muted); font-size: 0.9rem; margin-bottom: 20px; }
+    .tryout-info-list {
+      background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px;
+      padding: 15px 18px; margin-bottom: 22px; font-size: 0.9rem;
+    }
+    .tryout-info-list ul { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+    .tryout-info-list li { display: flex; justify-content: space-between; border-bottom: 1px dashed #cbd5e1; padding-bottom: 6px; }
+    .tryout-info-list li:last-child { border-bottom: none; padding-bottom: 0; }
+    .btn {
+      display: inline-block; padding: 10px 18px; border: none; border-radius: 6px; font-size: 0.95rem;
+      font-weight: 600; cursor: pointer; transition: 0.2s; text-align: center; text-decoration: none;
+    }
+    .btn-primary { background: var(--primary); color: white; width: 100%; padding: 12px 18px; font-size: 1rem; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:disabled { background: #94a3b8; cursor: not-allowed; }
+    .btn-logout {
+      background: var(--danger); color: white; padding: 7px 14px; font-size: 0.85rem;
+    }
+    .btn-logout:hover { background: var(--danger-hover); }
+
+    /* Header CAT */
+    header {
+      background: var(--primary); color: white; padding: 15px 25px; display: flex;
+      justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;
+      position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .header-title h1 { font-size: 1.2rem; }
+    .header-info { display: flex; align-items: center; gap: 15px; }
+    .timer-box {
+      background: rgba(255,255,255,0.15); padding: 6px 14px; border-radius: 6px;
+      font-weight: bold; font-size: 1.1rem; letter-spacing: 1px;
+    }
+
+    /* Main Container */
+    #exam-screen, #result-screen { display: none; max-width: 1200px; margin: 20px auto; padding: 0 15px; }
+    .exam-layout { display: grid; grid-template-columns: 1fr 300px; gap: 20px; }
+    @media (max-width: 850px) { .exam-layout { grid-template-columns: 1fr; } }
+
+    .card {
+      background: var(--card); border-radius: 10px; padding: 25px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.05); border: 1px solid #e2e8f0;
+    }
+
+    /* Soal Area */
+    .question-header {
+      display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;
+      border-bottom: 2px solid var(--bg); padding-bottom: 12px; margin-bottom: 18px;
+    }
+    .badge-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .badge-no { background: var(--primary); color: white; padding: 4px 12px; border-radius: 20px; font-weight: bold; font-size: 0.9rem; }
+    .badge-subtes { background: #e0e7ff; color: #1e40af; padding: 4px 12px; border-radius: 20px; font-weight: 700; font-size: 0.82rem; }
+    .question-text { font-size: 1.05rem; margin-bottom: 15px; white-space: pre-line; }
+
+    /* Ilustrasi Gambar Soal & Pembahasan */
+    .question-media, .explanation-media {
+      margin: 12px 0 18px 0;
+      padding: 12px;
+      background: #ffffff;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      display: inline-block;
+      max-width: 100%;
+    }
+    .question-media svg, .explanation-media svg {
+      max-width: 100%;
+      height: auto;
+      display: block;
+    }
+
+    /* Opsi Jawaban */
+    .options-list { display: flex; flex-direction: column; gap: 10px; }
+    .option-item {
+      display: flex; align-items: center; gap: 12px; padding: 12px 15px;
+      border: 1px solid var(--border); border-radius: 8px; cursor: pointer; transition: 0.15s;
+    }
+    .option-item:hover { background: #f8fafc; border-color: var(--primary); }
+    .option-item.selected { background: #eff6ff; border-color: var(--primary); font-weight: 600; }
+    .option-letter {
+      width: 30px; height: 30px; border-radius: 50%; background: var(--bg);
+      display: flex; align-items: center; justify-content: center; font-weight: bold; flex-shrink: 0;
+    }
+    .option-item.selected .option-letter { background: var(--primary); color: white; }
+
+    /* Navigasi Bawah Soal */
+    .nav-actions {
+      display: flex; justify-content: space-between; align-items: center; margin-top: 25px;
+      padding-top: 15px; border-top: 1px solid #e2e8f0; flex-wrap: wrap; gap: 10px;
+    }
+    .btn-nav { background: #e2e8f0; color: var(--text); }
+    .btn-nav:hover { background: #cbd5e1; }
+    .btn-ragu { background: var(--warning); color: #000; }
+    .btn-finish { background: var(--success); color: white; width: 100%; margin-top: 15px; }
+    .btn-finish:hover { background: #15803d; }
+
+    /* Grid Nomor Soal */
+    .grid-numbers {
+      display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; margin-top: 15px;
+      max-height: 360px; overflow-y: auto; padding-right: 4px;
+    }
+    .num-btn {
+      padding: 8px 0; border: 1px solid var(--border); border-radius: 6px;
+      background: white; font-weight: 600; cursor: pointer; text-align: center;
+    }
+    .num-btn.active { border: 2px solid var(--primary); }
+    .num-btn.answered { background: var(--success); color: white; border-color: var(--success); }
+    .num-btn.doubt { background: var(--warning); color: black; border-color: var(--warning); }
+
+    .legend { display: flex; gap: 12px; font-size: 0.8rem; margin-top: 15px; flex-wrap: wrap; }
+    .legend span { display: flex; align-items: center; gap: 5px; }
+    .dot { width: 12px; height: 12px; border-radius: 3px; display: inline-block; }
+
+    /* Result & Pembahasan */
+    .score-banner {
+      text-align: center; padding: 30px; background: linear-gradient(135deg, #1e40af, #3b82f6);
+      color: white; border-radius: 12px; margin-bottom: 25px;
+    }
+    .score-big { font-size: 3rem; font-weight: bold; margin: 10px 0; }
+    .subtes-score-grid {
+      display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-top: 20px; text-align: center;
+    }
+    @media (max-width: 700px) { .subtes-score-grid { grid-template-columns: 1fr; } }
+    .subtes-box {
+      background: rgba(255, 255, 255, 0.14); padding: 15px; border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.25);
+    }
+    .subtes-box h4 { font-size: 0.95rem; margin-bottom: 5px; opacity: 0.95; }
+    .subtes-box .sub-val { font-size: 1.8rem; font-weight: 800; }
+    .subtes-box .sub-detail { font-size: 0.82rem; opacity: 0.9; margin-top: 4px; }
+
+    .result-actions {
+      display: flex; justify-content: center; gap: 12px; margin-top: 20px; flex-wrap: wrap;
+    }
+    .filter-bar {
+      display: flex; gap: 8px; margin-bottom: 18px; flex-wrap: wrap;
+    }
+    .filter-btn {
+      padding: 7px 14px; border-radius: 20px; border: 1px solid var(--border);
+      background: white; font-weight: 600; font-size: 0.88rem; cursor: pointer;
+    }
+    .filter-btn.active {
+      background: var(--primary); color: white; border-color: var(--primary);
+    }
+
+    .review-card { margin-bottom: 20px; border-left: 5px solid var(--border); }
+    .review-card.correct { border-left-color: var(--success); }
+    .review-card.mid { border-left-color: var(--warning); }
+    .review-card.wrong { border-left-color: var(--danger); }
+    .pembahasan-box {
+      background: #f8fafc; padding: 15px; border-radius: 8px; margin-top: 12px;
+      border: 1px dashed #94a3b8; font-size: 0.95rem;
+    }
+    .poin-badge-row {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; margin-bottom: 10px;
+    }
+    .poin-pill {
+      padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: 600;
+      background: #e2e8f0; color: #0f172a;
+    }
+    .poin-pill.max-poin {
+      background: #dcfce7; color: #166534; border: 1px solid #86efac;
+    }
+    .poin-pill.user-poin {
+      outline: 2px solid var(--primary);
+    }
+
+    /* Custom Modal Dialog (Pengganti alert/confirm) */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(15, 23, 42, 0.6); display: none; align-items: center;
+      justify-content: center; z-index: 999; padding: 20px;
+    }
+    .modal-card {
+      background: white; padding: 25px; border-radius: 12px; max-width: 400px;
+      width: 100%; text-align: center; box-shadow: 0 15px 30px rgba(0,0,0,0.2);
+    }
+    .modal-card h3 { color: var(--primary); margin-bottom: 10px; }
+    .modal-card p { color: var(--text); font-size: 0.95rem; margin-bottom: 20px; }
+    .modal-btns { display: flex; gap: 10px; justify-content: center; }
+  </style>
+</head>
+<body>
+
+  <!-- HALAMAN AWAL MULAI TRYOUT -->
+  <div id="login-screen">
+    <div class="login-box">
+      <h2>Portal Ujian CAT</h2>
+      <p>Tryout Gratis CPNS Versi CAT: TWK, TIU & TKP</p>
+      <div class="tryout-info-list">
+        <ul>
+          <li><span>Jumlah Soal</span><strong>100 Soal</strong></li>
+          <li><span>TWK (No. 1 - 35)</span><strong>35 Soal</strong></li>
+          <li><span>TIU (No. 36 - 65)</span><strong>30 Soal</strong></li>
+          <li><span>TKP (No. 66 - 100)</span><strong>35 Soal</strong></li>
+          <li><span>Durasi Pengerjaan</span><strong>90 Menit</strong></li>
+        </ul>
+      </div>
+      <button type="button" class="btn btn-primary" id="btn-start-tryout" onclick="beginTryout()">Mulai Tryout</button>
+    </div>
+  </div>
+
+  <!-- HALAMAN UJIAN CAT -->
+  <div id="exam-screen">
+    <header>
+      <div class="header-title">
+        <h1>TRYOUT 3 - CPNS VERSI CAT (TWK • TIU • TKP)</h1>
+        <small id="peserta-info">Peserta: Peserta Tryout CPNS</small>
+      </div>
+      <div class="header-info">
+        <div class="timer-box" id="timer">90:00</div>
+        <button type="button" class="btn btn-logout" onclick="confirmLogout()">Keluar</button>
+      </div>
+    </header>
+
+    <div class="exam-layout" style="margin-top: 20px;">
+      <!-- Kolom Kiri: Soal -->
+      <div class="card">
+        <div class="question-header">
+          <div class="badge-group">
+            <span class="badge-no" id="q-number">Soal No. 1</span>
+            <span class="badge-subtes" id="q-subtes">TWK</span>
+          </div>
+          <span id="q-status" style="font-size: 0.85rem; color: var(--muted);">Belum dijawab</span>
+        </div>
+        <div class="question-text" id="q-text"></div>
+        <div id="q-media"></div>
+        <div class="options-list" id="q-options"></div>
+
+        <div class="nav-actions">
+          <button class="btn btn-nav" id="btn-prev" onclick="prevQuestion()">&laquo; Sebelumnya</button>
+          <button class="btn btn-ragu" id="btn-doubt" onclick="toggleDoubt()">Ragu-Ragu</button>
+          <button class="btn btn-nav" id="btn-next" onclick="nextQuestion()">Selanjutnya &raquo;</button>
+        </div>
+      </div>
+
+      <!-- Kolom Kanan: Navigasi Nomor -->
+      <div class="card">
+        <h3>Navigasi Soal</h3>
+        <p style="font-size: 0.78rem; color: var(--muted); margin-top: 4px;">1-35: TWK | 36-65: TIU | 66-100: TKP</p>
+        <div class="grid-numbers" id="number-grid"></div>
+        <div class="legend">
+          <span><i class="dot" style="background: var(--success);"></i> Dijawab</span>
+          <span><i class="dot" style="background: var(--warning);"></i> Ragu</span>
+          <span><i class="dot" style="background: #fff; border: 1px solid #cbd5e1;"></i> Kosong</span>
+        </div>
+        <button class="btn btn-finish" onclick="confirmFinish()">Selesai & Kumpulkan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HALAMAN HASIL & PEMBAHASAN -->
+  <div id="result-screen">
+    <div class="score-banner">
+      <h2>Hasil Ujian Tryout 3 CPNS Versi CAT</h2>
+      <p id="res-peserta"></p>
+      <div class="score-big" id="res-total-score">Total Skor: 0 / 500</div>
+      <p id="res-detail">Dijawab: 0 | Kosong: 0</p>
+
+      <!-- Perhitungan Skor Dipisahkan per Subtes -->
+      <div class="subtes-score-grid">
+        <div class="subtes-box">
+          <h4>Tes Wawasan Kebangsaan (TWK)</h4>
+          <div class="sub-val" id="score-twk">0 / 175</div>
+          <div class="sub-detail" id="detail-twk">Benar: 0 | Salah: 0 | Kosong: 0</div>
+        </div>
+        <div class="subtes-box">
+          <h4>Tes Inteligensia Umum (TIU)</h4>
+          <div class="sub-val" id="score-tiu">0 / 150</div>
+          <div class="sub-detail" id="detail-tiu">Benar: 0 | Salah: 0 | Kosong: 0</div>
+        </div>
+        <div class="subtes-box">
+          <h4>Tes Karakteristik Pribadi (TKP)</h4>
+          <div class="sub-val" id="score-tkp">0 / 175</div>
+          <div class="sub-detail" id="detail-tkp">Poin 5: 0 Soal | Dijawab: 0 | Kosong: 0</div>
+        </div>
+      </div>
+
+      <div class="result-actions">
+        <button class="btn" style="background: white; color: var(--primary);" onclick="retryExam()">Ulangi Ujian</button>
+        <button class="btn btn-logout" onclick="logoutUser()">Halaman Awal</button>
+      </div>
+    </div>
+
+    <div style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; margin-bottom:15px;">
+      <h3>Kunci Jawaban & Pembahasan Lengkap</h3>
+      <div class="filter-bar" id="filter-bar">
+        <button class="filter-btn active" onclick="filterReview('ALL', this)">Semua (100)</button>
+        <button class="filter-btn" onclick="filterReview('TWK', this)">TWK (1-35)</button>
+        <button class="filter-btn" onclick="filterReview('TIU', this)">TIU (36-65)</button>
+        <button class="filter-btn" onclick="filterReview('TKP', this)">TKP (66-100)</button>
+      </div>
+    </div>
+    <div id="review-container"></div>
+  </div>
+
+  <!-- CUSTOM MODAL -->
+  <div class="modal-overlay" id="custom-modal">
+    <div class="modal-card">
+      <h3 id="modal-title">Konfirmasi</h3>
+      <p id="modal-message">Pesan konfirmasi</p>
+      <div class="modal-btns" id="modal-buttons"></div>
+    </div>
+  </div>
+
+<script>
+  // =========================================================================
+  // ILUSTRASI GAMBAR SVG (SOAL & PEMBAHASAN NO. 55)
+  // =========================================================================
+  const SVG_SOAL_55 = `
+    <div class="question-media">
+      <svg width="310" height="205" viewBox="0 0 310 205" xmlns="http://www.w3.org/2000/svg">
+        <!-- Latar Belakang Poligon Bangun Gabungan Berwarna Gelap (Arsiran Abu-Abu) -->
+        <polygon points="15,15 245,15 245,168 92,168 92,92 15,92" fill="#bdbdbd" stroke="#0f172a" stroke-width="2"/>
+        <!-- Segitiga Putih di Bagian Dalam -->
+        <polygon points="15,92 168,92 207,15" fill="#ffffff" stroke="#0f172a" stroke-width="2"/>
+        <!-- Garis Tanda Sama Panjang (4 cm & 4 cm) pada Alas Segitiga Putih -->
+        <line x1="53" y1="86" x2="57" y2="98" stroke="#0f172a" stroke-width="1.8"/>
+        <line x1="128" y1="86" x2="132" y2="98" stroke="#0f172a" stroke-width="1.8"/>
+        <!-- Label Ukuran Sesuai Gambar Soal PDF -->
+        <text x="24" y="112" font-size="14" font-family="Segoe UI, sans-serif" fill="#0f172a" font-weight="600">4 cm</text>
+        <text x="80" y="142" font-size="14" font-family="Segoe UI, sans-serif" fill="#0f172a" font-weight="600" transform="rotate(-90 80 142)">4 cm</text>
+        <text x="152" y="188" font-size="14" font-family="Segoe UI, sans-serif" fill="#0f172a" font-weight="600">8 cm</text>
+        <text x="256" y="96" font-size="14" font-family="Segoe UI, sans-serif" fill="#0f172a" font-weight="600">8 cm</text>
+      </svg>
+    </div>
+  `;
+
+  const SVG_PEMBAHASAN_55 = `
+    <div class="explanation-media">
+      <svg width="335" height="225" viewBox="0 0 335 225" xmlns="http://www.w3.org/2000/svg">
+        <!-- Latar Belakang Poligon Bangun Gabungan Berwarna Gelap -->
+        <polygon points="48,30 278,30 278,183 125,183 125,107 48,107" fill="#bdbdbd" stroke="#0f172a" stroke-width="2"/>
+        <!-- Segitiga Putih -->
+        <polygon points="48,107 201,107 240,30" fill="#ffffff" stroke="#0f172a" stroke-width="2"/>
+        <!-- Garis Putus-Putus Pemisah Persegi 4x4 dan Persegi 8x8 -->
+        <line x1="125" y1="30" x2="125" y2="107" stroke="#0f172a" stroke-width="1.8" stroke-dasharray="5,4"/>
+        <!-- Tanda Sama Panjang pada Segmen Alas Segitiga -->
+        <line x1="86" y1="101" x2="90" y2="113" stroke="#0f172a" stroke-width="1.8"/>
+        <line x1="161" y1="101" x2="165" y2="113" stroke="#0f172a" stroke-width="1.8"/>
+        <!-- Label Dimensi Lengkap Sesuai Gambar Pembahasan PDF -->
+        <text x="72" y="22" font-size="13" font-family="Segoe UI, sans-serif" fill="#0f172a" font-weight="600">4 cm</text>
+        <text x="188" y="22" font-size="13" font-family="Segoe UI, sans-serif" fill="#0f172a" font-weight="600">8 cm</text>
+        <text x="8" y="73" font-size="13" font-family="Segoe UI, sans-serif" fill="#0f172a" font-weight="600">4 cm</text>
+        <text x="72" y="125" font-size="13" font-family="Segoe UI, sans-serif" fill="#0f172a" font-weight="600">4 cm</text>
+        <text x="148" y="125" font-size="13" font-family="Segoe UI, sans-serif" fill="#0f172a" font-weight="600">4 cm</text>
+        <text x="83" y="152" font-size="13" font-family="Segoe UI, sans-serif" fill="#0f172a" font-weight="600">4 cm</text>
+        <text x="186" y="203" font-size="13" font-family="Segoe UI, sans-serif" fill="#0f172a" font-weight="600">8 cm</text>
+        <text x="288" y="112" font-size="13" font-family="Segoe UI, sans-serif" fill="#0f172a" font-weight="600">8 cm</text>
+      </svg>
+    </div>
+  `;
+
+  // =========================================================================
+  // BANK SOAL TRYOUT 3 CPNS VERSI CAT (100 SOAL: 1-35 TWK, 36-65 TIU, 66-100 TKP)
+  // =========================================================================
+  const questions = [
+    // ==================== TES WAWASAN KEBANGSAAN (TWK: 1 - 35) ====================
+    {
+      no: 1,
+      category: "TWK",
+      text: "Berdasarkan teori kausalitas, diketahui bahwa sumber formal dari Pancasila adalah ....",
+      options: {
+        A: "Kitab Kertanegara",
+        B: "Piagam Jakarta",
+        C: "Alinea IV Pembukaan UUD 1945",
+        D: "Tata kehidupan bangsa Indonesia",
+        E: "Hasil sidang BPUPKI I"
+      },
+      answer: "C",
+      explanation: "Sumber formal Pancasila adalah alinea IV Pembukaan UUD 1945 yang memuat rumusan dan susunan Pancasila secara resmi."
+    },
+    {
+      no: 2,
+      category: "TWK",
+      text: "Sebagai sebuah ideologi, Pancasila mengandung unsur tujuan hidup yang dijabarkan melalui sila yang ....",
+      options: {
+        A: "Pertama",
+        B: "Kedua",
+        C: "Ketiga",
+        D: "Keempat",
+        E: "Kelima"
+      },
+      answer: "E",
+      explanation: "Tujuan yang ingin dicapai oleh bangsa Indonesia adalah terwujudnya keadilan sosial bagi seluruh rakyat Indonesia tanpa terkecuali. Tujuan tersebut dijabarkan pada Pancasila sila kelima."
+    },
+    {
+      no: 3,
+      category: "TWK",
+      text: "Nilai-nilai dalam Pancasila akan tetap ada sepanjang masa dalam kehidupan bangsa Indonesia, baik dalam adat istiadat, kebudayaan, kegiatan kenegaraan, maupun dalam keagamaan. Hal tersebut merupakan salah satu tanda bahwa nilai Pancasila bersifat ....",
+      options: {
+        A: "Majemuk",
+        B: "Tunggal",
+        C: "Objektif",
+        D: "Subjektif",
+        E: "Kausatif"
+      },
+      answer: "C",
+      explanation: "Salah satu maksud nilai Pancasila bersifat objektif adalah di mana nilai-nilai dalam Pancasila akan tetap ada sepanjang masa dalam kehidupan bangsa Indonesia, baik dalam adat istiadat, kebudayaan, kegiatan kenegaraan, maupun dalam keagamaan."
+    },
+    {
+      no: 4,
+      category: "TWK",
+      text: "Sebagai paradigma pembangunan nasional berarti Pancasila menjadi dasar bagi segala aspek pembangunan serta meliputi asas-asas pembangunan nasional berikut, kecuali ....",
+      options: {
+        A: "Demokrasi",
+        B: "Manfaat",
+        C: "Adil dan merata",
+        D: "Persatuan pembangunan",
+        E: "Kesadaran hukum"
+      },
+      answer: "D",
+      explanation: "Asas pembangunan nasional meliputi:\n• Demokrasi\n• Usaha bersama dan kekeluargaan\n• Peri kemanusiaan dan keseimbangan\n• Adil dan merata\n• Manfaat\n• Kepercayaan diri\n• Kesadaran hukum"
+    },
+    {
+      no: 5,
+      category: "TWK",
+      text: "Sebagai sebuah ideologi terbuka, Pancasila memiliki nilai-nilai yang dapat berubah dan dinamis sesuai dengan keadaan dan perkembangan zaman. Nilai ini disebut dengan ....",
+      options: {
+        A: "Nilai dasar",
+        B: "Nilai proletar",
+        C: "Nilai instrumental",
+        D: "Nilai dinamika",
+        E: "Nilai inovasi"
+      },
+      answer: "C",
+      explanation: "Sebagai sebuah ideologi terbuka, nilai-nilai dasar Pancasila (cita-cita dan tujuan) tetap tidak boleh berubah. Yang boleh berubah mengikuti keadaan dan perkembangan zaman adalah nilai instrumentalnya (pengamalan)."
+    },
+    {
+      no: 6,
+      category: "TWK",
+      text: "Inti nilai-nilai Pancasila bersifat universal ini berarti ....",
+      options: {
+        A: "Nilai-nilai Pancasila dibuat berdasarkan ideologi dari seluruh dunia",
+        B: "Nilai-nilai Pancasila dapat diterapkan dan digunakan juga oleh negara lain",
+        C: "Nilai-nilai Pancasila dibuat melampaui zamannya",
+        D: "Nilai-nilai Pancasila dibuat dengan mempertimbangkan kondisi dunia",
+        E: "Nilai-nilai Pancasila menjadi lambang perdamaian dunia"
+      },
+      answer: "B",
+      explanation: "Pancasila bersifat universal karena nilai-nilai Pancasila dapat diterapkan dan digunakan juga oleh negara lain."
+    },
+    {
+      no: 7,
+      category: "TWK",
+      text: "Dasar negara Pancasila merupakan hasil dari sidang BPUPKI. BPUPKI sendiri kemudian dibubarkan pada ....",
+      options: {
+        A: "11 Juli 1945",
+        B: "16 Juli 1945",
+        C: "27 Juli 1945",
+        D: "7 Agustus 1945",
+        E: "9 Agustus 1945"
+      },
+      answer: "D",
+      explanation: "Pada 7 Agustus 1945, BPUPKI dibubarkan dan dibentuklah Dokuritsu Junbi Inkai (PPKI) dengan Ir. Soekarno sebagai ketua."
+    },
+    {
+      no: 8,
+      category: "TWK",
+      text: "Persatuan, kekeluargaan, keseimbangan lahir batin, musyawarah, dan keadilan rakyat adalah dasar negara yang disampaikan oleh ....",
+      options: {
+        A: "Supomo",
+        B: "Ir. Soekarno",
+        C: "M Yamin",
+        D: "Radjiman Wediodiningrat",
+        E: "Ahmad Subardjo"
+      },
+      answer: "A",
+      explanation: "Tanggal 30 Mei 1945, Mr. Supomo menyampaikan Dasar Negara Indonesia Merdeka, yaitu:\n1) Persatuan\n2) Kekeluargaan\n3) Keseimbangan lahir dan batin\n4) Musyawarah\n5) Keadilan rakyat"
+    },
+    {
+      no: 9,
+      category: "TWK",
+      text: "Sila dalam Pancasila yang tidak mendasari, meliputi, dan menjiwai sila lainnya adalah sila ....",
+      options: {
+        A: "Pertama",
+        B: "Kedua",
+        C: "Ketiga",
+        D: "Keempat",
+        E: "Kelima"
+      },
+      answer: "E",
+      explanation: "Pancasila memiliki susunan berupa hierarki piramidal, di mana sila-sila di depan sila lainnya mendasari, meliputi, dan menjiwai sila-sila di belakangnya. Ini berarti sila yang tidak mendasari, meliputi, dan menjiwai sila lainnya adalah sila terakhir, yaitu sila kelima."
+    },
+    {
+      no: 10,
+      category: "TWK",
+      text: "Penghayatan dan pengamalan akan Bineka Tunggal Ika secara sungguh-sungguh merupakan nilai dari sila ....",
+      options: {
+        A: "Pertama",
+        B: "Kedua",
+        C: "Ketiga",
+        D: "Keempat",
+        E: "Kelima"
+      },
+      answer: "C",
+      explanation: "Penghayatan dan pengamalan akan Bineka Tunggal Ika merupakan usaha ke arah bersatu dalam keberagaman di Negara Kesatuan Republik Indonesia sehingga merupakan nilai Pancasila sila ketiga."
+    },
+    {
+      no: 11,
+      category: "TWK",
+      text: "Dalam sejarah pemberlakuan konstitusi di Indonesia terjadi beberapa kali periode pemberlakuan konstitusi dengan periode terpendek adalah konstitusi ....",
+      options: {
+        A: "UUD 1945",
+        B: "Konstitusi RIS",
+        C: "UUDS 1950",
+        D: "Dekrit Presiden 1959",
+        E: "UUD 1945 Hasil Amandemen"
+      },
+      answer: "B",
+      explanation: "Periode Konstitusi Republik Indonesia Serikat (RIS) tercatat sebagai periode pemberlakuan konstitusi yang paling singkat karena berlaku tidak sampai satu tahun (27 Desember 1949 - 17 Agustus 1950)."
+    },
+    {
+      no: 12,
+      category: "TWK",
+      text: "Pemberian grasi, amnesti, abolisi, dan rehabilitasi oleh Presiden diatur secara lengkap dalam Undang-Undang Dasar 1945 Pasal ....",
+      options: {
+        A: "11",
+        B: "12",
+        C: "13",
+        D: "14",
+        E: "16"
+      },
+      answer: "D",
+      explanation: "Pemberian grasi, amnesti, abolisi dan rehabilitasi oleh Presiden diatur dalam Pasal 14 ayat 1 dan 2 Undang-Undang Dasar 1945."
+    },
+    {
+      no: 13,
+      category: "TWK",
+      text: "Pasal 23 Undang-Undang Dasar 1945 secara khusus mengatur tentang segala macam hal yang berkaitan dengan ....",
+      options: {
+        A: "Keuangan",
+        B: "Dewan Perwakilan Rakyat",
+        C: "Kekuasaan Kehakiman",
+        D: "Wilayah Negara",
+        E: "Warga Negara dan Penduduk"
+      },
+      answer: "A",
+      explanation: "Undang-Undang Dasar 1945 Pasal 23 ayat 1 sampai dengan 3 mengatur tentang Keuangan."
+    },
+    {
+      no: 14,
+      category: "TWK",
+      text: "Perubahan Undang-Undang Dasar Negara Republik Indonesia Tahun 1945 pertama kali dilakukan pada sidang umum MPR pada tahun ....",
+      options: {
+        A: "1998",
+        B: "1999",
+        C: "2000",
+        D: "2001",
+        E: "2002"
+      },
+      answer: "B",
+      explanation: "Waktu perubahan (amandemen) UUD 1945 adalah:\n• Amandemen pertama: sidang umum MPR tahun 1999\n• Amandemen kedua: sidang tahunan MPR tahun 2000\n• Amandemen ketiga: sidang tahunan MPR tahun 2001\n• Amandemen keempat: sidang tahunan MPR tahun 2002"
+    },
+    {
+      no: 15,
+      category: "TWK",
+      text: "Ditinjau dari segi sistematika, Undang-Undang Dasar 1945 setelah amandemen terdiri atas .... bagian.",
+      options: {
+        A: "Satu",
+        B: "Dua",
+        C: "Tiga",
+        D: "Lima",
+        E: "Tujuh"
+      },
+      answer: "B",
+      explanation: "Setelah amandemen, Undang-Undang Dasar Tahun 1945 terdiri atas dua bagian, yaitu:\n• Pembukaan\n• Pasal-pasal (sebagai ganti istilah batang tubuh)"
+    },
+    {
+      no: 16,
+      category: "TWK",
+      text: "Jumlah bab dalam Undang-Undang Dasar Negara Republik Indonesia Tahun 1945 yang mengalami amandemen sebanyak ....",
+      options: {
+        A: "17 bab",
+        B: "19 bab",
+        C: "20 bab",
+        D: "21 bab",
+        E: "25 bab"
+      },
+      answer: "D",
+      explanation: "Perubahan Undang-Undang Dasar Negara Republik Indonesia Tahun 1945 yang dilakukan mencakup 21 bab, 73 pasal, dan 170 ayat, 3 pasal aturan peralihan dan 2 pasal aturan tambahan."
+    },
+    {
+      no: 17,
+      category: "TWK",
+      text: "Pemilihan Umum Republik Indonesia pertama kali diselenggarakan pada masa periode konstitusi ....",
+      options: {
+        A: "UUD 1945",
+        B: "Konstitusi RIS",
+        C: "UUDS 1950",
+        D: "Dekrit Presiden 1959",
+        E: "UUD 1945 Hasil Amandemen"
+      },
+      answer: "C",
+      explanation: "Pemilihan Umum Republik Indonesia pertama kali diselenggarakan pada tahun 1955, yang termasuk dalam periode konstitusi Undang-Undang Dasar Sementara 1950 (berlaku 17 Agustus 1950 - 5 Juli 1959)."
+    },
+    {
+      no: 18,
+      category: "TWK",
+      text: "Presiden tidak dapat membekukan dan/atau membubarkan Dewan Perwakilan Rakyat. Hal tersebut merupakan isi pasal UUD 1945 yang mengalami perubahan dalam amandemen UUD 1945 yang ....",
+      options: {
+        A: "Pertama dan kedua",
+        B: "Pertama",
+        C: "Kedua",
+        D: "Ketiga",
+        E: "Keempat"
+      },
+      answer: "D",
+      explanation: "Hal tersebut merupakan isi Pasal 7C UUD 1945 hasil amandemen yang ketiga."
+    },
+    {
+      no: 19,
+      category: "TWK",
+      text: "Salah satu bab yang dihapus dalam Undang-Undang Dasar 1945 hasil amandemen adalah bab tentang ....",
+      options: {
+        A: "Dewan Pertimbangan Agung",
+        B: "Badan Pemeriksaan Keuangan",
+        C: "Kementerian Negara",
+        D: "Kekuasaan Kehakiman",
+        E: "Hak Asasi Manusia"
+      },
+      answer: "A",
+      explanation: "Bab IV dalam Undang-Undang Dasar 1945 yang berisi tentang Dewan Pertimbangan Agung dihapus melalui amandemen Undang-Undang Dasar 1945 keempat."
+    },
+    {
+      no: 20,
+      category: "TWK",
+      text: "Undang-Undang Dasar 1945 atau Konstitusi Negara Republik Indonesia untuk pertama kalinya disahkan dan ditetapkan oleh ....",
+      options: {
+        A: "BPUPKI",
+        B: "Panitia Sembilan",
+        C: "PPKI",
+        D: "KNPI",
+        E: "DPR"
+      },
+      answer: "C",
+      explanation: "Undang-Undang Dasar 1945 disahkan dan ditetapkan oleh PPKI melalui sidang PPKI pertama pada 18 Agustus 1945."
+    },
+    {
+      no: 21,
+      category: "TWK",
+      text: "Bineka Tunggal Ika seharusnya bersifat inklusif maksudnya ....",
+      options: {
+        A: "Mengembangkan konsep baru dari unsur asli dengan unsur yang datang dari luar",
+        B: "Mayoritas tidak memaksakan kehendaknya pada minoritas",
+        C: "Adanya kebebasan beragama sesuai yang diyakininya",
+        D: "Persatuan adalah hal mutlak di tengah perbedaan",
+        E: "Perbedaan adalah hal mutlak di tengah persatuan"
+      },
+      answer: "B",
+      explanation: "Konsep inklusif adalah mayoritas tidak memaksakan kehendaknya pada minoritas."
+    },
+    {
+      no: 22,
+      category: "TWK",
+      text: "Bineka Tunggal Ika dilandasi oleh sifat-sifat di bawah ini, kecuali ...",
+      options: {
+        A: "Saling percaya",
+        B: "Saling hormat",
+        C: "Saling cinta",
+        D: "Rukun",
+        E: "Eksklusif"
+      },
+      answer: "E",
+      explanation: "Dalam Bineka Tunggal Ika harus bersifat saling percaya, saling hormat, saling cinta, rukun, dan bukan saling mendahulukan kepentingannya/eksklusif."
+    },
+    {
+      no: 23,
+      category: "TWK",
+      text: "Indonesia terdiri atas Zelfbesturende landschappen berarti ...",
+      options: {
+        A: "Daerah-daerah swapraja",
+        B: "Kota dan setingkatnya",
+        C: "Desa dan setingkatnya",
+        D: "Daerah persemakmuran",
+        E: "Daerah bekas jajahan"
+      },
+      answer: "A",
+      explanation: "Negara Indonesia terdiri atas Zelfbesturende landschappen atau daerah-daerah swapraja."
+    },
+    {
+      no: 24,
+      category: "TWK",
+      text: "Indonesia juga terdiri atas Volksgemeenschappen berarti ...",
+      options: {
+        A: "Daerah-daerah swapraja",
+        B: "Kota dan setingkatnya",
+        C: "Desa dan setingkatnya",
+        D: "Daerah persemakmuran",
+        E: "Daerah bekas jajahan"
+      },
+      answer: "C",
+      explanation: "Negara Indonesia terdiri atas Volksgemeenschappen yang berarti desa atau yang setingkat dengan itu."
+    },
+    {
+      no: 25,
+      category: "TWK",
+      text: "Dalam negara persatuan, bagaimana letak kepentingan individu?",
+      options: {
+        A: "Kepentingan individu seimbang dengan kepentingan kolektif",
+        B: "Kepentingan individu diakomodir secara aktif",
+        C: "Kepentingan kelompok bersifat mutlak diakomodir",
+        D: "Kepentingan individu dan kelompok dibawah kepentingan negara",
+        E: "Kepentingan individu tidak bisa diakomodasi karena kepentingan kelompok lebih penting"
+      },
+      answer: "A",
+      explanation: "Dalam negara persatuan kepentingan individu letaknya seimbang dengan kepentingan kolektif."
+    },
+    {
+      no: 26,
+      category: "TWK",
+      text: "Tentara Keamanan Rakyat merupakan cikal bakal dari TNI. Tokoh yang menjabat sebagai Kepala Staf Tentara Keamanan Rakyat pertama kali adalah ....",
+      options: {
+        A: "Urip Sumohardjo",
+        B: "Jenderal Soedirman",
+        C: "T.B. Simatupang",
+        D: "A. H. Nasution",
+        E: "Supriyadi"
+      },
+      answer: "A",
+      explanation: "Tentara Keamanan Rakyat dibentuk 5 Oktober 1945 dengan Urip Sumohardjo ditunjuk sebagai Kepala Staf Tentara Keamanan Rakyat yang pertama."
+    },
+    {
+      no: 27,
+      category: "TWK",
+      text: "Provinsi Papua Barat adalah salah satu provinsi yang lahir setelah era reformasi. Provinsi ini beribu kota di ....",
+      options: {
+        A: "Raja Ampat",
+        B: "Sentani",
+        C: "Manokwari",
+        D: "Sorong",
+        E: "Kaimana"
+      },
+      answer: "C",
+      explanation: "Provinsi Papua Barat beribu kota di Manokwari."
+    },
+    {
+      no: 28,
+      category: "TWK",
+      text: "Deklarasi Djuanda diumumkan oleh pemerintah Indonesia pada ....",
+      options: {
+        A: "11 Desember 1957",
+        B: "13 Desember 1957",
+        C: "19 Desember 1957",
+        D: "11 April 1960",
+        E: "13 April 1960"
+      },
+      answer: "B",
+      explanation: "Pada tanggal 13 Desember 1957, pemerintah Indonesia mengumumkan Deklarasi Djuanda oleh Perdana Menteri Indonesia saat itu, Djuanda Kartawidjaja. Deklarasi ini menyatakan kepada dunia bahwa laut Indonesia termasuk laut sekitar, di antara, dan di dalam kepulauan Indonesia menjadi satu wilayah NKRI."
+    },
+    {
+      no: 29,
+      category: "TWK",
+      text: "Perundingan yang berhasil mengakhiri konfrontasi fisik antara Indonesia dengan Belanda adalah ....",
+      options: {
+        A: "Perundingan New York",
+        B: "Perundingan Linggarjati",
+        C: "Perundingan Renville",
+        D: "Perundingan Roem Royen",
+        E: "Konferensi Meja Bundar"
+      },
+      answer: "E",
+      explanation: "Konferensi Meja Bundar yang berlangsung di Den Haag pada 23 Agustus sampai 2 November 1949, berhasil mengakhiri konfrontasi fisik antara Indonesia dengan Belanda."
+    },
+    {
+      no: 30,
+      category: "TWK",
+      text: "Selain membagi wilayah Indonesia ke dalam provinsi-provinsi, PPKI juga membentuk sebanyak ... kementerian untuk membantu kerja presiden.",
+      options: {
+        A: "8",
+        B: "10",
+        C: "12",
+        D: "13",
+        E: "16"
+      },
+      answer: "C",
+      explanation: "Untuk membantu kerja presiden, PPKI membentuk 12 kementerian yang terdiri atas:\n1. Departemen Dalam Negeri\n2. Departemen Luar Negeri\n3. Departemen Kehakiman\n4. Departemen Keuangan\n5. Departemen Kemakmuran\n6. Departemen Kesehatan\n7. Departemen Penerangan\n8. Departemen Pengajaran, Pendidikan, dan Kebudayaan\n9. Departemen Sosial\n10. Departemen Pertahanan\n11. Departemen Perhubungan\n12. Departemen Pekerjaan Umum."
+    },
+    {
+      no: 31,
+      category: "TWK",
+      text: "Konsep negara kepulauan berdasarkan Deklarasi Djuanda diakui dalam Konvensi Hukum Laut PBB tahun ....",
+      options: {
+        A: "1960",
+        B: "1968",
+        C: "1978",
+        D: "1980",
+        E: "1982"
+      },
+      answer: "E",
+      explanation: "Konsep negara kepulauan berdasarkan Deklarasi Djuanda diakui dalam Konvensi Hukum Laut PBB tahun 1982 yang ditandatangani di Montego Bay, Jamaika."
+    },
+    {
+      no: 32,
+      category: "TWK",
+      text: "Provinsi berikut ini adalah provinsi yang lahir setelah era orde baru, kecuali ....",
+      options: {
+        A: "Provinsi Kepulauan Bangka Belitung",
+        B: "Provinsi Gorontalo",
+        C: "Provinsi Banten",
+        D: "Provinsi Maluku Utara",
+        E: "Provinsi Riau"
+      },
+      answer: "E",
+      explanation: "Provinsi Riau ditetapkan melalui keputusan Presiden RI pada tanggal 27 Februari tahun 1958, yang berarti sebelum era orde baru."
+    },
+    {
+      no: 33,
+      category: "TWK",
+      text: "Pada tanggal 19 Desember 1961, Presiden Soekarno mengumandangkan Tri Komando Rakyat (Trikora) sebagai Komando Pembebasan Irian Barat di kota ....",
+      options: {
+        A: "Jakarta",
+        B: "Yogyakarta",
+        C: "Surabaya",
+        D: "Ambon",
+        E: "Jayapura"
+      },
+      answer: "B",
+      explanation: "Pada tanggal 19 Desember 1961, Presiden Soekarno mengumumkan pelaksanaan Trikora di Alun-alun Utara Yogyakarta."
+    },
+    {
+      no: 34,
+      category: "TWK",
+      text: "Provinsi-provinsi di bawah ini merupakan provinsi yang terbentuk pada masa awal kemerdekaan Republik Indonesia, kecuali ....",
+      options: {
+        A: "Sumatra",
+        B: "DKI Jakarta",
+        C: "Jawa Tengah",
+        D: "Maluku",
+        E: "Sunda Kecil"
+      },
+      answer: "B",
+      explanation: "8 provinsi pada awal kemerdekaan Republik Indonesia adalah:\n• Sumatra\n• Jawa Barat\n• Jawa Tengah\n• Jawa Timur\n• Sunda Kecil\n• Maluku\n• Sulawesi (Celebes)\n• Kalimantan (Borneo)"
+    },
+    {
+      no: 35,
+      category: "TWK",
+      text: "Sidang BPUPKI yang kedua dimulai pada tanggal ....",
+      options: {
+        A: "29 Mei 1945",
+        B: "4 Juni 1945",
+        C: "22 Juni 1945",
+        D: "10 Juli 1945",
+        E: "14 Juli 1945"
+      },
+      answer: "D",
+      explanation: "Pada tanggal 10 Juli 1945 dimulai sidang BPUPKI II. Sidang ini membahas rancangan Undang-Undang Dasar (UUD)."
+    },
+
+    // ==================== TES INTELIGENSIA UMUM (TIU: 36 - 65) ====================
+    {
+      no: 36,
+      category: "TIU",
+      text: "ALEGORI = ...",
+      options: {
+        A: "Kenangan",
+        B: "Umpama",
+        C: "Biasanya",
+        D: "Alasan",
+        E: "Keadaan"
+      },
+      answer: "B",
+      explanation: "ALEGORI sama dengan ibarat, kias, UMPAMA."
+    },
+    {
+      no: 37,
+      category: "TIU",
+      text: "LENGAS = ...",
+      options: {
+        A: "Benci",
+        B: "Meleset",
+        C: "Lari",
+        D: "Menghindar",
+        E: "Lembap"
+      },
+      answer: "E",
+      explanation: "LENGAS sama dengan berair, LEMBAP."
+    },
+    {
+      no: 38,
+      category: "TIU",
+      text: "STANZA = ...",
+      options: {
+        A: "Puisi",
+        B: "Halte",
+        C: "Bait",
+        D: "Romantis",
+        E: "Gelap"
+      },
+      answer: "C",
+      explanation: "STANZA, yaitu kumpulan larik sajak yang menjadi satuan struktur sajak, ditentukan oleh jumlah larik, pola matra, atau rima. Jadi, STANZA sama dengan BAIT."
+    },
+    {
+      no: 39,
+      category: "TIU",
+      text: "MUMUK >< ...",
+      options: {
+        A: "Lubak",
+        B: "Hancur",
+        C: "Keropos",
+        D: "Padat",
+        E: "Kuat"
+      },
+      answer: "D",
+      explanation: "Persamaan kata dari MUMUK adalah lapuk atau keropos. Jadi, lawan kata dari keropos adalah PADAT."
+    },
+    {
+      no: 40,
+      category: "TIU",
+      text: "BERDUS >< ...",
+      options: {
+        A: "Kempis",
+        B: "Lebam",
+        C: "Perih",
+        D: "Bengkak",
+        E: "Buang"
+      },
+      answer: "A",
+      explanation: "Persamaan kata dari BERDUS adalah kembung, bengkak, atau buncit. Jadi, lawan kata dari kembung adalah KEMPIS."
+    },
+    {
+      no: 41,
+      category: "TIU",
+      text: "AKRONIM >< ...",
+      options: {
+        A: "Singkatan",
+        B: "Perbedaan",
+        C: "Kepanjangan",
+        D: "Kesesuaian",
+        E: "Ketepatan"
+      },
+      answer: "C",
+      explanation: "Persamaan kata dari AKRONIM adalah singkatan atau kependekan. Jadi, lawan kata dari kependekan adalah KEPANJANGAN."
+    },
+    {
+      no: 42,
+      category: "TIU",
+      text: "FLUTE : TIUP = ... : ...",
+      options: {
+        A: "Dengar : Musik",
+        B: "Harpa : Petik",
+        C: "Senar : Gitar",
+        D: "Betot : Bass",
+        E: "Perkusi : Konga"
+      },
+      answer: "B",
+      explanation: "Cara memainkan alat musik FLUTE adalah DITIUP. Cara memainkan alat musik HARPA adalah dengan cara DIPETIK."
+    },
+    {
+      no: 43,
+      category: "TIU",
+      text: "PADI : SEBULIR = ... : ...",
+      options: {
+        A: "Pasir : Sebutir",
+        B: "Kayu : Segenggam",
+        C: "Darah : Segumpal",
+        D: "Segenggam : Beras",
+        E: "Selembar : Daun"
+      },
+      answer: "C",
+      explanation: "Kata bantu untuk menyebut PADI adalah SEBULIR. Kata bantu untuk menyebut DARAH adalah SEGUMPAL."
+    },
+    {
+      no: 44,
+      category: "TIU",
+      text: "PENSIL : TULIS = ... : ...",
+      options: {
+        A: "Potong : Gunting",
+        B: "Lukis : Kanvas",
+        C: "Buku : Abjad",
+        D: "Pisau : Iris",
+        E: "Gambar : Warna"
+      },
+      answer: "D",
+      explanation: "PENSIL merupakan alat yang digunakan untuk MENULIS. PISAU merupakan alat yang digunakan untuk MENGIRIS."
+    },
+    {
+      no: 45,
+      category: "TIU",
+      text: "Perhatikan teks berikut!\n\nDani memiliki pabrik konveksi. Pabrik konveksi Dani mencoba memproduksi kaus anak-anak. Kaus yang diproduksi adalah kaus dengan desain gambar Shaun The Sheep. Kaus dari pabrik Dani dijual dengan harga relatif murah dengan sasaran konsumen masyarakat Bandung dan sekitarnya. Ternyata kaus tersebut laku keras sehingga pabrik milik Hamdani mendapat keuntungan besar. Berdasarkan pengalaman ini, Hamdani ingin mengembangkan usahanya di kota-kota besar seperti di Semarang, Surabaya, dan Yogyakarta.\n\nKesimpulan yang tepat untuk melengkapi paragraf analogi di atas adalah ....",
+      options: {
+        A: "Produksi kaus Dani disukai banyak konsumen dari berbagai kalangan.",
+        B: "Pabrik kaus Dani meraup keuntungan yang cukup besar.",
+        C: "Dani sangat senang usaha kausnya berhasil.",
+        D: "Dani beranggapan bahwa produknya pasti akan laku keras.",
+        E: "Harga kaus produksi pabrik Dani terjangkau semua orang."
+      },
+      answer: "E",
+      explanation: "Paragraf analogi adalah paragraf perbandingan dengan membandingkan dua objek yang berbeda kemudian dicari kesamaan dari dua objek tersebut dalam sebuah kesimpulan. Kesimpulan yang tepat untuk melengkapi paragraf analogi di atas adalah Harga kaus produksi pabrik Dani terjangkau semua orang."
+    },
+    {
+      no: 46,
+      category: "TIU",
+      text: "30, 31, ..., ..., 40, 45",
+      options: {
+        A: "33, 37",
+        B: "32, 34",
+        C: "31, 34",
+        D: "33, 36",
+        E: "31, 33"
+      },
+      answer: "D",
+      explanation: "Memiliki pola:\n+1, +2, +3, +4, +5\n30 → 31 → 33 → 36 → 40 → 45\nAngka yang dicari = 31 + 2 = 33 dan 33 + 3 = 36."
+    },
+    {
+      no: 47,
+      category: "TIU",
+      text: "6, ..., 29, 174, ..., 1002, 995",
+      options: {
+        A: "34, 51",
+        B: "35, 51",
+        C: "35, 162",
+        D: "36, 167",
+        E: "36, 154"
+      },
+      answer: "D",
+      explanation: "Memiliki pola:\n×6, -7, ×6, -7, ×6, -7\n6 → 36 → 29 → 174 → 167 → 1002 → 995\nAngka yang dicari = 6 × 6 = 36 dan 174 - 7 = 167."
+    },
+    {
+      no: 48,
+      category: "TIU",
+      text: "29, 66, 127, 218, ...",
+      options: {
+        A: "343",
+        B: "244",
+        C: "246",
+        D: "341",
+        E: "345"
+      },
+      answer: "E",
+      explanation: "Memiliki pola:\n• 2 + 3³ = 29\n• 2 + 4³ = 66\n• 2 + 5³ = 127\n• 2 + 6³ = 218\n• 2 + 7³ = 345\nAngka yang dicari = 2 + 7³ = 2 + 343 = 345."
+    },
+    {
+      no: 49,
+      category: "TIU",
+      text: "(1,69 : 13) × 1,3 = ....",
+      options: {
+        A: "1,69",
+        B: "0,169",
+        C: "16,9",
+        D: "169",
+        E: "1.690"
+      },
+      answer: "B",
+      explanation: "Lakukan operasi di dalam kurung terlebih dahulu:\n(1,69 : 13) × 1,3 = 0,13 × 1,3 = 0,169."
+    },
+    {
+      no: 50,
+      category: "TIU",
+      text: "-34 × (-22) - (-2.020) = ...",
+      options: {
+        A: "2.768",
+        B: "2.668",
+        C: "2.568",
+        D: "2.478",
+        E: "2.786"
+      },
+      answer: "A",
+      explanation: "Lakukan operasi perkalian terlebih dahulu.\nINGAT: Negatif dikali negatif hasilnya positif.\n(-34 × (-22)) - (-2.020)\n= 748 + 2.020\n= 2.768."
+    },
+    {
+      no: 51,
+      category: "TIU",
+      text: "Jika rata-rata dari 2, 3, x, dan y adalah 5 maka rata-rata dari 4, 5, 6, x, dan y adalah ....",
+      options: {
+        A: "4,6",
+        B: "5,0",
+        C: "5,6",
+        D: "6,0",
+        E: "6,4"
+      },
+      answer: "D",
+      explanation: "Diketahui: rata-rata dari 2, 3, x, dan y adalah 5 maka:\n(2 + 3 + x + y) / 4 = 5\n5 + x + y = 20\nx + y = 15\n\nRata-rata dari 4, 5, 6, x, dan y adalah:\n(4 + 5 + 6 + (x + y)) / 5 = (4 + 5 + 6 + 15) / 5\n= 30 / 5\n= 6."
+    },
+    {
+      no: 52,
+      category: "TIU",
+      text: "Suatu persegi panjang mempunyai luas 120 cm². Jika panjangnya bertambah 25% dan lebarnya berkurang 20% maka luasnya menjadi ...",
+      options: {
+        A: "100 cm²",
+        B: "110 cm²",
+        C: "120 cm²",
+        D: "130 cm²",
+        E: "140 cm²"
+      },
+      answer: "C",
+      explanation: "Diketahui: Luas = 120 cm² ⇒ p × l = 120\nPanjangnya (p) bertambah 25% dan lebarnya (l) berkurang 20% maka luasnya menjadi:\n(p + 25%p) × (l - 20%l)\n= (125%p) × (80%l)\n= (125/100)p × (80/100)l\n= (5/4)p × (4/5)l\n= (20/20) × p × l\n= (20/20) × 120\n= 120 cm².\nJadi, luasnya tetap."
+    },
+    {
+      no: 53,
+      category: "TIU",
+      text: "Sebuah kantor memiliki 8 bagian, masing-masing dengan 10-16 seksi. Setiap seksi sedikitnya ada 40 pegawai tetapi tidak lebih dari 60 pegawai. Jika 10% pegawai pada setiap seksi adalah juru tulis, berapakah minimum jumlah juru tulis di satu bagian?",
+      options: {
+        A: "40",
+        B: "60",
+        C: "65",
+        D: "96",
+        E: "100"
+      },
+      answer: "A",
+      explanation: "Diketahui:\n• Banyak bagian = 8\n• Banyak seksi = 10 - 16\n• Banyak pegawai/seksi = 40 - 60\n• Banyak juru tulis = 10% dari pegawai\n\nJumlah minimum juru tulis pada setiap bagian adalah:\n= batas bawah seksi × batas bawah pegawai × 10%\n= 10 × 40 × 10%\n= 40 juru tulis."
+    },
+    {
+      no: 54,
+      category: "TIU",
+      text: "Sepuluh tahun yang lalu, Rudi adalah sepertiga dari usianya sekarang. Lima belas tahun yang akan datang perbandingan antara usia Marlena dan usia Rudi adalah 3 : 5. Berapa tahun usia Marlena 5 tahun yang akan datang?",
+      options: {
+        A: "30",
+        B: "20",
+        C: "15",
+        D: "12",
+        E: "8"
+      },
+      answer: "E",
+      explanation: "Misalkan:\nUsia Rudi sekarang = a\nUsia Marlena sekarang = b\n\nSepuluh tahun yang lalu Rudi adalah sepertiga dari usianya sekarang maka:\na - 10 = (1/3)a\na - (1/3)a = 10\n(2/3)a = 10 ⇔ a = 15\nUsia Rudi sekarang = 15 tahun.\n\nLima belas tahun yang akan datang perbandingan antara usia Marlena dan usia Rudi adalah 3 : 5.\nUsia Rudi 15 tahun mendatang adalah = 15 + 15 = 30 tahun.\n(b + 15) / (a + 15) = 3 / 5\n(b + 15) / (15 + 15) = 3 / 5\nb + 15 = (3/5) × 30 = 18\nb = 18 - 15 = 3 tahun.\n\nJadi, usia Marlena 5 tahun yang akan datang adalah:\nb + 5 = 3 + 5 = 8 tahun."
+    },
+    {
+      no: 55,
+      category: "TIU",
+      text: "Luas daerah yang berwarna gelap pada gambar di bawah ini adalah ....",
+      media: SVG_SOAL_55,
+      options: {
+        A: "66 cm²",
+        B: "64 cm²",
+        C: "62 cm²",
+        D: "60 cm²",
+        E: "58 cm²"
+      },
+      answer: "B",
+      explanationMedia: SVG_PEMBAHASAN_55,
+      explanation: "Perhatikan gambar berikut.\nINGAT kembali rumus persegi dan rumus segitiga:\n• Luas Persegi = sisi × sisi\n• Luas Segitiga = 1/2 × alas × tinggi\n\nLuas daerah yang diarsir adalah:\n= luas bangun - luas putih\n= ((8 × 8) + (4 × 4)) - (8 × 4 : 2)\n= (64 + 16) - 16\n= 64."
+    },
+    {
+      no: 56,
+      category: "TIU",
+      text: "Semua pegawai mendapat gaji pokok. Sebagian pegawai mendapat bonus penghasilan. Kesimpulannya ....",
+      options: {
+        A: "Semua pegawai tidak mendapat gaji pokok dan bonus penghasilan",
+        B: "Semua pegawai mendapat gaji pokok dan bonus penghasilan",
+        C: "Sebagian pegawai mendapat gaji pokok dan bonus penghasilan",
+        D: "Pegawai yang diberi gaji pokok pasti mendapat bonus penghasilan",
+        E: "Sebagian pegawai mendapat bonus penghasilan saja"
+      },
+      answer: "C",
+      explanation: "Diketahui premis:\n• Semua pegawai mendapat gaji pokok.\n• Sebagian pegawai mendapat bonus penghasilan.\nSalah satu premis partikular maka kesimpulan pasti partikular. Yang mungkin pilihan C dan E. Kesimpulan yang tepat adalah sebagian pegawai mendapat gaji pokok dan bonus penghasilan."
+    },
+    {
+      no: 57,
+      category: "TIU",
+      text: "Semua pasangan yang menikah di KUA adalah pasangan sah. Pasangan yang sah pasti memiliki buku nikah. Rina dan Budi mempunyai buku nikah. Kesimpulannya ....",
+      options: {
+        A: "Rina dan Budi tidak menikah",
+        B: "Buku nikah Rina dan Budi palsu",
+        C: "Rina dan Budi menikah di KUA",
+        D: "Rina dan Budi pasangan yang tidak sah",
+        E: "Budi dan Rina belum tentu sah"
+      },
+      answer: "C",
+      explanation: "Diketahui premis:\n1. Semua pasangan yang menikah di KUA adalah pasangan sah.\n2. Pasangan yang sah pasti memiliki buku nikah.\n3. Rina dan Budi mempunyai buku nikah.\nDari premis 1 dan 2 menghasilkan:\n4. Semua pasangan yang menikah di KUA pasti memiliki buku nikah.\nDari premis 3 dan 4, diperoleh kesimpulan Rina dan Budi menikah di KUA."
+    },
+    {
+      no: 58,
+      category: "TIU",
+      text: "Semua pemilik mobil harus mempunyai surat izin mengemudi. Lantip memiliki 2 mobil mewah. Kesimpulannya ....",
+      options: {
+        A: "Lantip tidak membutuhkan surat izin mengemudi",
+        B: "Lantip wajib memiliki surat izin mengemudi",
+        C: "Lantip boleh memiliki surat mengemudi",
+        D: "Tidak dapat ditarik kesimpulan",
+        E: "Semua salah"
+      },
+      answer: "B",
+      explanation: "Karena semua pemilik mobil harus mempunyai surat izin mengemudi dan Lantip memiliki 2 mobil mewah maka Lantip harus memiliki surat izin mengemudi."
+    },
+    {
+      no: 59,
+      category: "TIU",
+      text: "Kendaraan roda dua dan bermesin boleh memasuki tol. Sementara kereta kuda beroda dua. Kesimpulannya ....",
+      options: {
+        A: "Tidak ada kesimpulan",
+        B: "Kereta kuda harus masuk jalan tol",
+        C: "Kereta kuda boleh masuk jalan tol",
+        D: "Kereta kuda dilarang masuk jalan tol",
+        E: "Semua salah"
+      },
+      answer: "D",
+      explanation: "Diketahui:\n• Kendaraan roda dua dan bermesin boleh memasuki tol.\n• Sementara kereta kuda beroda dua.\nKarena kereta kuda beroda dua tetapi tidak bermesin maka kereta kuda dilarang masuk jalan tol."
+    },
+    {
+      no: 60,
+      category: "TIU",
+      text: "Semua balita mendapat imunisasi. Beberapa balita mendapat vitamin. Kesimpulannya ....",
+      options: {
+        A: "Semua balita mendapat imunisasi dan vitamin",
+        B: "Balita yang telah imunisasi biasanya mendapat vitamin",
+        C: "Sebagian balita mendapat vitamin saja",
+        D: "Sebagian balita mendapat vitamin dan imunisasi",
+        E: "Semua salah"
+      },
+      answer: "D",
+      explanation: "Diketahui premis:\n• Semua balita mendapat imunisasi.\n• Beberapa balita mendapat vitamin.\nSalah satu premis partikular maka kesimpulan pasti partikular. Yang mungkin pilihan C dan D. Kesimpulan yang tepat adalah beberapa balita mendapat imunisasi dan vitamin."
+    },
+    {
+      no: 61,
+      category: "TIU",
+      text: "Informasi untuk soal:\nPamanku memiliki beberapa anak, di antaranya adalah Anton, Bowo, Cika, dan Desti. Anton lebih tua daripada Cika dan Bowo lebih muda daripada Desti.\n\nJika Endang lebih tua dari Desti, manakah pernyataan berikut yang benar?",
+      options: {
+        A: "Cika lebih tua dari Endang",
+        B: "Anton lebih tua dari Endang",
+        C: "Endang lebih tua dari Anton",
+        D: "Endang lebih tua dari Bowo",
+        E: "Cika sama dengan Endang"
+      },
+      answer: "D",
+      explanation: "Diketahui pernyataan utama:\n• Anton lebih tua daripada Cika maka Anton > Cika\n• Bowo lebih muda daripada Desti maka Bowo < Desti atau Desti > Bowo\n\nDari soal: Endang lebih tua dari Desti maka Endang > Desti\nSehingga: Endang > Desti > Bowo.\nTidak ada hubungan Endang dengan Anton dan Cika sehingga jawaban A, B, C, dan E salah. Jawaban yang benar adalah Endang lebih tua dari Bowo."
+    },
+    {
+      no: 62,
+      category: "TIU",
+      text: "Informasi untuk soal:\nPamanku memiliki beberapa anak, di antaranya adalah Anton, Bowo, Cika, dan Desti. Anton lebih tua daripada Cika dan Bowo lebih muda daripada Desti.\n\nJika Bowo lebih muda daripada Cika, manakah pernyataan yang benar?",
+      options: {
+        A: "Cika lebih muda daripada Desti",
+        B: "Desti lebih muda daripada Cika",
+        C: "Anton usianya sama dengan Desti",
+        D: "Desti lebih tua daripada Anton",
+        E: "Anton lebih tua daripada Bowo"
+      },
+      answer: "E",
+      explanation: "Dari soal: Bowo lebih muda daripada Cika maka Bowo < Cika atau Cika > Bowo sehingga Anton > Cika > Bowo tetapi Anton dan Cika tidak dapat dibandingkan dengan Desti (Jawaban A, B, C, dan D salah). Jadi, jawaban yang benar adalah Anton lebih tua dari Bowo."
+    },
+    {
+      no: 63,
+      category: "TIU",
+      text: "Informasi untuk soal:\nPamanku memiliki beberapa anak, di antaranya adalah Anton, Bowo, Cika, dan Desti. Anton lebih tua daripada Cika dan Bowo lebih muda daripada Desti.\n\nJika Anji lebih tua daripada Meli, Dinar, dan Desti, manakah pernyataan berikut yang benar?",
+      options: {
+        A: "Anton lebih tua dari Anji",
+        B: "Anji lebih tua dari Bowo",
+        C: "Anji sama dengan Bowo",
+        D: "Desti lebih tua dari Anji",
+        E: "Anji lebih tua dari Anton"
+      },
+      answer: "B",
+      explanation: "Dari soal: Anji lebih tua daripada Meli, Dinar, dan Desti.\nAnji > Meli, Dinar, Desti.\nAnji > Desti > Bowo tetapi Anji tidak dapat dibandingkan dengan Anton dan Cika (Jawaban A dan E salah).\nJawaban yang benar: Anji lebih tua dari Desti; Anji lebih tua dari Bowo."
+    },
+    {
+      no: 64,
+      category: "TIU",
+      text: "Nur mempunyai 3 buah mobil. Harga mobil 1 lebih mahal dibandingkan harga mobil 2. Harga mobil 3 lebih mahal dari harga mobil 2. Manakah pernyataan berikut yang benar?",
+      options: {
+        A: "Harga mobil 2 lebih kecil dari rata-rata harga mobil 1 dan 3",
+        B: "Harga mobil 3 lebih mahal daripada harga mobil 1",
+        C: "Harga mobil 1 lebih mahal daripada harga mobil 3.",
+        D: "Harga mobil 1 ditambah harga mobil 2 lebih besar daripada harga mobil 1 ditambah harga mobil 3",
+        E: "Tidak ada jawaban yang benar"
+      },
+      answer: "A",
+      explanation: "Diketahui:\nMobil 1 > Mobil 2\nMobil 3 > Mobil 2\n(+)\nMobil 1 + Mobil 3 > 2 × Mobil 2\n⇔ (Mobil 1 + Mobil 3) / 2 > Mobil 2\nJadi, rata-rata harga mobil 1 dan 3 pasti lebih besar dari harga mobil 2."
+    },
+    {
+      no: 65,
+      category: "TIU",
+      text: "Gaji Pak Maryadi adalah Rp300.000,00 lebih banyak daripada gaji Pak Gito, sedangkan gaji Pak Agus adalah sepertiga gaji dari Pak Gito. Jadi ....",
+      options: {
+        A: "Tidak diketahui apakah gaji Pak Maryadi lebih banyak atau lebih sedikit dari gaji Pak Agus",
+        B: "Gaji Pak Maryadi lebih sedikit dari gaji Pak Agus",
+        C: "Gaji Pak Maryadi sama banyaknya dengan gaji Pak Agus",
+        D: "Gaji Pak Maryadi sama banyaknya dengan gaji Pak Gito",
+        E: "Gaji Pak Maryadi lebih banyak dari gaji Pak Agus"
+      },
+      answer: "E",
+      explanation: "Misalkan gaji Pak Gito adalah X maka:\n• Gaji Pak Maryadi = X + Rp300.000,00\n• Gaji Pak Agus = X / 3\nBerapapun besar gaji Pak Gito:\nGaji Pak Gito < Gaji Pak Maryadi\nGaji Pak Agus < Gaji Pak Gito\nJadi: Gaji Pak Agus < Gaji Pak Gito < Gaji Pak Maryadi.\nJadi, gaji Pak Maryadi selalu lebih besar dari gaji Pak Agus."
+    },
+
+    // ==================== TES KARAKTERISTIK PRIBADI (TKP: 66 - 100) ====================
+    {
+      no: 66,
+      category: "TKP",
+      text: "Seorang tamu merasa puas dengan pelayanan yang saya berikan dan ingin memberikan uang dengan nilai yang sangat menggiurkan kepada saya. Padahal peraturan kantor tidak memperbolehkan hal tersebut. Saya akan ....",
+      options: {
+        A: "Menerimanya dan akan membaginya dengan teman di ruangan saya",
+        B: "Menolaknya, namun apabila memaksa akan saya terima",
+        C: "Memintanya untuk memberikan di luar kantor karena tidak enak dengan teman yang lain",
+        D: "Menerimanya untuk kemudian disampaikan kepada atasan",
+        E: "Menolak dengan halus dan memberitahukan tentang peraturan di kantor"
+      },
+      points: { E: 5, B: 4, D: 3, A: 2, C: 1 },
+      explanation: "Kunci TKP: E (5), B (4), D (3), A (2), C (1). Integritas dalam menolak gratifikasi secara santun sekaligus mengedukasi tamu terkait aturan instansi ditunjukkan oleh opsi E (skor 5)."
+    },
+    {
+      no: 67,
+      category: "TKP",
+      text: "Suatu saat saya mengingkari sebuah janji yang saya buat dengan teman saya maka saya ....",
+      options: {
+        A: "Merasa biasa saja, teman saya tersebut pernah ingkar janji juga",
+        B: "Merasa malu terhadap diri sendiri",
+        C: "Merasa tenang karena baru pertama kali ini saya ingkar janji",
+        D: "Merasa sangat bersalah",
+        E: "Merasa takut akan dibenci atau dimarahi oleh teman saya"
+      },
+      points: { D: 5, B: 4, E: 3, C: 2, A: 1 },
+      explanation: "Kunci TKP: D (5), B (4), E (3), C (2), A (1). Kesadaran moral dan tanggung jawab atas komitmen ditunjukkan dengan rasa bersalah yang mendalam ketika mengingkari janji (opsi D, skor 5)."
+    },
+    {
+      no: 68,
+      category: "TKP",
+      text: "Setelah meminta bantuan saya lembur semalam untuk kepentingan pribadinya, atasan membebaskan saya untuk tidak masuk kantor selama satu hari. Saya akan ....",
+      options: {
+        A: "Menerimanya karena bisa saya gunakan untuk beristirahat",
+        B: "Tetap masuk kerja karena saya lembur bukan urusan kantor",
+        C: "Menerimanya karena memang saya telah membantunya",
+        D: "Meminta jatah libur pada saat saya membutuhkan saja",
+        E: "Tetap masuk kerja karena saya sudah mendapat imbalan uang"
+      },
+      points: { B: 5, E: 4, A: 3, C: 2, D: 1 },
+      explanation: "Kunci TKP: B (5), E (4), A (3), C (2), D (1). Profesionalisme dan integritas memisahkan urusan pribadi pimpinan dengan kewajiban dinas kantor ditunjukkan dengan tetap masuk kerja (opsi B, skor 5)."
+    },
+    {
+      no: 69,
+      category: "TKP",
+      text: "Untuk mendapatkan kenaikan jabatan, saya harus bersaing dengan teman kantor dari divisi lain. Saya akan ....",
+      options: {
+        A: "Fokus memberikan kinerja terbaik di posisi saya saat ini",
+        B: "Mencari kelemahan saingan saya untuk mengalahkannya",
+        C: "Meminta bantuan teman yang berpengaruh untuk mempromosikan saya",
+        D: "Berusaha mendekati atasan dan memengaruhinya supaya memilih saya",
+        E: "Membuat isu buruk tentang saingan saya, supaya ia tereliminasi dari persaingan"
+      },
+      points: { A: 5, D: 4, C: 3, B: 2, E: 1 },
+      explanation: "Kunci TKP: A (5), D (4), C (3), B (2), E (1). Semangat berprestasi secara sehat dan sportif ditunjukkan dengan fokus membuktikan kualitas melalui kinerja terbaik (opsi A, skor 5)."
+    },
+    {
+      no: 70,
+      category: "TKP",
+      text: "Dalam bekerja saya senang mempunyai teman yang ....",
+      options: {
+        A: "Banyak membantu saya",
+        B: "Memacu saya untuk menjadi lebih baik",
+        C: "Baik kepada saya",
+        D: "Mengerti tugasnya",
+        E: "Pintar menghangatkan suasana"
+      },
+      points: { B: 5, D: 4, C: 3, A: 2, E: 1 },
+      explanation: "Kunci TKP: B (5), D (4), C (3), A (2), E (1). Sesuai tabel kunci jawaban TKP halaman 499 PDF: B (5), D (4), C (3), A (2), E (1) — memilih lingkungan kerja yang memacu pengembangan diri dan prestasi."
+    },
+    {
+      no: 71,
+      category: "TKP",
+      text: "Dalam sebuah perlombaan saya tidak berhasil menjadi yang terbaik. Saya akan ....",
+      options: {
+        A: "Biasa saja",
+        B: "Tetap berlatih seperti biasa",
+        C: "Terpukul dan merasa gagal",
+        D: "Akan mencobanya lagi dan berusaha dengan lebih baik",
+        E: "Mengevaluasi kegagalan saya"
+      },
+      points: { D: 5, E: 4, B: 3, A: 2, C: 1 },
+      explanation: "Kunci TKP: D (5), E (4), B (3), A (2), C (1). Daya juang dan orientasi pada pencapaian ditunjukkan dengan pantang menyerah untuk mencoba lagi dengan usaha yang lebih baik (opsi D, skor 5)."
+    },
+    {
+      no: 72,
+      category: "TKP",
+      text: "Setelah diterima sebagai PNS, sepuluh tahun berikutnya saya rasa saya akan berada di posisi ....",
+      options: {
+        A: "Lebih baik dari saat ini",
+        B: "Sama seperti saat ini",
+        C: "Belum jelas, karena saya tidak tahu nasib saya",
+        D: "Sama seperti saat ini, namun berbeda tempat kerja",
+        E: "Bukan PNS lagi"
+      },
+      points: { A: 5, B: 4, D: 3, C: 2, E: 1 },
+      explanation: "Kunci TKP: A (5), B (4), D (3), C (2), E (1). Memiliki optimisme dan visi pengembangan karier untuk terus bertumbuh menjadi lebih baik di masa depan (opsi A, skor 5)."
+    },
+    {
+      no: 73,
+      category: "TKP",
+      text: "Saat terjadi kekosongan pimpinan di bagian tempat saya bekerja, saya diberikan tugas untuk menjadi pelaksana tugas pimpinan. Saya akan ....",
+      options: {
+        A: "Meminta waktu untuk memikirkannya",
+        B: "Menolaknya karena beban kerjanya sungguh berat",
+        C: "Menerima dan melaksanakan dengan sebaik mungkin",
+        D: "Menolak dan menyarankan teman lain untuk menggantikan saya",
+        E: "Menerima dan meminta bantuan teman untuk membantu saya"
+      },
+      points: { C: 5, E: 4, A: 3, D: 2, B: 1 },
+      explanation: "Kunci TKP: C (5), E (4), A (3), D (2), B (1). Kesiapan menerima amanah kepemimpinan dengan penuh tanggung jawab dan dedikasi ditunjukkan oleh opsi C (skor 5)."
+    },
+    {
+      no: 74,
+      category: "TKP",
+      text: "Saya sangat senang melakukan perjalanan dan berpetualang karena ....",
+      options: {
+        A: "Memberikan energi baru untuk bekerja",
+        B: "Bisa melakukan hal-hal baru",
+        C: "Bisa melupakan beban pekerjaan",
+        D: "Membuat hati menjadi tenang",
+        E: "Bisa bertemu dengan banyak orang baru"
+      },
+      points: { B: 5, E: 4, A: 3, D: 2, C: 1 },
+      explanation: "Kunci TKP: B (5), E (4), A (3), D (2), C (1). Kreativitas dan keterbukaan terhadap pengalaman baru tercermin pada semangat eksplorasi hal-hal baru (opsi B, skor 5)."
+    },
+    {
+      no: 75,
+      category: "TKP",
+      text: "Dalam menghadapi sebuah permasalahan, biasanya saya mempunyai ide-ide yang ....",
+      options: {
+        A: "Sama dengan banyak orang",
+        B: "Segar dan memberi solusi",
+        C: "Sedikit ketinggalan jaman",
+        D: "Biasa saja",
+        E: "Bisa diterima banyak orang"
+      },
+      points: { B: 5, E: 4, A: 3, D: 2, C: 1 },
+      explanation: "Kunci TKP: B (5), E (4), A (3), D (2), C (1). Kemampuan berpikir inovatif dan solutif dalam pemecahan masalah ditunjukkan oleh opsi B (skor 5)."
+    },
+    {
+      no: 76,
+      category: "TKP",
+      text: "Perusahaan membutuhkan masukan terkait sistem kerja baru dan fasilitas karyawan untuk tahun depan. Saya akan ....",
+      options: {
+        A: "Membiarkan orang lain mengajukan ide terlebih dahulu",
+        B: "Memberi masukan hanya apabila diperintahkan oleh atasan",
+        C: "Tidak ikut memberikan masukan",
+        D: "Memberi masukan sistem kerja yang efektif untuk perusahaan dan karyawan",
+        E: "Mendukung ide dari teman dekat saya"
+      },
+      points: { D: 5, B: 4, A: 3, E: 2, C: 1 },
+      explanation: "Kunci TKP: D (5), B (4), A (3), E (2), C (1). Inisiatif tinggi dan kepedulian terhadap kemajuan organisasi dengan menyumbangkan ide sistem kerja yang efektif (opsi D, skor 5)."
+    },
+    {
+      no: 77,
+      category: "TKP",
+      text: "Saat sedang menikmati makan siang pada jam istirahat, tiba-tiba datang seorang tamu yang membutuhkan pelayanan di kantor saya. Kebetulan teman saya di bagian tersebut sedang keluar, saya akan ....",
+      options: {
+        A: "Menelepon teman saya untuk segera kembali ke kantor",
+        B: "Segera membantu tamu tersebut sebisa saya",
+        C: "Meminta teman yang lain untuk menemani tamu tersebut",
+        D: "Membiarkan saja karena itu bukan tanggung jawab saya",
+        E: "Menerima tamu tersebut dan memintanya untuk menunggu"
+      },
+      points: { B: 5, E: 4, A: 3, C: 2, D: 1 },
+      explanation: "Kunci TKP: B (5), E (4), A (3), C (2), D (1). Orientasi pelayanan publik yang sigap dan responsif membantu tamu yang membutuhkan bantuan (opsi B, skor 5)."
+    },
+    {
+      no: 78,
+      category: "TKP",
+      text: "Seorang pelanggan datang dan mengajukan komplain saat saya sedang sibuk mengerjakan pekerjaan saya. Yang saya lakukan adalah ....",
+      options: {
+        A: "Menyarankan pelanggan tersebut untuk mengajukan permasalahannya ke teman saya",
+        B: "Menolak melayani karena sedang mengerjakan pekerjaan",
+        C: "Menghentikan pekerjaan dan melayani pelanggan tersebut terlebih dahulu",
+        D: "Tetap mengerjakan pekerjaan sambil mendengarkan permasalahan pelanggan",
+        E: "Meminta bantuan teman untuk mengerjakan pekerjaan saya karena saya harus melayani pelanggan"
+      },
+      points: { C: 5, E: 4, A: 3, D: 2, B: 1 },
+      explanation: "Kunci TKP: C (5), E (4), A (3), D (2), B (1). Memprioritaskan pelayanan prima kepada pelanggan dengan fokus mendengarkan dan menindaklanjuti keluhan secara penuh (opsi C, skor 5)."
+    },
+    {
+      no: 79,
+      category: "TKP",
+      text: "Saat pergantian jam kerja, rekan kerja saya belum datang. Sementara masih ada beberapa orang yang harus dilayani. Saya akan ....",
+      options: {
+        A: "Meninggalkan pekerjaan karena jam kerja saya sudah habis",
+        B: "Melayani dengan sebal",
+        C: "Memintanya untuk menunggu teman saya melanjutkan pelayanan",
+        D: "Tetap melanjutkan pelayanan sambil menunggu teman saya datang",
+        E: "Berkonsultasi dengan atasan apa yang harus saya lakukan"
+      },
+      points: { D: 5, B: 4, E: 3, C: 2, A: 1 },
+      explanation: "Kunci TKP: D (5), B (4), E (3), C (2), A (1). Komitmen pelayanan publik memastikan masyarakat tetap terlayani dengan baik hingga rekan pengganti hadir (opsi D, skor 5)."
+    },
+    {
+      no: 80,
+      category: "TKP",
+      text: "Saat sedang mengerjakan sebuah proyek, anak teman kerja saya masuk rumah sakit. Saya akan ....",
+      options: {
+        A: "Tetap melanjutkan pekerjaan sesuai tugas masing-masing",
+        B: "Ikut bersedih dan memikirkan keadaan teman saya",
+        C: "Menghibur teman saya",
+        D: "Memberinya waktu yang cukup untuk merawat anaknya dan membantu menyelesaikan pekerjaannya",
+        E: "Menemani teman saya dan menunda penyelesaian pekerjaan"
+      },
+      points: { D: 5, B: 4, C: 3, E: 2, A: 1 },
+      explanation: "Kunci TKP: D (5), B (4), C (3), E (2), A (1). Empati sosial yang dipadukan dengan kerja sama tim agar target proyek tetap selesai tepat waktu (opsi D, skor 5)."
+    },
+    {
+      no: 81,
+      category: "TKP",
+      text: "Seorang teman kerja membutuhkan bantuan saya, sementara saat itu saya juga sedang sibuk dengan pekerjaan saya. Saya akan ....",
+      options: {
+        A: "Menolaknya karena saya sendiri sedang sibuk",
+        B: "Memintanya untuk mencari bantuan teman lain",
+        C: "Tidak memedulikannya karena fokus dengan pekerjaan saya",
+        D: "Akan membantunya setelah pekerjaan saya selesai",
+        E: "Memarahinya karena telah mengganggu saya"
+      },
+      points: { D: 5, B: 4, A: 3, C: 2, E: 1 },
+      explanation: "Kunci TKP: D (5), B (4), A (3), C (2), E (1). Mengatur skala prioritas dengan menyelesaikan tanggung jawab utama terlebih dahulu lalu segera membantu rekan kerja (opsi D, skor 5)."
+    },
+    {
+      no: 82,
+      category: "TKP",
+      text: "Saat sedang melakukan pembayaran di sebuah supermarket saya menyadari bahwa uang kembalian yang saya terima kurang dari yang seharusnya. Saya akan ....",
+      options: {
+        A: "Memberitahu kasir dan memintanya untuk lebih berhati-hati",
+        B: "Marah dan meminta kasir untuk segera mengembalikan uang saya",
+        C: "Mengabaikannya karena mungkin tidak sengaja berbuat kesalahan",
+        D: "Membiarkannya saja karena tidak seberapa",
+        E: "Melakukan konfirmasi untuk mengecek kebenaran uang kembalian"
+      },
+      points: { E: 5, A: 4, C: 3, D: 2, B: 1 },
+      explanation: "Kunci TKP: E (5), A (4), C (3), D (2), B (1). Ketelitian, pengendalian diri, dan komunikasi asertif ditunjukkan dengan mengonfirmasi ulang jumlah kembalian secara objektif (opsi E, skor 5)."
+    },
+    {
+      no: 83,
+      category: "TKP",
+      text: "Saya akan ditugaskan untuk melakukan sebuah pekerjaan di daerah yang belum pernah saya datangi sama sekali. Saya akan ....",
+      options: {
+        A: "Menolak tugas tersebut",
+        B: "Mencari informasi selengkap mungkin tentang daerah tersebut",
+        C: "Memikirkannya saat akan berangkat",
+        D: "Bertanya kepada teman yang pernah ditugaskan disana",
+        E: "Mendatangi kota tersebut sebelum mulai bertugas untuk melakukan survei"
+      },
+      points: { E: 5, B: 4, D: 3, C: 2, A: 1 },
+      explanation: "Kunci TKP: E (5), B (4), D (3), C (2), A (1). Sesuai tabel kunci jawaban TKP halaman 499 PDF: E (5), B (4), D (3), C (2), A (1) — persiapan proaktif dengan melakukan survei langsung di lokasi penugasan."
+    },
+    {
+      no: 84,
+      category: "TKP",
+      text: "Menghadapi sebuah kondisi baru, saya selalu merasa ....",
+      options: {
+        A: "Takut",
+        B: "Tidak yakin",
+        C: "Biasa saja",
+        D: "Senang",
+        E: "Antusias"
+      },
+      points: { D: 5, E: 4, C: 3, B: 2, A: 1 },
+      explanation: "Kunci TKP: D (5), E (4), C (3), B (2), A (1). Sesuai tabel kunci jawaban TKP halaman 499 PDF: D (5), E (4), C (3), B (2), A (1) — kemampuan beradaptasi tinggi dengan menyambut situasi baru secara positif."
+    },
+    {
+      no: 85,
+      category: "TKP",
+      text: "Saya harus berbagi ruangan dengan seorang rekan kerja. Padahal saya merasa lebih nyaman bekerja sendiri dalam ruangan. Yang saya lakukan adalah ....",
+      options: {
+        A: "Membuat rekan kerja saya tidak nyaman",
+        B: "Pindah ke ruangan lain yang kosong",
+        C: "Membiasakan diri dan membangun suasana kerja yang menyenangkan",
+        D: "Bekerja dengan setengah hati",
+        E: "Melakukan protes kepada atasan karena menempatkan orang di ruangan saya"
+      },
+      points: { C: 5, B: 4, D: 3, E: 2, A: 1 },
+      explanation: "Kunci TKP: C (5), B (4), D (3), E (2), A (1). Kemampuan beradaptasi dengan lingkungan kerja baru serta menciptakan suasana kolaboratif yang nyaman (opsi C, skor 5)."
+    },
+    {
+      no: 86,
+      category: "TKP",
+      text: "Atasan saya memberikan penilaian kinerja yang buruk terhadap diri saya. Maka saya akan ....",
+      options: {
+        A: "Bekerja dengan lebih baik",
+        B: "Merasa sedih",
+        C: "Intropeksi diri dan memperbaiki kekurangan saya",
+        D: "Membenci atasan saya",
+        E: "Menjadi malas bekerja"
+      },
+      points: { C: 5, A: 4, B: 3, E: 2, D: 1 },
+      explanation: "Kunci TKP: C (5), A (4), B (3), E (2), D (1). Kematangan pribadi dan kemauan belajar ditunjukkan dengan melakukan introspeksi diri serta memperbaiki kekurangan kinerja (opsi C, skor 5)."
+    },
+    {
+      no: 87,
+      category: "TKP",
+      text: "Banyak orang membicarakan kekurangan dan kelemahan saya dalam bekerja di belakang saya. Sikap saya adalah ....",
+      options: {
+        A: "Merasa marah dan membenci orang yang membicarakan saya",
+        B: "Berusaha memperbaiki kekurangan saya tersebut",
+        C: "Menegur mereka yang membicarakan saya",
+        D: "Biasa saja karena semua orang mempunyai kekurangan dan kelemahan",
+        E: "Berusaha mencari kekurangan dan kelemahan orang yang membicarakan saya itu"
+      },
+      points: { B: 5, D: 4, C: 3, E: 2, A: 1 },
+      explanation: "Kunci TKP: B (5), D (4), C (3), E (2), A (1). Mengelola emosi secara dewasa dengan menjadikan kritik atau pembicaraan orang lain sebagai pemicu perbaikan diri (opsi B, skor 5)."
+    },
+    {
+      no: 88,
+      category: "TKP",
+      text: "Saya mengalami kegagalan dalam tes seleksi CPNS, padahal itu merupakan cita-cita saya sejak lama. Saya ....",
+      options: {
+        A: "Tidak menyerah dan tetap mempersiapkan diri untuk tes selanjutnya",
+        B: "Merasa sedih, namun hanya sebentar saja",
+        C: "Merasa sangat bodoh dan meratapi nasib saya",
+        D: "Meninggalkan cita-cita saya tersebut dan merasa ini bukan jalan saya",
+        E: "Tidak terima dan merasa ada yang salah dalam tes seleksi"
+      },
+      points: { A: 5, B: 4, C: 3, E: 2, D: 1 },
+      explanation: "Kunci TKP: A (5), B (4), C (3), E (2), D (1). Ketangguhan mental dan daya juang tinggi ditunjukkan dengan tidak menyerah serta terus mempersiapkan diri lebih matang (opsi A, skor 5)."
+    },
+    {
+      no: 89,
+      category: "TKP",
+      text: "Dalam melaksanakan suatu tugas yang telah dipercayakan kepada saya, saya akan ....",
+      options: {
+        A: "Selalu menunggu keputusan pimpinan",
+        B: "Berani mengambil keputusan sendiri",
+        C: "Membuat keputusan dengan bantuan teman yang lain",
+        D: "Tidak berani mengambil keputusan sendiri",
+        E: "Hanya mengambil keputusan yang berada dalam wewenang saya"
+      },
+      points: { B: 5, E: 4, C: 3, A: 2, D: 1 },
+      explanation: "Kunci TKP: B (5), E (4), C (3), A (2), D (1). Sesuai tabel kunci jawaban TKP halaman 499 PDF: B (5), E (4), C (3), A (2), D (1) — kemandirian dan keberanian mengambil keputusan atas tugas yang dipercayakan."
+    },
+    {
+      no: 90,
+      category: "TKP",
+      text: "Saya tiba-tiba mendapat tugas ke luar kota sampai dengan bulan depan. Padahal saya belum membuat laporan kerja bulanan. Saya akan ....",
+      options: {
+        A: "Membuat laporan kerja bulanan setelah pulang dari tugas ke luar kota",
+        B: "Tidak membuat laporan kerja bulanan",
+        C: "Menyelesaikan laporan kerja bulanan sebelum berangkat tugas",
+        D: "Meminta bantuan teman untuk mengerjakan laporan kerja bulanan",
+        E: "Meminta pertimbangan atasan"
+      },
+      points: { E: 5, C: 4, A: 3, D: 2, B: 1 },
+      explanation: "Kunci TKP: E (5), C (4), A (3), D (2), B (1). Sesuai tabel kunci jawaban TKP halaman 500 PDF: E (5), C (4), A (3), D (2), B (1) — berkoordinasi dan meminta arahan pimpinan terkait skala prioritas tugas mendadak."
+    },
+    {
+      no: 91,
+      category: "TKP",
+      text: "Di saat kami harus menyelesaikan sebuah proyek, partner saya mendadak sakit, padahal tenggat waktu yang diberikan sudah sangat dekat. Saya akan ....",
+      options: {
+        A: "Menyelesaikan pekerjaan sendirian dan memberi kesempatan partner saya untuk beristirahat",
+        B: "Segera mencari partner baru",
+        C: "Tidak menyelesaikan proyek tersebut",
+        D: "Meminta pengunduran tenggat waktu",
+        E: "Mencari tenaga sementara yang dapat membantu mengerjakan pekerjaan partner saya"
+      },
+      points: { A: 5, E: 4, D: 3, B: 2, C: 1 },
+      explanation: "Kunci TKP: A (5), E (4), D (3), B (2), C (1). Tanggung jawab penuh terhadap keberhasilan tim serta empati kepada rekan yang sakit ditunjukkan oleh opsi A (skor 5)."
+    },
+    {
+      no: 92,
+      category: "TKP",
+      text: "Beberapa hari lagi saya akan menghadapi ujian kompetensi, di mana pada ujian sebelumnya saya gagal dengan hasil yang kurang baik. Saya akan ....",
+      options: {
+        A: "Belajar berdasarkan soal ujian kompetensi yang kemarin",
+        B: "Mempersiapkan diri dengan lebih baik supaya berhasil lolos dengan hasil yang memuaskan",
+        C: "Melakukan persiapan dan belajar sewajarnya saja",
+        D: "Mencari kemungkinan jalan pintas untuk lolos uji kompetensi",
+        E: "Tidak belajar karena itu tidak berpengaruh terhadap karier saya"
+      },
+      points: { E: 5, D: 4, A: 3, C: 2, B: 1 },
+      explanation: "Kunci TKP: E (5), D (4), A (3), C (2), B (1). Sesuai tabel kunci jawaban TKP halaman 500 PDF: E (5), D (4), A (3), C (2), B (1)."
+    },
+    {
+      no: 93,
+      category: "TKP",
+      text: "Menurut saya, kuliah dan menuntut ilmu saat sudah bekerja adalah ....",
+      options: {
+        A: "Sesuatu yang sia-sia",
+        B: "Harus kita lakukan karena tuntutan kantor",
+        C: "Boleh dilakukan kalau kita tidak banyak pekerjaan",
+        D: "Dilakukan untuk mendapatkan kenaikan jabatan",
+        E: "Penting untuk meningkatkan pengetahuan kita"
+      },
+      points: { E: 5, A: 4, C: 3, D: 2, B: 1 },
+      explanation: "Kunci TKP: E (5), A (4), C (3), D (2), B (1). Sesuai tabel kunci jawaban TKP halaman 500 PDF: E (5), A (4), C (3), D (2), B (1) — kemauan belajar berkelanjutan untuk meningkatkan kapasitas dan pengetahuan."
+    },
+    {
+      no: 94,
+      category: "TKP",
+      text: "Saya mendapatkan tugas untuk melanjutkan pendidikan di luar kota, sementara anak-anak saya masih kecil. Yang saya lakukan ....",
+      options: {
+        A: "Mempertimbangkannya dengan keluarga",
+        B: "Menolak tugas tersebut",
+        C: "Menerima tugas tersebut dan membawa keluarga untuk pindah dan tinggal bersama",
+        D: "Meminta atasan untuk menunda tugas tersebut",
+        E: "Menerima tugas tersebut dan menjalani jauh dari keluarga untuk sementara"
+      },
+      points: { E: 5, A: 4, C: 3, D: 2, B: 1 },
+      explanation: "Kunci TKP: E (5), A (4), C (3), D (2), B (1). Sesuai tabel kunci jawaban TKP halaman 500 PDF: E (5), A (4), C (3), D (2), B (1) — profesionalisme menjalankan penugasan pengembangan kompetensi dari instansi."
+    },
+    {
+      no: 95,
+      category: "TKP",
+      text: "Dalam sebuah tim sepakbola, saya memiliki kemampuan di bawah teman-teman anggota tim yang lain. Saya akan ....",
+      options: {
+        A: "Merasa minder",
+        B: "Malas berlatih",
+        C: "Berlatih lebih giat",
+        D: "Keluar dari tim",
+        E: "Berlatih sesuai jadwal"
+      },
+      points: { E: 5, A: 4, C: 3, B: 2, D: 1 },
+      explanation: "Kunci TKP: E (5), A (4), C (3), B (2), D (1). Sesuai tabel kunci jawaban TKP halaman 500 PDF: E (5), A (4), C (3), B (2), D (1)."
+    },
+    {
+      no: 96,
+      category: "TKP",
+      text: "Divisi tempat saya bekerja sedang mengalami masalah manajemen keuangan yang sangat serius. Saya akan ....",
+      options: {
+        A: "Mencari peluang untuk pindah ke divisi lain yang lebih sehat manajemennya",
+        B: "Mencoba mencari solusi dari divisi lain yang pernah mengalami hal serupa",
+        C: "Tetap bekerja seperti biasa dan tidak ikut memikirkannya",
+        D: "Membiarkan itu menjadi urusan manajer keuangan",
+        E: "Menganalisis sumber masalah dan membantu mencari alternatif solusi"
+      },
+      points: { E: 5, C: 4, A: 3, D: 2, B: 1 },
+      explanation: "Kunci TKP: E (5), C (4), A (3), D (2), B (1). Kepedulian terhadap organisasi serta kemampuan analitis membantu mencari alternatif solusi atas permasalahan divisi (opsi E, skor 5)."
+    },
+    {
+      no: 97,
+      category: "TKP",
+      text: "Secara ideal saya ingin bekerja dalam sebuah tim yang ....",
+      options: {
+        A: "Berprestasi tinggi",
+        B: "Tidak menyita banyak waktu",
+        C: "Terdiri atas bagian-bagian terpisah",
+        D: "Saling menopang",
+        E: "Memberikan keuntungan"
+      },
+      points: { E: 5, A: 4, C: 3, D: 2, B: 1 },
+      explanation: "Kunci TKP: E (5), A (4), C (3), D (2), B (1). Sesuai tabel kunci jawaban TKP halaman 500 PDF: E (5), A (4), C (3), D (2), B (1)."
+    },
+    {
+      no: 98,
+      category: "TKP",
+      text: "Anak buah saya mengerjakan pekerjaannya dengan sangat baik melebihi target yang diberikan. Yang saya lakukan ....",
+      options: {
+        A: "Memujinya dan menyemangatinya supaya dia semakin termotivasi",
+        B: "Memberinya sedikit penghargaan dan memintanya untuk menjaga prestasi kerjanya",
+        C: "Memberikannya target yang sedikit lebih tinggi",
+        D: "Mengusulkannya untuk promosi jabatan",
+        E: "Biasa saja dan menganggap itu sebagai prestasi yang wajar"
+      },
+      points: { E: 5, A: 4, B: 3, D: 2, C: 1 },
+      explanation: "Kunci TKP: E (5), A (4), B (3), D (2), C (1). Sesuai tabel kunci jawaban TKP halaman 500 PDF: E (5), A (4), B (3), D (2), C (1)."
+    },
+    {
+      no: 99,
+      category: "TKP",
+      text: "Beberapa anggota kelompok saya cenderung malas dan susah bekerja sama dengan yang lain. Yang saya lakukan ....",
+      options: {
+        A: "Langsung mengeluarkan mereka",
+        B: "Mencari solusi sendiri dan membuat kebijakan untuk mereka",
+        C: "Memarahi dan meminta mereka untuk bekerja serius",
+        D: "Memanggil mereka dan menanyakan apa masalah mereka",
+        E: "Membiarkan saja"
+      },
+      points: { E: 5, D: 4, B: 3, C: 2, A: 1 },
+      explanation: "Kunci TKP: E (5), D (4), B (3), C (2), A (1). Sesuai tabel kunci jawaban TKP halaman 500 PDF: E (5), D (4), B (3), C (2), A (1)."
+    },
+    {
+      no: 100,
+      category: "TKP",
+      text: "Kawasan di sekitar perumahan saya banyak rumput yang tinggi sehingga terlihat kumuh dan mengganggu kenyamanan. Yang saya lakukan ....",
+      options: {
+        A: "Memanggil orang untuk membersihkannya",
+        B: "Membiarkan saja karena bukan urusan saya sendiri",
+        C: "Melaporkan kondisi yang ada kepada ketua RT",
+        D: "Mengajak warga sekitar untuk bersama-sama membersihkan",
+        E: "Membersihkan rumput tersebut sendirian"
+      },
+      points: { D: 5, E: 4, A: 3, C: 2, B: 1 },
+      explanation: "Kunci TKP: D (5), E (4), A (3), C (2), B (1). Jiwa gotong royong dan kemampuan menggerakkan partisipasi sosial masyarakat untuk menjaga kebersihan lingkungan bersama (opsi D, skor 5)."
+    }
+  ];
+
+  // =========================================================================
+  // STATE & LOGIKA APLIKASI CAT
+  // =========================================================================
+  const EXAM_DURATION_SECONDS = 90 * 60; // 90 Menit (100 Soal sesuai cover Tryout 3)
+  let currentUser = { user: "CAT-03", nama: "Peserta Tryout CPNS" };
+  let currentIndex = 0;
+  let userAnswers = new Array(questions.length).fill(null);
+  let doubtStatus = new Array(questions.length).fill(false);
+  let timeLeft = EXAM_DURATION_SECONDS;
+  let timerInterval = null;
+
+  // Fungsi Modal Custom (Pengganti alert & confirm agar aman di semua iframe/browser)
+  function showModal(title, message, buttons) {
+    const overlay = document.getElementById("custom-modal");
+    document.getElementById("modal-title").textContent = title;
+    document.getElementById("modal-message").textContent = message;
+    const btnContainer = document.getElementById("modal-buttons");
+    btnContainer.innerHTML = "";
+
+    buttons.forEach(b => {
+      const btn = document.createElement("button");
+      btn.className = "btn " + (b.className || "btn-primary");
+      btn.style.width = "auto";
+      btn.textContent = b.text;
+      btn.onclick = () => {
+        overlay.style.display = "none";
+        if (b.onClick) b.onClick();
+      };
+      btnContainer.appendChild(btn);
+    });
+
+    overlay.style.display = "flex";
+  }
+
+  // Mulai Tryout Langsung Tanpa Login Database
+  function beginTryout() {
+    currentUser = { user: "CAT-03", nama: "Peserta Tryout CPNS" };
+    startExam();
+  }
+
+  function resetExamState() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+    currentIndex = 0;
+    userAnswers = new Array(questions.length).fill(null);
+    doubtStatus = new Array(questions.length).fill(false);
+    timeLeft = EXAM_DURATION_SECONDS;
+
+    const timerEl = document.getElementById("timer");
+    timerEl.textContent = "90:00";
+    timerEl.style.color = "white";
+  }
+
+  function startExam() {
+    resetExamState();
+    document.getElementById("login-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("exam-screen").style.display = "block";
+    document.getElementById("peserta-info").textContent = `Peserta: ${currentUser.nama}`;
+
+    initNumberGrid();
+    renderQuestion(0);
+    startTimer();
+  }
+
+  function retryExam() {
+    startExam();
+  }
+
+  function confirmLogout() {
+    showModal(
+      "Konfirmasi Keluar",
+      "Apakah Anda yakin ingin keluar dari ujian dan kembali ke halaman awal? Progres jawaban Anda saat ini akan direset.",
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Keluar", className: "btn-logout", onClick: logoutUser }
+      ]
+    );
+  }
+
+  function logoutUser() {
+    resetExamState();
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "none";
+    document.getElementById("login-screen").style.display = "flex";
+  }
+
+  function startTimer() {
+    clearInterval(timerInterval);
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      const m = Math.floor(timeLeft / 60).toString().padStart(2, '0');
+      const s = (timeLeft % 60).toString().padStart(2, '0');
+      document.getElementById("timer").textContent = `${m}:${s}`;
+
+      if (timeLeft <= 300) {
+        document.getElementById("timer").style.color = "#fca5a5";
+      }
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        showModal(
+          "Waktu Habis",
+          "Waktu ujian telah habis! Jawaban Anda akan dikumpulkan otomatis.",
+          [{ text: "Lihat Hasil", className: "btn-primary", onClick: finishExam }]
+        );
+      }
+    }, 1000);
+  }
+
+  function initNumberGrid() {
+    const grid = document.getElementById("number-grid");
+    grid.innerHTML = "";
+    questions.forEach((q, idx) => {
+      const btn = document.createElement("button");
+      btn.className = "num-btn";
+      btn.id = `num-btn-${idx}`;
+      btn.textContent = q.no;
+      btn.onclick = () => renderQuestion(idx);
+      grid.appendChild(btn);
+    });
+  }
+
+  function updateNumberGrid() {
+    questions.forEach((_, idx) => {
+      const btn = document.getElementById(`num-btn-${idx}`);
+      if (!btn) return;
+      btn.className = "num-btn";
+      if (idx === currentIndex) btn.classList.add("active");
+      if (doubtStatus[idx]) {
+        btn.classList.add("doubt");
+      } else if (userAnswers[idx] !== null) {
+        btn.classList.add("answered");
+      }
+    });
+  }
+
+  function getSubtesLabel(cat) {
+    if (cat === "TWK") return "TWK - Tes Wawasan Kebangsaan";
+    if (cat === "TIU") return "TIU - Tes Inteligensia Umum";
+    return "TKP - Tes Karakteristik Pribadi";
+  }
+
+  function renderQuestion(index) {
+    currentIndex = index;
+    const q = questions[index];
+
+    document.getElementById("q-number").textContent = `Soal No. ${q.no} dari ${questions.length}`;
+    document.getElementById("q-subtes").textContent = getSubtesLabel(q.category);
+    document.getElementById("q-text").textContent = q.text;
+    document.getElementById("q-media").innerHTML = q.media ? q.media : "";
+
+    const statusEl = document.getElementById("q-status");
+    if (doubtStatus[index]) {
+      statusEl.textContent = "Ditandai Ragu-Ragu";
+      statusEl.style.color = "#b45309";
+    } else if (userAnswers[index]) {
+      statusEl.textContent = `Terjawab (${userAnswers[index]})`;
+      statusEl.style.color = "var(--success)";
+    } else {
+      statusEl.textContent = "Belum dijawab";
+      statusEl.style.color = "var(--muted)";
+    }
+
+    const optContainer = document.getElementById("q-options");
+    optContainer.innerHTML = "";
+
+    ["A", "B", "C", "D", "E"].forEach(letter => {
+      const div = document.createElement("div");
+      div.className = "option-item" + (userAnswers[index] === letter ? " selected" : "");
+      div.onclick = () => selectOption(letter);
+      div.innerHTML = `
+        <div class="option-letter">${letter}</div>
+        <div>${q.options[letter]}</div>
+      `;
+      optContainer.appendChild(div);
+    });
+
+    document.getElementById("btn-prev").disabled = (index === 0);
+    document.getElementById("btn-next").disabled = (index === questions.length - 1);
+    updateNumberGrid();
+  }
+
+  function selectOption(letter) {
+    userAnswers[currentIndex] = letter;
+    renderQuestion(currentIndex);
+  }
+
+  function toggleDoubt() {
+    doubtStatus[currentIndex] = !doubtStatus[currentIndex];
+    renderQuestion(currentIndex);
+  }
+
+  function prevQuestion() {
+    if (currentIndex > 0) renderQuestion(currentIndex - 1);
+  }
+
+  function nextQuestion() {
+    if (currentIndex < questions.length - 1) renderQuestion(currentIndex + 1);
+  }
+
+  function confirmFinish() {
+    const unanswered = userAnswers.filter(a => a === null).length;
+    const msg = unanswered > 0 
+      ? `Masih ada ${unanswered} soal yang belum dijawab. Yakin ingin mengakhiri ujian?`
+      : "Apakah Anda yakin ingin mengumpulkan semua jawaban sekarang?";
+    
+    showModal(
+      "Kumpulkan Jawaban",
+      msg,
+      [
+        { text: "Batal", className: "btn-nav" },
+        { text: "Ya, Kumpulkan", className: "btn-finish", onClick: finishExam }
+      ]
+    );
+  }
+
+  function filterReview(category, btnEl) {
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    if (btnEl) btnEl.classList.add("active");
+
+    document.querySelectorAll(".review-card").forEach(card => {
+      if (category === "ALL" || card.dataset.category === category) {
+        card.style.display = "block";
+      } else {
+        card.style.display = "none";
+      }
+    });
+  }
+
+  function finishExam() {
+    clearInterval(timerInterval);
+    document.getElementById("exam-screen").style.display = "none";
+    document.getElementById("result-screen").style.display = "block";
+
+    // Variabel Perhitungan Skor Terpisah: TWK, TIU, dan TKP
+    let twkScore = 0, twkBenar = 0, twkSalah = 0, twkKosong = 0;
+    let tiuScore = 0, tiuBenar = 0, tiuSalah = 0, tiuKosong = 0;
+    let tkpScore = 0, tkpDijawab = 0, tkpKosong = 0, tkpPoin5 = 0;
+
+    let totalDijawab = 0;
+    let totalKosong = 0;
+
+    const reviewContainer = document.getElementById("review-container");
+    reviewContainer.innerHTML = "";
+
+    questions.forEach((q, idx) => {
+      const uAns = userAnswers[idx];
+      if (uAns === null) {
+        totalKosong++;
+      } else {
+        totalDijawab++;
+      }
+
+      const card = document.createElement("div");
+      card.dataset.category = q.category;
+
+      if (q.category === "TWK" || q.category === "TIU") {
+        // Sistem Penilaian TWK & TIU: Benar = 5, Salah/Kosong = 0
+        const isCorrect = (uAns !== null && uAns === q.answer);
+        const earned = isCorrect ? 5 : 0;
+
+        if (q.category === "TWK") {
+          twkScore += earned;
+          if (uAns === null) twkKosong++;
+          else if (isCorrect) twkBenar++;
+          else twkSalah++;
+        } else {
+          tiuScore += earned;
+          if (uAns === null) tiuKosong++;
+          else if (isCorrect) tiuBenar++;
+          else tiuSalah++;
+        }
+
+        const cardStatusClass = isCorrect ? "correct" : "wrong";
+        const statusLabelColor = isCorrect ? "var(--success)" : "var(--danger)";
+        const statusText = uAns === null
+          ? "Tidak Dijawab (0 Poin)"
+          : (isCorrect ? "Benar (+5 Poin)" : "Salah (0 Poin)");
+
+        card.className = `card review-card ${cardStatusClass}`;
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+            <div>
+              <strong>Soal No. ${q.no}</strong>
+              <span class="badge-subtes" style="margin-left:6px;">${q.category}</span>
+            </div>
+            <span style="font-weight:bold; color:${statusLabelColor}">${statusText}</span>
+          </div>
+          <p style="margin-bottom:10px; white-space:pre-line;">${q.text}</p>
+          ${q.media ? q.media : ""}
+          <p style="margin-bottom:6px;"><strong>Jawaban Anda:</strong> ${uAns ? `${uAns}. ${q.options[uAns]}` : '-'}</p>
+          <p style="margin-bottom:10px;"><strong style="color:var(--success)">Kunci Jawaban:</strong> ${q.answer}. ${q.options[q.answer]}</p>
+          <div class="pembahasan-box">
+            <strong>Pembahasan:</strong>
+            ${q.explanationMedia ? q.explanationMedia : ""}
+            <div style="margin-top:6px; white-space:pre-line;">${q.explanation}</div>
+          </div>
+        `;
+      } else {
+        // Sistem Penilaian TKP: Sesuai Kunci Bobot 1 - 5
+        const earnedPoints = uAns ? q.points[uAns] : 0;
+        tkpScore += earnedPoints;
+
+        if (uAns === null) {
+          tkpKosong++;
+        } else {
+          tkpDijawab++;
+          if (earnedPoints === 5) tkpPoin5++;
+        }
+
+        const bestOption = ["A", "B", "C", "D", "E"].find(opt => q.points[opt] === 5);
+
+        let cardStatusClass = "wrong";
+        let statusLabelColor = "var(--danger)";
+        if (earnedPoints === 5) {
+          cardStatusClass = "correct";
+          statusLabelColor = "var(--success)";
+        } else if (earnedPoints >= 3) {
+          cardStatusClass = "mid";
+          statusLabelColor = "#b45309";
+        }
+
+        const poinPillsHtml = ["A", "B", "C", "D", "E"].map(opt => {
+          const pt = q.points[opt];
+          const isMax = pt === 5 ? " max-poin" : "";
+          const isUser = uAns === opt ? " user-poin" : "";
+          return `<span class="poin-pill${isMax}${isUser}">Opsi ${opt}: ${pt} Poin</span>`;
+        }).join("");
+
+        card.className = `card review-card ${cardStatusClass}`;
+        card.innerHTML = `
+          <div style="display:flex; justify-content:space-between; margin-bottom:10px; flex-wrap:wrap; gap:8px;">
+            <div>
+              <strong>Soal No. ${q.no}</strong>
+              <span class="badge-subtes" style="margin-left:6px;">TKP</span>
+            </div>
+            <span style="font-weight:bold; color:${statusLabelColor}">
+              ${uAns === null ? 'Tidak Dijawab (0 Poin)' : `Skor Anda: ${earnedPoints} / 5 Poin`}
+            </span>
+          </div>
+          <p style="margin-bottom:10px; white-space:pre-line;">${q.text}</p>
+          <p style="margin-bottom:6px;"><strong>Jawaban Anda:</strong> ${uAns ? `${uAns}. ${q.options[uAns]} (Poin ${earnedPoints})` : '-'}</p>
+          <p style="margin-bottom:10px;"><strong style="color:var(--success)">Jawaban Poin Tertinggi (5):</strong> ${bestOption}. ${q.options[bestOption]}</p>
+          <div class="pembahasan-box">
+            <strong>Distribusi Poin Setiap Opsi:</strong>
+            <div class="poin-badge-row">${poinPillsHtml}</div>
+            <strong>Pembahasan:</strong>
+            <div style="margin-top:6px; white-space:pre-line;">${q.explanation}</div>
+          </div>
+        `;
+      }
+
+      reviewContainer.appendChild(card);
+    });
+
+    const grandTotalScore = twkScore + tiuScore + tkpScore;
+
+    document.getElementById("res-peserta").textContent = `Peserta: ${currentUser.nama}`;
+    document.getElementById("res-total-score").textContent = `Total SKD: ${grandTotalScore} / 500`;
+    document.getElementById("res-detail").textContent = `Total Dijawab: ${totalDijawab} Soal | Kosong: ${totalKosong} Soal`;
+
+    // Tampilkan skor terpisah per subtes
+    document.getElementById("score-twk").textContent = `${twkScore} / 175`;
+    document.getElementById("detail-twk").textContent = `Benar: ${twkBenar} | Salah: ${twkSalah} | Kosong: ${twkKosong}`;
+
+    document.getElementById("score-tiu").textContent = `${tiuScore} / 150`;
+    document.getElementById("detail-tiu").textContent = `Benar: ${tiuBenar} | Salah: ${tiuSalah} | Kosong: ${tiuKosong}`;
+
+    document.getElementById("score-tkp").textContent = `${tkpScore} / 175`;
+    document.getElementById("detail-tkp").textContent = `Poin 5: ${tkpPoin5} Soal | Dijawab: ${tkpDijawab} | Kosong: ${tkpKosong}`;
+
+    // Reset filter pembahasan ke Semua
+    const firstFilterBtn = document.querySelector("#filter-bar .filter-btn");
+    if (firstFilterBtn) filterReview("ALL", firstFilterBtn);
+  }
+</script>
+</body>
+</html>
